@@ -4,8 +4,9 @@ This is an addon that will build an on screen display for tracking currencies fr
 Currently tracked currencies include:
     - Accolades, Ichor, Tokens, Zeni, Plasm, Imps, Beads, Silt, Potpourri, Hallmarks, Gallantry, Crafter, and Silver Vouchers.
 
-
-Current commands include: //cur
+Addon Command: //cur
+Current commands include:
+    
     - visible
         * Toggles the visibility of the currency display.
 
