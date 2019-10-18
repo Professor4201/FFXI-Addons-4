@@ -91,7 +91,7 @@ if windower.ffxi.get_player() then
                 ["Chat Color"]     = 3,
                 
                 ["Verethragna"] =
-                    {["Tumbling Truffle"]       = {["count"]=0,["max"]=3,["trial_weapon"]="Puglists",     ["number"]=68,    ["NM_id"]={"FB"},               ["PH_id"]={"F8"},                   ["PH_delay"]=300,           ["zone"]="La Theine Plateau"},
+                    {["Tumbling Truffle"]       = {["count"]=0,["max"]=3,["trial_weapon"]="Pugilists",    ["number"]=68,    ["NM_id"]={"FB"},               ["PH_id"]={"F8"},                   ["PH_delay"]=300,           ["zone"]="La Theine Plateau"},
                     ["Helldiver"]               = {["count"]=0,["max"]=3,["trial_weapon"]="Simian Fists", ["number"]=69,    ["NM_id"]={"16B"},              ["PH_id"]={"16A"},                  ["PH_delay"]=300,           ["zone"]="Buburimu Peninsula"},
                     ["Orctrap"]                 = {["count"]=0,["max"]=3,["trial_weapon"]="Simian Fists", ["number"]=70,    ["NM_id"]={"10C"},              ["PH_id"]={"10B"},                  ["PH_delay"]=300,           ["zone"]="Carpenters' Landing"},
                     ["Intulo"]                  = {["count"]=0,["max"]=4,["trial_weapon"]="Simian Fists", ["number"]=71,    ["NM_id"]={"8E"},               ["PH_id"]={"8D"},                   ["PH_delay"]=300,           ["zone"]="Bibiki Bay"},
