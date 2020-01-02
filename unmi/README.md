@@ -5,4 +5,4 @@ Basic usage of the addon:
 //unmi buy "item name" 'quantity'
 ** Quantity will default to '1' if nothing is entered.
 
-Example: //unmi buy prize 99 - (This will purchase 99 prize powders with out any menu interaction.)
+Example: //unmi buy prize 99 - This will purchase 99 prize powders with out any menu interaction.
