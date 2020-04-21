@@ -113,9 +113,6 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
             
             if item then
                 
-                local message = string.format("You successfully synthesized a %s", res.items[item].name)
-                windower.add_to_chat(10, message)
-                
                 if result == 14 then
                     local packed = ("iCCCCHHHHHHHHHCCCCCCCCH"):pack(0x00006f08, success, quality, count, _junk1, item, lost1, lost2, lost3, lost4, lost5, lost6, lost7, lost8, skill1, skill2, skill3, skill4, up1, up2, up3, up4, crystal):append(extra)
                     
