@@ -3,6 +3,7 @@ _addon.author   = "Elidyr"
 _addon.version  = "0.20200421"
 _addon.command  = "fast"
 
+local color   = 22
 local flags   = {fast=false, finish=false, quality=nil, enabled=false}
 local res     = require("resources")
 local packets = require("packets")
@@ -27,7 +28,7 @@ windower.register_event("addon command", function(...)
             windower.add_to_chat(22, "Fastcraft is now Enabled!")
             
         end
-        
+    
     end
 
 end)
@@ -61,15 +62,18 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
         local param     = original:unpack("C", 0x0c+1) or false
         local animation = original:unpack("C", 0x0d+1) or false
         local wut       = original:unpack("C", 0x0e+1) or false
+        local quality   = {[0] = "NQ Synthesis", [2] = "HQ Synthesis", [-1] = "Break"}
         
         if id and index and effect and param and animation and animation == 44 and param ~= 1 and id == windower.ffxi.get_mob_by_target("me").id then
             local packet  = original:sub(1,4)..("I"):pack(id)..("H"):pack(index)..("H"):pack(effect)..("C"):pack(param)..("C"):pack(animation)..("C"):pack(120)
             flags.fast    = true
             flags.quality = param
-
+            windower.add_to_chat(color, string.format("Fastcraft: %s", quality[param]))
+            
             return packet
         
         else
+            windower.add_to_chat(color, string.format("Fastcraft: %s", quality[param]))
             return original
         
         end
@@ -104,9 +108,10 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
         elseif flags.quality == 2 then
             
             quality, success = 2, 0
-        
+            
         else
             quality, success = -1, 1
+            
         end
         
         if flags.fast and flags.finish then
