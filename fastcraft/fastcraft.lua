@@ -62,7 +62,7 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
         local param     = original:unpack("C", 0x0c+1) or false
         local animation = original:unpack("C", 0x0d+1) or false
         local wut       = original:unpack("C", 0x0e+1) or false
-        local quality   = {[0] = "NQ Synthesis", [2] = "HQ Synthesis", [-1] = "Break"}
+        local quality   = {[0] = "NQ Synthesis", [2] = "HQ Synthesis", [1] = "Break"}
         
         if id and index and effect and param and animation and animation == 44 and param ~= 1 and id == windower.ffxi.get_mob_by_target("me").id then
             local packet  = original:sub(1,4)..("I"):pack(id)..("H"):pack(index)..("H"):pack(effect)..("C"):pack(param)..("C"):pack(animation)..("C"):pack(120)
