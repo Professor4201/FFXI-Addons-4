@@ -14,4 +14,4 @@ COMMANDS
 *You can change the font color on Line: 6 with a number 1-255*\
 
 ------------------------------- **UPDATED** -------------------------------\
-*Added quality to chat log at the start of synthesis.*\
+*Added quality to chat log at the start of synthesis.*
