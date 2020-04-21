@@ -7,7 +7,7 @@ as I know there is an occurence of where the item is being printed to
 the log in other versions; this one should display normally.
 
 ---------------------------- **THINGS TO NOTE** -----------------------------\
-COMMANDS
+COMMANDS\
 *//fast on* or *//fast off* or *//fast toggle*\
 \
 *It will run normal speed on breaks.*\
