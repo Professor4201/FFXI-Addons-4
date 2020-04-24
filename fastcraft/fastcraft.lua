@@ -1,9 +1,9 @@
 _addon.name     = "fastcraft"
 _addon.author   = "Elidyr"
-_addon.version  = "0.20200421"
+_addon.version  = "0.20200424"
 _addon.command  = "fast"
 
-local color   = 22
+local color   = 20
 local flags   = {fast=false, finish=false, quality=nil, enabled=false}
 local res     = require("resources")
 local packets = require("packets")
@@ -61,21 +61,33 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
         local effect    = original:unpack("H", 0x0a+1) or false
         local param     = original:unpack("C", 0x0c+1) or false
         local animation = original:unpack("C", 0x0d+1) or false
-        local wut       = original:unpack("C", 0x0e+1) or false
         local quality   = {[0] = "NQ Synthesis", [2] = "HQ Synthesis", [1] = "Break"}
         
         if id and index and effect and param and animation and animation == 44 and param ~= 1 and id == windower.ffxi.get_mob_by_target("me").id then
-            local packet  = original:sub(1,4)..("I"):pack(id)..("H"):pack(index)..("H"):pack(effect)..("C"):pack(param)..("C"):pack(animation)..("C"):pack(120)
-            flags.fast    = true
-            flags.quality = param
-            windower.add_to_chat(color, string.format("Fastcraft: %s", quality[param]))
+            local animate  = original:sub(1,4)..("I"):pack(id)..("H"):pack(index)..("H"):pack(effect)..("C"):pack(param)..("C"):pack(animation)..("C"):pack(120)
+            local complete = ("iIbbbbbbbb":pack(0x00005908, 0x00, 0, 0, 0, 0, 0, 0, 0, 0))
+            flags.fast, flags.quality = true, param
             
-            return packet
+            windower.add_to_chat(color, string.format("Fastcraft: %s", quality[param]))
+            windower.packets.inject_incoming(0x039, animate)
+            windower.packets.inject_outgoing(0x059, complete)
+            
+            return false
+        
+        elseif id == windower.ffxi.get_mob_by_target("me").id then
+            local animate  = original:sub(1,4)..("I"):pack(id)..("H"):pack(index)..("H"):pack(effect)..("C"):pack(param)..("C"):pack(animation)..("C"):pack(120)
+            local complete = ("iIbbbbbbbb":pack(0x00005908, 0x00, 0, 0, 0, 0, 0, 0, 0, 0))
+            flags.fast, flags.quality = true, param
+            
+            windower.add_to_chat(color, string.format("Fastcraft: %s", quality[param]))
+            windower.packets.inject_incoming(0x039, animate)
+            windower.packets.inject_outgoing(0x059, complete)
+            
+            return false
         
         else
-            windower.add_to_chat(color, string.format("Fastcraft: %s", quality[param]))
             return original
-        
+            
         end
 
     end
@@ -122,8 +134,7 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
                     local packed = ("iCCCCHHHHHHHHHCCCCCCCCH"):pack(0x00006f08, success, quality, count, _junk1, item, lost1, lost2, lost3, lost4, lost5, lost6, lost7, lost8, skill1, skill2, skill3, skill4, up1, up2, up3, up4, crystal):append(extra)
                     
                     windower.packets.inject_incoming(0x6f, packed)
-                    flags.finish = false
-                    flags.fast   = false
+                    flags.finish, flags.fast = false, false
                     
                 end 
             
