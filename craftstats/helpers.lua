@@ -175,7 +175,7 @@ function helpers.get()
                 string.format("\nHQ T1:  %+15s %s[%03s]%s", info.hq1, self.getColor(percents.hq1), percents.hq1, close),
                 string.format("\nHQ T2:  %+15s %s[%03s]%s", info.hq2, self.getColor(percents.hq2), percents.hq2, close),
                 string.format("\nHQ T3:  %+15s %s[%03s]%s", info.hq3, self.getColor(percents.hq3), percents.hq3, close),
-                string.format("\nBreaks: %+15s %s[%03s]%s", info.breaks, self.getColor(percents.breaks), percents.breaks, close),
+                string.format("\nBreaks: %+15s %s[%03s]%s", info.breaks, self.getColor(percents.breaks, true), percents.breaks, close),
                 
             }
             
@@ -194,19 +194,32 @@ function helpers.get()
         
     end
     
-    self.getColor = function(value)
-        local value = value or false
+    self.getColor = function(value, reverse)
+        local value   = value or false
+        local reverse = reverse or false
         
         if value and type(value) == "number" then
-            local colors = {[98]="\\cs(101, 237, 9)", [85]="\\cs(166, 224, 40)", [75]="\\cs(232, 232, 39)", [60]="\\cs(230, 161, 44)", [50]="\\cs(232, 106, 28)", [5]="\\cs(217, 37, 37)", [0]="\\cs(196, 0, 0)"} 
             local color  = nil
+            local colors = {
+                {value=00, color="\\cs(196, 000, 00)"},
+                {value=10, color="\\cs(232, 047, 14)"},
+                {value=50, color="\\cs(232, 106, 28)"},
+                {value=60, color="\\cs(230, 161, 44)"},
+                {value=75, color="\\cs(232, 232, 39)"},
+                {value=85, color="\\cs(166, 224, 40)"},
+                {value=98, color="\\cs(101, 237, 09)"},
+            } 
             
             if value then
                 
-                for i,v in pairs(colors) do
+                for _,v in ipairs(colors) do
                     
-                    if value >= i then
-                        color = v
+                    if v and type(v) == "table" and value >= v.value and not reverse then
+                        color = v.color
+                    
+                    elseif v and type(v) == "table" and value <= v.value and reverse then
+                        color = v.color
+                    
                     end
                     
                 end
