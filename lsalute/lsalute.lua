@@ -45,6 +45,7 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
     -- Incoming Action Event.
     if id == 0x028  then
         local p        = packets.parse("incoming", original)
+        local player   = windower.ffxi.get_player()
         local actor    = windower.ffxi.get_mob_by_id(p["Actor"])
         local target   = windower.ffxi.get_mob_by_id(p["Target 1 ID"])
         local category = p["Category"]
@@ -57,11 +58,46 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
             if (category == 11) then
             
                 if helpers.isInParty(target.name) and res.monster_abilities[param] then
-                    
-                    if res.monster_abilities[param].en == "Charm" and message == 186 then
-                        local tp = windower.ffxi.get_player()["vitals"].tp
+                    local ability  = res.monster_abilities[param] or false
+                    local messages = {[186] = true,[194]=true,[205]=true,[266]=true,[288]=true,[319]=true}
+                    local charms   = {
                         
-                        if tp > 999 and (target.distance):sqrt() < 21 then
+                        ["Charm"]              = true,
+                        ["Maiden's Virelai"]   = true,
+                        ["Luminous Drape"]     = true,
+                        ["Frond Fatale"]       = true,
+                        ["Wisecrack"]          = true,
+                        ["Danse Macabre"]      = true,
+                        ["Gala Macabre"]       = true,
+                        ["Brain Jack"]         = true,
+                        ["Tainting Breath"]    = true,
+                        ["Belly Dance"]        = true,
+                        ["Attractant"]         = true,
+                        ["Fanatic Dance"]      = true,
+                        ["Frog Song"]          = true,
+                        ["Frog Chorus"]        = true,
+                        ["Floral Bouquet"]     = true,
+                        ["Enthrall"]           = true,
+                        ["Soothing Aroma"]     = true,
+                        ["Seed of Deference"]  = true,
+                        ["Luminous Drape"]     = true,
+                        ["Nocturnal Servitude"]= true,
+                        
+                    }
+                    
+                    if player and ability and charms[ability.name] and messages[message] then
+                        local tp = windower.ffxi.get_player()["vitals"].tp
+                        local f  = false
+                        
+                        for _,v in ipairs(player.buffs) do
+                            
+                            if (v == 14 or v == 17 then)
+                                f = true
+                            end
+                            
+                        end
+                        
+                        if tp > 999 and (target.distance):sqrt() < 21 and not f then
                             coroutine.sleep(1)
                             helpers.blast(target, skill)
                             windower.send_command(string.format("%s, you're it! --> %s", target.name, res.weapon_skills[skill].en))
