@@ -15,4 +15,4 @@ Addon uses string matching, so you do not have to spell out the entire weapon sk
 - Empyreal Arrow
 
 \
-This is currently in testing to the nature of how rarely charms may occur so expect bugs, and updates as we test!
+This is currently in testing due to the nature of how rarely charms may occur so expect bugs, and updates as we test!
