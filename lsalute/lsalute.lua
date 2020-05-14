@@ -91,7 +91,7 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
                         
                         for _,v in ipairs(player.buffs) do
                             
-                            if (v == 14 or v == 17 then)
+                            if (v == 14 or v == 17) then
                                 f = true
                             end
                             
