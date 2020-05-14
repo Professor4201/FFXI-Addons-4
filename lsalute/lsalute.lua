@@ -61,9 +61,10 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
                     if res.monster_abilities[param].en == "Charm" and message == 186 then
                         local tp = windower.ffxi.get_player()["vitals"].tp
                         
-                        if tp > 999 then
+                        if tp > 999 and (target.distance):sqrt() < 21 then
                             coroutine.sleep(1)
                             helpers.blast(target, skill)
+                            windower.send_command(string.format("%s, you're it! --> %s", target.name, res.weapon_skills[skill].en))
                             
                         end
                         
