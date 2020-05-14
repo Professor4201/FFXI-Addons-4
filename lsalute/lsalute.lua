@@ -85,7 +85,7 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
                         
                     }
                     
-                    if player and ability and charms[ability.name] and messages[message] then
+                    if player and ability and charms[ability.en] and messages[message] then
                         local tp = windower.ffxi.get_player()["vitals"].tp
                         local f  = false
                         
