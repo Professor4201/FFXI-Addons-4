@@ -7,7 +7,7 @@ What this addon does is makes it so when a member of your party is charmed and y
 \
 \
 Addon uses string matching, so you do not have to spell out the entire weapon skill name.\
-*Currently supports the following weaponskills*
+*Currently supports the following weaponskills.*
 - Leaden Salute
 - True Flight
 - Namas Arrow
