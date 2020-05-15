@@ -6,7 +6,7 @@ What this addon does is makes it so when a member of your party is charmed and y
 **Example: //salute true**
 \
 \
-Addon uses string matching, so you do not have to spell out the entire weapon skill name.
+Addon uses string matching, so you do not have to spell out the entire weapon skill name.\
 *Currently supports the following weaponskills*
 - Leaden Salute
 - True Flight
