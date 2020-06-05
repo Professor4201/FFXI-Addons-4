@@ -31,17 +31,17 @@ local deliver = function(target)
     
     if accounts and target and #accounts > 0 then
         local delivery = ""
-        local delay    = 0.8
+        local delay    = 0.1
         
         for i,v in ipairs(accounts) do
             
             if i == 1 and v ~= player.name then
                 delivery = (delivery .. string.format("interact %s %s %s", target.id, v, delay))
-                delay = delay + 0.8
+                delay = delay + 0.5
                 
             elseif v ~= player.name then
                 delivery = (delivery .. string.format("|interact %s %s %s", target.id, v, delay))
-                delay = delay + 0.8
+                delay = delay + 0.5
                 
             end
         
