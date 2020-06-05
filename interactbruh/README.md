@@ -3,6 +3,6 @@
 
 **Command Usage**
 ```
-//ibruh interact
+//ibruh bigpoke
 ```
 *You must have an NPC targeted!!*
