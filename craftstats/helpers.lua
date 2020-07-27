@@ -10,7 +10,7 @@ function helpers.get()
     local skills = {
         [00] = "None",
         [03] = "Fishing",
-        [53] = "Woodworking",
+        [35] = "Woodworking",
         [19] = "Smithing",
         [51] = "Goldsmithing",
         [11] = "Clothcraft",
