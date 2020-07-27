@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local sparks = {}
 function sparks.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local sparks_injection = false

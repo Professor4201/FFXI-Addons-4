@@ -3,23 +3,22 @@
 --------------------------------------------------------------------------------
 local controls = {}
 function controls.run()
-    self = {}
+    local self = {}
     
-    -- Private variables.
-    
-    --------------------------------------------------------------------------------------
-    -- Handle the execution of all helper commands.
-    --------------------------------------------------------------------------------------
     self.execute = function(commands)
         local command = commands[2] or false
         
         if command then
             local scan = command:sub(1, #command):lower()
             
-            if (scan == "on" or scan == "off" or ("toggle"):match(scan)) then
+            if (scan == "on" or ("toggle"):match(scan)) then
                 helpers["controls"].toggle()
                 helpers["popchat"]:pop(("CONTROLS HELPER: " .. tostring(helpers["controls"].getEnabled()):upper()), system["Popchat Window"])
-            
+                
+            elseif scan == "off" then
+                helpers["controls"].setEnabled(false)
+                helpers["popchat"]:pop(("CONTROLS HELPER: " .. tostring(helpers["controls"].getEnabled()):upper()), system["Popchat Window"])
+                
             elseif ("assist"):match(scan) then
                 helpers["controls"].autoAssist()
                 helpers["popchat"]:pop(("Auto-Assist: " .. tostring(helpers["controls"].getAutoAssist()):upper()), system["Popchat Window"])

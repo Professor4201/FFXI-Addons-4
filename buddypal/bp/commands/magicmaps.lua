@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local magicmaps = {}
 function magicmaps.run()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local vendors = T{"Promurouve"}

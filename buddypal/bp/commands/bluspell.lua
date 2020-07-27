@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local bluspell = {}
 function bluspell.run()
-    self = {}
+    local self = {}
     
     self.execute = function(commands)
         local command = commands[2] or false

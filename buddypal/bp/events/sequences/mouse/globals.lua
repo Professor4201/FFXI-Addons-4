@@ -8,7 +8,7 @@ globals[1] = function(type, x, y, delta, blocked)
     
     if player then
         
-        if helpers["warp"] ~= nil then
+        if helpers["warp"] ~= nil and #helpers["warp"].getList() > 0 then
             local warper   = helpers["warp"].getDisplays()
             local list     = helpers["warp"].getList()
     
@@ -29,6 +29,35 @@ globals[1] = function(type, x, y, delta, blocked)
                 for i,_ in pairs(warper) do
                     
                     if warper[i]:hover(x, y) then
+                        return true
+                        
+                    end
+                    
+                end
+                
+            end
+        
+        elseif helpers["interact"] ~= nil and #helpers["interact"].getList() > 0 then
+            local displays = helpers["interact"].getDisplays()
+            local list     = helpers["interact"].getList()
+    
+            if displays and type == 1 then
+                
+                for i,_ in pairs(displays) do
+                    
+                    if displays[i]:hover(x, y) then
+                        helpers["interact"].interact({id=list[i].id, index=list[i].index, x=list[i].position.x-0.6, y=list[i].position.y-0.6, z=list[i].position.z})
+                        return true
+                        
+                    end
+                    
+                end
+            
+            elseif displays and type == 2 then
+                
+                for i,_ in pairs(displays) do
+                    
+                    if displays[i]:hover(x, y) then
                         return true
                         
                     end

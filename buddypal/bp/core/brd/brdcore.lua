@@ -7,21 +7,22 @@ local core = {}
 function core.get()
     self = {}
     
-    -- BARD MASTER SETTINGS.
+    -- MASTER SETTINGS.
     local settings = {}
     settings["AM"]                                 = I{false,true}
     settings["AM THRESHOLD"]                       = I{3000,2000,1000}
     settings["1HR"]                                = I{false,true}
-    settings["JA"]                                 = I{false,true}
+    settings["JA"]                                 = I{true,false}
     settings["RA"]                                 = I{false,true}
     settings["CURES"]                              = I{1,2,3}
     settings["SUBLIMATION"]                        = I{true,false}
     settings["HATE"]                               = I{false,true}
     settings["BUFFS"]                              = I{false,true}
-    settings["DEBUFFS"]                            = I{false,true}
-    settings["STATUS"]                             = I{false,true}
+    settings["DEBUFFS"]                            = I{true,false}
+    settings["STATUS"]                             = I{true,false}
     settings["WS"]                                 = I{false,true}
-    settings["WSNAME"]                             = "Moonlight"
+    settings["WSNAME"]                             = "Resolution"
+    settings["RANGED WS"]                          = "N/A"
     settings["TP THRESHOLD"]                       = 1000
     settings["SC"]                                 = I{false,true}
     settings["BURST"]                              = I{false,true}
@@ -32,17 +33,17 @@ function core.get()
     settings["STUNS"]                              = I{false,true}
     settings["TANK MODE"]                          = I{false,true}
     settings["SUPER-TANK"]                         = I{false,true}
-    settings["HASSO MODE"]                         = I{true,false}
-    settings["SEKKA"]                              = "Upheaval"
+    settings["SEKKA"]                              = "Resolution"
     settings["SHADOWS"]                            = I{false,true}
     settings["FOOD"]                               = I{"Sublime Sushi","Sublime Sushi +1"}
     settings["SAMBAS"]                             = I{"Drain Samba II","Haste Samba"}
     settings["STEPS"]                              = I{"Quickstep","Box Step","Stutter Step"}
+    settings["RUNES"]                              = {rune1="",rune2="",rune3=""}
     settings["RUNE1"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
     settings["RUNE2"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
     settings["RUNE3"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
     settings["SKILLUP"]                            = I{false,true}
-    settings["SKILLS"]                             = I{"Singing"}
+    settings["SKILLS"]                             = I{"Enhancing"}
     settings["COMPOSURE"]                          = I{true,false}
     settings["CONVERT"]                            = I{true,false}
     settings["ENSPELL"]                            = I{"Enfire","Enblizzard","Enaero","Enstone","Enthunder","Enwater"}
@@ -66,27 +67,34 @@ function core.get()
     settings["ETARGET"]                            = system["Main Character"]
     settings["BUBBLE BUFF"]                        = I{"Ecliptic Attrition","Lasting Emanation"}
     settings["BOOST"]                              = I{false,true}
-    settings["MYRKR"]                              = I{false,true}
+    settings["PET"]                                = I{false,true}
     settings["SPIRITS"]                            = T{"Light Spirit","Fire Spirirt","Ice Spirit","Air Spirit","Earth Spirit","Thunder Spirit","Water Spirit","Dark Spirit"}
     settings["SUMMON"]                             = I{"Carbuncle","Cait Sith","Ifrit","Shiva","Garuda","Titan","Ramuh","Leviathan","Fenrir","Diabolos","Siren"}
     settings["BPRAGE"]                             = I{false,true}
     settings["BPWARD"]                             = I{false,true}
+    settings["AUTO SIC"]                           = I{false,true}
+    settings["AOEHATE"]                            = I{false,true}
+    settings["EMBOLDEN"]                           = I{"Palanx","Temper","Regen IV"}
+    settings["BLU MODE"]                           = I{"DPS","NUKE"}
+    settings["MIGHTY GUARD"]                       = I{true,false}
+    settings["CHIVALRY"]                           = I{1000,1500,2000,2500,3000}
+    settings["WEATHER"]                            = I{"Firestorm","Hailstorm","Windstorm","Sandstorm","Thunderstorm","Rainstorm","Voidstorm","Aurorastorm"}
+    settings["ARTS"]                               = I{1,2,3}
+    settings["MISERY"]                             = I{false,true}
+    settings["IMPETUS WS"]                         = "Raging Fists"
+    settings["FOORWORK WS"]                        = "Tornado Kick"
+    settings["DEFAULT WS"]                         = "Howling Fist"
     
     settings["SPELLS"]={
         
-        ["Dia"]           = {["allowed"]=0,["delay"]=60},  ["Dia II"]      ={["allowed"]=0,["delay"]=120},
-        ["Bio"]           = {["allowed"]=0,["delay"]=60},  ["Bio II"]      ={["allowed"]=0,["delay"]=120},
-        ["Distract"]      = {["allowed"]=0,["delay"]=120}, ["Dispel"]      ={["allowed"]=0,["delay"]=15}, 
-        ["Frazzle"]       = {["allowed"]=0,["delay"]=120}, 
-        ["Addle"]         = {["allowed"]=0,["delay"]=120}, 
-        ["Blind"]         = {["allowed"]=0,["delay"]=180}, 
-        ["Paralyze"]      = {["allowed"]=0,["delay"]=120}, 
-        ["Slow"]          = {["allowed"]=0,["delay"]=120}, 
-        ["Silence"]       = {["allowed"]=0,["delay"]=120},
+        ["Foe Requiem VII"] = {["allowed"]=0,["delay"]=120},
+        ["Pining Nocturne"] = {["allowed"]=0,["delay"]=120},
+        ["Magic Finale"]    = {["allowed"]=0,["delay"]=25},
+        ["Silence"]         = {["allowed"]=0,["delay"]=120},
         
     }
     
-    settings["Magic Burst"]={
+    settings["MAGIC BURST"]={
         
         ["Transfixion"]   = T{"Inundation"},
         ["Compression"]   = T{"Bio II","Bio III","Blind II","Aspir","Drain","Frazzle III","Impact"},
@@ -102,13 +110,27 @@ function core.get()
     -- JOB POINTS AVAILABLE.
     settings["JOB POINTS"] = windower.ffxi.get_player()["job_points"][windower.ffxi.get_player().main_job:lower()].jp_spent
     
+    -- DISPLAY SETTINGS
+    local display          = I{false, true}
+    local display_settings = {
+        ['pos']={['x']=system["Job Window X"],['y']=system["Job Window Y"]},
+        ['bg']={['alpha']=200,['red']=0,['green']=0,['blue']=0,['visible']=false},
+        ['flags']={['right']=false,['bottom']=false,['bold']=false,['draggable']=system["Job Draggable"],['italic']=false},
+        ['padding']=system["Job Padding"],
+        ['text']={['size']=system["Job Font"].size,['font']=system["Job Font"].font,['fonts']={},['alpha']=system["Job Font"].alpha,['red']=system["Job Font"].r,['green']=system["Job Font"].g,['blue']=system["Job Font"].b,
+            ['stroke']={['width']=system["Job Stroke"].width,['alpha']=system["Job Stroke"].alpha,['red']=system["Job Stroke"].r,['green']=system["Job Stroke"].g,['blue']=system["Job Stroke"].b}
+        },
+    }
+    
+    local window = texts.new(windower.ffxi.get_player().main_job_full, display_settings)
+    
     -- PLAYLIST SETTINGS
     local jukebox  = images.new({color={alpha = 255},texture={fit = false},draggable=true})
         jukebox:path(string.format("%sbp/core/brd/icons/jukebox.png", windower.addon_path))
         jukebox:size(64, 64)
         jukebox:transparency(0)
-        jukebox:pos_x(200)
-        jukebox:pos_y(200)
+        jukebox:pos_x(275)
+        jukebox:pos_y(425)
         jukebox:show()
         
     local songlist = {}
@@ -126,6 +148,7 @@ function core.get()
     
     songlist = texts.new("", songlist_settings, songlist_settings)
     
+    -- HANDLE PARTY CHAT COMMANDS
     self.handleChat = function(message, sender, mode, gm)
         
         if (mode == 3 or mode == 4) then
@@ -147,190 +170,69 @@ function core.get()
         
     end
     
+    -- HANDLE ADDON COMMANDS.
     self.handleCommands = function(commands)
-        local command = commands[1]:lower() or false
+         local command = commands[1] or false
         
-        -- HANDLE SONG COMMANDS.
-        helpers["songs"].handleCommands(commands)
+        if command and type(command) == "string" then
+            local command = command:lower()
+            local message = ""
         
-        if command == "on" or command == "toggle" or command == "off" then
-            system["BP Enabled"]:next()
-            helpers['popchat']:pop(("Automation: " .. tostring(system["BP Enabled"]:current())):upper(), system["Popchat Window"])
-            
-            if not system["BP Enabled"]:current() then
-                helpers["queue"].clear()
-            end
-        
-        elseif command == "am" then
-            settings["AM"]:next()
-            helpers['popchat']:pop(("Auto-Aftermath: " .. tostring(settings["AM"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "1hr" then
-            settings["1HR"]:next()
-            helpers['popchat']:pop(("Auto-1hour: " .. tostring(settings["1HR"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "ja" then
-            settings["JA"]:next()
-            helpers['popchat']:pop(("Auto-Job Abilities: " .. tostring(settings["JA"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "ra" then
-            settings["RA"]:next()
-            helpers['popchat']:pop(("Auto-Ranged Attacks: " .. tostring(settings["RA"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "hate" then
-            settings["HATE"]:next()
-            helpers['popchat']:pop(("Auto-Enmity: " .. tostring(settings["HATE"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "buffs" then
-            settings["BUFFS"]:next()
-            helpers['popchat']:pop(("Auto-Buffing: " .. tostring(settings["BUFFS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "debuffs" then
-            settings["DEBUFFS"]:next()
-            helpers['popchat']:pop(("Auto-Debuffing: " .. tostring(settings["DEBUFFS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "ws" then
-            settings["WS"]:next()
-            helpers['popchat']:pop(("Auto-Weapon Skills: " .. tostring(settings["WS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "wsname" then
-            local weaponskill = windower.convert_auto_trans(table.concat(commands, " "):sub(8)):lower()
-            for _,v in pairs(windower.ffxi.get_abilities().weapon_skills) do
+            if command == "repeat" then
+                settings["REPEAT"]:next()
+                message = string.format("REPEATING SONGS: %s", tostring(settings["REPEAT"]))
                 
-                if v and res.weapon_skills[v].en then
-                    local match = res.weapon_skills[v].en:lower():match(("[%a%s%']+"))
-
-                    if weaponskill:sub(1,5) == match:sub(1,5) then
-                        settings["WSNAME"] = res.weapon_skills[v].en
-                        helpers['popchat']:pop(("Weapon Skill now set to: " .. tostring(settings["WSNAME"])):upper(), system["Popchat Window"])
-                    end
-                    
+            elseif command == "clear" then
+                helpers["songs"].clearQueue()
+                helpers['popchat']:pop(("Songs Queue has been cleared."):upper(), system["Popchat Window"])
+                message = ("SONGS QUEUE HAS BEEN CLEARED")
+            
+            elseif command == "ambuscade" then
+                message = ("AMBUSCADE SETTINGS ENABLED!")
+                settings["HATE"]:setTo(false)
+                settings["BUFFS"]:setTo(true)
+                settings["JA"]:setTo(true)
+                settings["WS"]:setTo(true)
+                settings["WSNAME"] = "Savage Blade"
+                settings["CURES"]:setTo(2)
+                settings["STATUS"]:setTo(true)
+                settings["DEBUFFS"]:setTo(true)
+                helpers["controls"].setEnabled(true)
+                
+                -- SET SONGS.
+                windower.send_command("bp loop march march ballad")
+                
+                if bpcore:isLeader() and windower.ffxi.get_party().party1_count < 6 then
+                    helpers["trust"].setEnabled(true)
                 end
                 
-            end
-            
-        elseif command == "sanguine" then
-            settings["SANGUINE"]:next()
-            helpers['popchat']:pop(("Auto-Sanguine Blade: " .. tostring(settings["SANGUINE"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "sc" then
-            settings["SC"]:next()
-            helpers['popchat']:pop(("Auto-Skillchains: " .. tostring(settings["SC"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "burst" then
-            settings["BURST"]:next()
-            helpers['popchat']:pop(("Auto-Bursting: " .. tostring(settings["BURST"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "element" then
-            local element = windower.convert_auto_trans(commands[2]):lower() or false
-            if element then
-
-                for _,v in pairs(res.elements) do
-
-                    if v and element:sub(1,6) == v.en:sub(1,6):lower() then
-                        settings["ELEMENT"]:setTo(v.en)
-                        helpers['popchat']:pop(("Auto-Burst Element now set to: " .. tostring(settings["ELEMENT"]:current())):upper(), system["Popchat Window"])    
-                    end
-                    
-                end
+                
+            elseif command == "disable" then
+                message = ("SETTINGS DISABLED!")
+                settings["HATE"]:setTo(false)
+                settings["BUFFS"]:setTo(false)
+                settings["JA"]:setTo(false)
+                settings["WS"]:setTo(true)
+                settings["WSNAME"] = "Savage Blade"
+                settings["CURES"]:setTo(1)
+                settings["STATUS"]:setTo(false)
+                settings["DEBUFFS"]:setTo(false)
+                helpers["controls"].setEnabled(true)
+                helpers["trust"].setEnabled(false)
+                
+                -- CLEAR SONGS QUEUE.
+                windower.send_command("bp clear")
                 
             end
             
-        elseif command == "tier" then
-            settings["TIER"]:next()
-            helpers['popchat']:pop(("Auto-Bursting Tier now set to: " .. tostring(settings["TIER"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "aoe" then
-            settings["ALLOW-AOE"]:next()
-            helpers['popchat']:pop(("AOE-Bursting now: " .. tostring(settings["ALLOW-AOE"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "drains" then
-            settings["DRAINS"]:next()
-            helpers['popchat']:pop(("Auto-Drains: " .. tostring(settings["DRAINS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "stuns" then
-            settings["STUNS"]:next()
-            helpers['popchat']:pop(("Auto-Stunning: " .. tostring(settings["STUNS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "super" then
-            settings["SUPER-TANK"]:next()
-            helpers['popchat']:pop(("Super-tanking: " .. tostring(settings["SUPER-TANK"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "utsu" then
-            settings["SHADOWS"]:next()
-            helpers['popchat']:pop(("Auto-Shadows: " .. tostring(settings["SHADOWS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "food" then
-            settings["FOOD"]:next()
-            helpers['popchat']:pop(("Auto-Food: " .. tostring(settings["FOOD"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "steps" then
-            settings["STEPS"]:next()
-            helpers['popchat']:pop(("Auto-Steps: " .. tostring(settings["STEPS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "skillup" then
-            settings["SKILLUP"]:next()
-            helpers['popchat']:pop(("Auto-Skillup: " .. tostring(settings["SKILLUP"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "skills" then
-            settings["SKILLS"]:next()
-            helpers['popchat']:pop(("Skill-Up Skill now set to: " .. tostring(settings["SKILLS"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "composure" then
-            settings["COMPOSURE"]:next()
-            helpers['popchat']:pop(("Auto-Composure: " .. tostring(settings["COMPOSURE"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "convert" then
-            settings["CONVERT"]:next()
-            helpers['popchat']:pop(("Auto-Convert: " .. tostring(settings["CONVERT"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "enspell" then
-            local enspell = windower.convert_auto_trans(commands[2]):sub(1,3):lower() or false
-            if enspell then
-
-                for _,v in pairs(settings["ENSPELL"]) do
-
-                    if v and type(v) == 'string' and enspell == v:sub(1,3):lower() then
-                        settings["ENSPELL"]:setTo(v)
-                        helpers['popchat']:pop(("Auto-Enspell now set to: " .. tostring(settings["ENSPELL"]:current())):upper(), system["Popchat Window"])    
-                    end
-                    
-                end
-                
-            end
-        
-        elseif command == "gains" then
-            local gain = windower.convert_auto_trans(commands[2]):lower() or false
-            if gain then
-
-                for _,v in pairs(settings["GAINS"]) do
-
-                    if v and type(v) == 'string' and gain == v:lower() then
-                        settings["GAINS"]:setTo(v)
-                        helpers['popchat']:pop(("Auto-Gain now set to: " .. tostring(settings["GAINS"]:current())):upper(), system["Popchat Window"])    
-                    end
-                    
-                end
-                
+            if message ~= "" then
+                helpers['popchat']:pop(message:upper() or ("INVALID COMANDS"):upper(), system["Popchat Window"])
             end
             
-        elseif command == "spikes" then
-            settings["SPIKES"]:next()
-            helpers['popchat']:pop(("Auto-Spikes now set to: " .. tostring(settings["SPIKES"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "dia" or command == "bio" then
-            settings["DIA"]:next()
-            helpers['popchat']:pop(("Dia/Bio Mode now set to: " .. tostring(settings["DIA"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "repeat" then
-            settings["REPEAT"]:next()
-            helpers['popchat']:pop(("Repeating songs: " .. tostring(settings["REPEAT"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "clear" then
-            helpers["songs"].clearQueue()
-            helpers['popchat']:pop(("Songs Queue has been cleared."):upper(), system["Popchat Window"])
-        
         end
+        
+        helpers["songs"].handleCommands(commands)
+        helpers["corecommands"].handle(commands)
         
     end
     
@@ -362,6 +264,9 @@ function core.get()
     
     self.handleAutomation = function()
         
+        -- Handle items.
+        system["Core"].handleItems()
+        
         if bpcore:checkReady() and not helpers["actions"].getMoving() and system["BP Enabled"]:current() then
             local player  = windower.ffxi.get_player() or false
             local current = helpers["queue"].getNextAction() or false
@@ -388,18 +293,25 @@ function core.get()
             end
             
             -- PLAYER IS ENGAGED.
-            if player.status == 1 and not singing then
+            if player.status == 1 then
                 local target = helpers["target"].getTarget() or windower.ffxi.get_mob_by_target("t") or false
                 
                 -- SKILLUP LOGIC.
                 if settings["SKILLUP"]:current() then
                     
-                    for i,v in pairs(system["Skillup"][settings["SKILLS"]:current()].list) do
-
-                        if windower.ffxi.get_spells()[MA[v].id] and bpcore:isMAReady(MA[v].recast_id) then
-                            helpers["queue"].add(MA[v], system["Skillup"][settings["SKILLS"]:current()].target)
-                        end
+                    if bpcore:findItemByName("B.E.W. Pitaru") and not helpers["queue"].inQueue(IT["B.E.W. Pitaru"], player) and not bpcore:buffActive(251) then
+                        helpers["queue"].add(IT["B.E.W. Pitaru"], "me")
                         
+                    else
+                    
+                        for i,v in pairs(system["Skillup"][settings["SKILLS"]:current()].list) do
+    
+                            if windower.ffxi.get_spells()[MA[v].id] and bpcore:isMAReady(MA[v].recast_id) then
+                                helpers["queue"].add(MA[v], system["Skillup"][settings["SKILLS"]:current()].target)
+                            end
+                            
+                        end
+                    
                     end
                     
                 end
@@ -411,7 +323,7 @@ function core.get()
                         
                         if bpcore:buffActive(272) and player["vitals"].tp > 1000 then
                             
-                            if settings["SANGUINE"]:current() and player["vitals"].hpp > system["RDM"]["Sanguine Threshold"] then
+                            if settings["SANGUINE"]:current() and player["vitals"].hpp > system["BRD"]["Sanguine Threshold"] then
                                 helpers["queue"].addToFront(WS["Sanguine Blade"], "t")
                             else
                                 helpers["queue"].addToFront(WS[settings["WSNAME"]], "t")
@@ -429,7 +341,7 @@ function core.get()
                         
                     elseif player["vitals"].tp > 1000 then
                         
-                        if settings["SANGUINE"]:current() and player["vitals"].hpp > system["RDM"]["Sanguine Threshold"] then
+                        if settings["SANGUINE"]:current() and player["vitals"].hpp > system["BRD"]["Sanguine Threshold"] then
                             helpers["queue"].addToFront(WS["Sanguine Blade"], "t")
                         else
                             helpers["queue"].addToFront(WS[settings["WSNAME"]], "t")
@@ -500,8 +412,6 @@ function core.get()
                 -- BUFF LOGIC.
                 if settings["BUFFS"]:current() then
                     
-                    
-                    
                     -- /WAR.
                     if player.sub_job == "WAR" then
                         
@@ -562,14 +472,26 @@ function core.get()
                     
                     -- BRD/.
                     if player.main_job == "BRD" then
-                    
+                        
+                        for i,v in pairs(settings["SPELLS"]) do
+                            local spell = MA[i]
+
+                            if (os.clock()-v.allowed) > v.delay and windower.ffxi.get_spells()[spell.id] and bpcore:isMAReady(spell.recast_id) and target then
+                                helpers["queue"].add(spell, target)
+                                settings["SPELLS"][spell.en].allowed = os.clock()
+                                break
+                                
+                            end
+                            
+                        end
+                        
                     end
                     
                     -- /DNC.
                     if player.sub_job == "DNC" then
                     
                         -- STEPS.
-                        if windower.ffxi.get_abilities()[JA[settings["STEPS"]:current()].id] and bpcore:canAct() and os.clock()-system["RDM"]["Steps Timer"] > system["RDM"]["Steps Delay"] then
+                        if windower.ffxi.get_abilities()[JA[settings["STEPS"]:current()].id] and bpcore:canAct() and os.clock()-system["BRD"]["Steps Timer"] > system["BRD"]["Steps Delay"] then
                             
                             if bpcore:isJAReady(JA[settings["STEPS"]:current()].recast_id) then
                                 helpers["queue"].add(JA[settings["STEPS"]:current()], "me")
@@ -583,7 +505,7 @@ function core.get()
                     if settings["DRAINS"]:current() and bpcore:canCast() then
                         
                         -- DRAIN
-                        if windower.ffxi.get_spells()[MA["Drain"].id] and player["vitals"].mpp < system["RDM"]["Drain Threshold"] then
+                        if windower.ffxi.get_spells()[MA["Drain"].id] and player["vitals"].mpp < system["BRD"]["Drain Threshold"] then
                             
                             if bpcore:isMAReady(MA["Drain"].recast_id) then
                                 helpers["queue"].add(MA["Drain"], "t")
@@ -592,7 +514,7 @@ function core.get()
                         end
                         
                         -- ASPIR
-                        if windower.ffxi.get_spells()[MA["Aspir"].id] and player["vitals"].mpp < system["RDM"]["Aspir Threshold"] then
+                        if windower.ffxi.get_spells()[MA["Aspir"].id] and player["vitals"].mpp < system["BRD"]["Aspir Threshold"] then
                             
                             if bpcore:isMAReady(MA["Aspir"].recast_id) then
                                 helpers["queue"].add(MA["Aspir"], "t")
@@ -605,20 +527,25 @@ function core.get()
                 end
             
             -- PLAYER IS DISENGAGED LOGIC.
-            elseif player.status == 0 and not singing then
-                
-                -- Determine which target is mine.
+            elseif (player.status == 0 or settings["SUPER-TANK"]:current()) then
                 local target = helpers["target"].getTarget()
                 
                 -- SKILLUP LOGIC.
                 if settings["SKILLUP"]:current() then
                     
-                    for i,v in pairs(system["Skillup"][settings["SKILLS"]:current()].list) do
-
-                        if windower.ffxi.get_spells()[MA[v].id] and bpcore:isMAReady(MA[v].recast_id) then
-                            helpers["queue"].add(MA[v], system["Skillup"][settings["SKILLS"]:current()].target)
-                        end
+                    if bpcore:findItemByName("B.E.W. Pitaru") and not helpers["queue"].inQueue(IT["B.E.W. Pitaru"], player) and not bpcore:buffActive(251) then
+                        helpers["queue"].add(IT["B.E.W. Pitaru"], "me")
                         
+                    else
+                    
+                        for i,v in pairs(system["Skillup"][settings["SKILLS"]:current()].list) do
+    
+                            if windower.ffxi.get_spells()[MA[v].id] and bpcore:isMAReady(MA[v].recast_id) then
+                                helpers["queue"].add(MA[v], system["Skillup"][settings["SKILLS"]:current()].target)
+                            end
+                            
+                        end
+                    
                     end
                     
                 end
@@ -640,7 +567,7 @@ function core.get()
                     if player.main_job == "RDM" then
                         
                         -- CONVERT LOGIC.
-                        if settings["CONVERT"]:current() and bpcore:canAct() and player["vitals"].hpp > system["RDM"]["Convert Threshold"].hpp and player["vitals"].mpp < system["RDM"]["Convert Threshold"].mpp then
+                        if settings["CONVERT"]:current() and bpcore:canAct() and player["vitals"].hpp > system["BRD"]["Convert Threshold"].hpp and player["vitals"].mpp < system["BRD"]["Convert Threshold"].mpp then
                             if bpcore:isJAReady(JA["Convert"].recast_id) then
                                 helpers["queue"].add(JA["Convert"], "me")
                             end
@@ -777,11 +704,23 @@ function core.get()
                 end
                 
                 -- DEBUFF LOGIC.
-                if settings["DEBUFFS"]:current() and bpcore:canCast() then
+                if settings["DEBUFFS"]:current() and bpcore:canCast() and target then
                     
                     -- BRD/.
                     if player.main_job == "BRD" then
-                    
+                        
+                        for i,v in pairs(settings["SPELLS"]) do
+                            local spell = MA[i]
+
+                            if (os.clock()-v.allowed) > v.delay and windower.ffxi.get_spells()[spell.id] and bpcore:isMAReady(spell.recast_id) then
+                                helpers["queue"].add(spell, target)
+                                settings["SPELLS"][spell.en].allowed = os.clock()
+                                break
+                                
+                            end
+                            
+                        end
+                        
                     end
                     
                 end
@@ -813,17 +752,10 @@ function core.get()
             
             end
             
-            -- HANDLE ALL CURING.
-            if settings["CURES"]:current() == 2 and (player.sub_job == "WHM" or player.sub_job == "RDM" or player.sub_job == "SCH") then
-                helpers["cures"].handleParty()
-                
-            elseif settings["CURES"]:current() == 3 and (player.sub_job == "WHM" or player.sub_job == "RDM" or player.sub_job == "SCH") then
-                helpers["cures"].handleParty()
-                helpers["cures"].handleAlliance()
-            end
-            
             -- HANDLE EVERYTHING INSIDE THE QUEUE.
-            helpers["queue"].handleQueue()
+            helpers["cures"].handleCuring()
+            helpers["buffer"].handleBuffs()
+            helpers['queue'].handleQueue()
         
         end
         
@@ -927,6 +859,63 @@ function core.get()
         songlist:destoy()
         
     end        
+    
+    self.toggleDisplay = function()
+        display:next()
+    end
+    
+    self.getDisplay = function()
+        return display:current()
+    end
+    
+    self.next = function(name)
+        local name = name or false
+        
+        if name then
+            settings[name]:next()
+        end
+        
+    end
+    
+    self.current = function(name)
+        local name = name or false
+        
+        if name then        
+            return settings[name]:current()
+        end
+        
+    end
+    
+    self.set = function(name, value)
+        local name, value = name or false, value or false
+        
+        if name and value then
+            settings[name]:setTo(value)
+        end
+        
+    end
+    
+    self.value = function(name, value)
+        local name, value = name or false, value or false
+        
+        if name and value then
+            settings[name] = (value)
+        end
+        
+    end
+    
+    self.get = function(name)
+        local name = name or false
+        
+        if name then        
+            return settings[name]
+        end
+        
+    end
+    
+    self.getSettings = function()
+        return settings
+    end
     
     return self
     

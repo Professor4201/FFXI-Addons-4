@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local thumb = {}
 function thumb.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local selection = I{1,2}

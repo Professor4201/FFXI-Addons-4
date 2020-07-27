@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local alias = {}
 function alias.new()
-    self = {}
+    local self = {}
     
     -- Private BP Binds.
     local aliases = {

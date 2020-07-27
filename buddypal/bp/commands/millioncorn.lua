@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local millioncorn = {}
 function millioncorn.run()
-    self = {}
+    local self = {}
     
     --------------------------------------------------------------------------------------
     -- Handle the execution of all helper commands.

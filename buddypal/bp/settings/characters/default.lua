@@ -7,10 +7,10 @@
 return {
     
     -- Characters Information.
-    ["Main Character"]           = "",
-    ["Characters"]               = T{},
-    ["Controllers"]              = T{},
-    ["Auto Join"]                = T{},
+    ["Main Character"]           = "Eliidyr",
+    ["Characters"]               = T{"Eliidyr","Dirtydupes","Deviousdupes","Dankdupes","Dustydupes","Duptimusprime","Rmtwhiss","Turtle","Ninjar","Mutant"},
+    ["Controllers"]              = T{"Eliidyr","Dirtydupes","Deviousdupes","Dankdupes","Dustydupes","Duptimusprime","Rmtwhiss","Turtle","Ninjar","Mutant","Uwu","Doomvtwo","Zutangdupes","Wutangdupes"},
+    ["Auto Join"]                = T{"Eliidyr","Dirtydupes","Deviousdupes","Dankdupes","Dustydupes","Duptimusprime","Rmtwhiss","Turtle","Ninjar","Mutant","Uwu","Doomvtwo","Zutangdupes","Wutangdupes","Gianni","Minimimi"},
     
     -- Pinger Settings.
     ["Ping Delay"]               = 0.6,
@@ -131,9 +131,6 @@ return {
         ["Crafter"]         = true, 
         ["Silver Vouchers"] = false,
         ["Canteens"]        = true, 
-        ["XP"]              = false, 
-        ["CP"]              = false, 
-        ["JP"]              = false,
         
     },
     
@@ -325,6 +322,7 @@ return {
         ["Drain Threshold"]     = 40,
         ["Aspir Threshold"]     = 65,
         ["Moonlight Threshold"] = 65,
+        ["Circle Threshold"]    = 28,
         ["Convert Threshold"]   = {hpp=35,mpp=15},
         ["Buff Exclusion"]      = T{"Glassy Gorger","Yakshi"},
     },
@@ -334,13 +332,15 @@ return {
         ["Hate Delay"]          = 10,
         ["Hate Timer"]          = os.clock(),
         ["Sanguine Threshold"]  = 50,
+        ["Pulse HPP Threshold"] = 50,
+        ["Pulse MPP Threshold"] = 35,
         ["Buff Exclusion"]      = T{"Glassy Gorger","Yakshi"},
     },
     
     -- HUD Settings.
     ["BP Window Settings"] = {
         ['pos']={['x']=001,['y']=225},
-        ['bg']={['alpha']=155,['red']=000,['green']=000,['blue']=000,['visible']=false},
+        ['bg']={['alpha']=200,['red']=000,['green']=000,['blue']=000,['visible']=false},
         ['flags']={['right']=false,['bottom']=false,['bold']=false,['draggable']=true,['italic']=false},
         ['padding']=15,
         ['text']={['size']=10,['font']='lucida console',['fonts']={},['alpha']=255,['red']=245,['green']=200,['blue']=020,

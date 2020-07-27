@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local zincore = {}
 function zincore.new()
-    self = {}
+    local self = {}
     
     -- Public Variables.
     local injecting = false

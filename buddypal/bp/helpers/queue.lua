@@ -5,12 +5,12 @@ local queue = {}
 
 -- Create event object.
 function queue.new()
-    self = {}
+    local self = {}
     
     local bpq                    = Q{}
     local winQueue               = {}
         winQueue["Position"]     = {["x"]=500,["y"]=75}
-        winQueue["BG"]           = {["alpha"]=180,["r"]=000,["g"]=000,["b"]=000}
+        winQueue["BG"]           = {["alpha"]=200,["r"]=000,["g"]=000,["b"]=000}
         winQueue["Flags"]        = {['right']=false,['bottom']=false,['bold']=false,['draggable']=false,['italic']=false}
         winQueue["Padding"]      = 5
         winQueue["Text"]         = {['size']=8,['font']='lucida console',['alpha']=255,['r']=245,['g']=200,['b']=020}
@@ -143,86 +143,6 @@ function queue.new()
             
             if type(target) == "string" then
                 local types = T{"t","bt","st","me","ft","ht"}
-                print("string")
-                if types:contains(target) and windower.ffxi.get_mob_by_target(target) then
-                    new_target = windower.ffxi.get_mob_by_target(target)
-                    
-                elseif windower.ffxi.get_mob_by_name(target) then
-                    new_target = windower.ffxi.get_mob_by_name(target)
-                
-                end
-            
-            elseif type(target) == "number" then
-                print("number")
-                if windower.ffxi.get_mob_by_id(target) then
-                    new_target = windower.ffxi.get_mob_by_id(target)
-                end
-            
-            elseif type(target) == "table" then
-                print("table")
-                if target.id then
-                
-                    if windower.ffxi.get_mob_by_id(target.id) then
-                        new_target = windower.ffxi.get_mob_by_id(target.id)
-                    end
-                
-                end
-                
-            end
-            print(new_target.name)
-            if new_target then
-                
-                if action_type == "JobAbility" then
-                    
-                    if bpcore:canAct() and not helpers["queue"].inQueue(action, new_target) and bpcore:isJAReady(JA[action.en].recast_id) then
-                        bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})
-                    end
-                    
-                elseif action_type == "Magic" then
-        
-                    if bpcore:canCast() and not helpers["queue"].inQueue(action, new_target) and bpcore:isMAReady(MA[action.en].recast_id) and player["vitals"].mp > action.mp_cost then
-                        bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})
-                    end
-                    
-                elseif action_type == "WeaponSkill" then
-                    
-                    if bpcore:canAct() and not helpers["queue"].inQueue(action, new_target) and not helpers["queue"].wsInQueue(action) and player["vitals"].tp > 1000 then
-                        bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})                    
-                    end
-                    
-                elseif action_type == "Item" then
-                    
-                    if bpcore:canItem() and not helpers["queue"].inQueue(action, new_target) and bpcore:findItemByName(action.en) then
-                        bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})
-                    end
-                    
-                elseif action_type == "Ranged" then
-        
-                    if bpcore:canAct() and not helpers["queue"].inQueue({id=65536,en="Ranged",prefix="/ra",type="Ranged"}, new_target) then
-                        bpq:insert(1, {action={id=65536,en="Ranged",element=-1,prefix="/ra",type="Ranged"}, target=new_target, priority=priority, attempts=0})
-                    end
-                    
-                end
-            
-            end
-            print(bpq)
-        end
-        
-    end
-    
-    --------------------------------------------------------------------------------
-    -- Add an action to the end queue.
-    --------------------------------------------------------------------------------
-    self.add = function(action, target, priority)
-        local player      = windower.ffxi.get_player() or false
-        local action_type = helpers["queue"].getType(action)
-        local priority    = priority or 0
-        local new_target
-        
-        if (player.status == 0 or player.status == 1) and not helpers["actions"].getMoving() then
-            
-            if type(target) == "string" then
-                local types = T{"t","bt","st","me","ft","ht"}
                 
                 if types:contains(target) and windower.ffxi.get_mob_by_target(target) then
                     new_target = windower.ffxi.get_mob_by_target(target)
@@ -233,12 +153,9 @@ function queue.new()
                 end
             
             elseif type(target) == "number" then
-            
+                
                 if windower.ffxi.get_mob_by_id(target) then
                     new_target = windower.ffxi.get_mob_by_id(target)
-                
-                else
-                    new_target = target
                 end
             
             elseif type(target) == "table" then
@@ -256,7 +173,151 @@ function queue.new()
             if new_target then
                 local ranges   = helpers["actions"].getRanges()
                 local distance = (new_target.distance):sqrt()
+                
+                -- Convert to self target.
+                if helpers["target"].onlySelf(action) and new_target.id ~= player.id then
+                    new_target = windower.ffxi.get_mob_by_target("me")
+                end
+                
+                if action_type == "JobAbility" then
                     
+                    if bpcore:canAct() and not helpers["queue"].inQueue(action, new_target) and bpcore:isJAReady(JA[action.en].recast_id) then
+                        
+                        if action.prefix == "/pet" then
+                            local pet = windower.ffxi.get_mob_by_target("pet") or false
+                            
+                            if pet and (distance-pet.distance:sqrt()) < (ranges[action.range]+new_target.model_size) and not helpers["queue"].typeInQueue(action) and player["vitals"].mp >= action.mp_cost then
+                                bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})
+                            end
+                            
+                        else
+                            
+                            if distance < (ranges[action.range]+new_target.model_size) and player["vitals"].mp >= action.mp_cost then
+                                bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})
+                            end
+                            
+                        end
+                        
+                    end
+                    
+                elseif action_type == "Magic" then
+                    
+                    if bpcore:canCast() and not helpers["queue"].inQueue(action, new_target) and bpcore:isMAReady(MA[action.en].recast_id) and player["vitals"].mp > action.mp_cost then
+                        
+                        if distance < ((ranges[action.range]+new_target.model_size) + 2) then
+                            
+                            if action.prefix == "/song" and new_target.id ~= player.id then
+                                
+                                if (("Requiem"):match(action.en) == nil or ("Nocturne"):match(action.en) == nil or ("FInale"):match(action.en) == nil) and bpcore:isJAReady(JA["Pianissimo"].recast_id) and bpcore:getAvailable("JA", "Pianissimo") then
+                                    bpq:insert(1, {action=JA["Pianissimo"], target=windower.ffxi.get_mob_by_target("me"), priority=priority, attempts=0})
+                                    bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})
+                                    
+                                else
+                                    bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})
+                                    
+                                end
+                                
+                            elseif action.prefix == "/song" and new_target.id == player.id then
+                                bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})
+                            
+                            elseif player["vitals"].mp >= action.mp_cost then
+                                bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})                                
+                            end
+
+                        end
+                        
+                    end
+                    
+                elseif action_type == "WeaponSkill" then
+                    
+                    if bpcore:canAct() and not helpers["queue"].inQueue(action, new_target) and not helpers["queue"].wsInQueue(action) and player["vitals"].tp > 1000 then
+                        
+                        if distance < (ranges[action.range]+new_target.model_size) then
+                            bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})                    
+                        end    
+                        
+                    end
+                    
+                elseif action_type == "Item" then
+                    
+                    if bpcore:canItem() and not helpers["queue"].inQueue(action, new_target) then
+                        
+                        if (bpcore:findItemByName(action.en, 0) or bpcore:findItemByName(action.en, 8) or bpcore:findItemByName(action.en, 10) or bpcore:findItemByName(action.en, 11) or bpcore:findItemByName(action.en, 12)) then
+                            bpq:insert(1, {action=action, target=new_target, priority=priority, attempts=0})
+                        end
+                        
+                    end
+                    
+                elseif action_type == "Ranged" then
+                    
+                    if bpcore:canAct() and not helpers["queue"].inQueue({id=65536,en="Ranged",prefix="/ra",type="Ranged", range=14}, new_target) then
+                        
+                        if distance < (ranges[action.range]+new_target.model_size) then
+                            bpq:insert(1, {action={id=65536,en="Ranged",element=-1,prefix="/ra",type="Ranged", range=14}, target=new_target, priority=priority, attempts=0})
+                        end
+                        
+                    end
+                    
+                end
+            
+            end
+            
+        end
+        
+    end
+    
+    --------------------------------------------------------------------------------
+    -- Add an action to the end queue.
+    --------------------------------------------------------------------------------
+    self.add = function(action, target, priority)
+        local player      = windower.ffxi.get_player() or false
+        local action_type = helpers["queue"].getType(action)
+        local priority    = priority or 0
+        local new_target
+        
+        if (player.status == 0 or player.status == 1) then
+            
+            if type(target) == "string" and action_type ~= "Movement" then
+                local types = T{"t","bt","st","me","ft","ht"}
+                
+                if types:contains(target) and windower.ffxi.get_mob_by_target(target) then
+                    new_target = windower.ffxi.get_mob_by_target(target)
+                    
+                elseif windower.ffxi.get_mob_by_name(target) then
+                    new_target = windower.ffxi.get_mob_by_name(target)
+                
+                end
+            
+            elseif type(target) == "number" and action_type ~= "Movement" then
+            
+                if windower.ffxi.get_mob_by_id(target) then
+                    new_target = windower.ffxi.get_mob_by_id(target)
+                
+                else
+                    new_target = target
+                end
+            
+            elseif type(target) == "table" and action_type ~= "Movement" then
+                
+                if target.id then
+                
+                    if windower.ffxi.get_mob_by_id(target.id) then
+                        new_target = windower.ffxi.get_mob_by_id(target.id)
+                    end
+                
+                end
+                
+            end
+            
+            if new_target and not helpers["actions"].getMoving() then
+                local ranges   = helpers["actions"].getRanges()
+                local distance = (new_target.distance):sqrt()
+                
+                -- Convert to self target.
+                if helpers["target"].onlySelf(action) and new_target.id ~= player.id and action_type ~= "Movement" then
+                    new_target = windower.ffxi.get_mob_by_target("me")
+                end
+                
                 if action_type == "JobAbility" then
 
                     if bpcore:canAct() and not helpers["queue"].inQueue(action, new_target) and bpcore:isJAReady(JA[action.en].recast_id) then
@@ -264,25 +325,45 @@ function queue.new()
                         if action.prefix == "/pet" then
                             local pet = windower.ffxi.get_mob_by_target("pet") or false
                             
-                            if pet and ( (pet.distance:sqrt()-distance) < (ranges[action.range]+new_target.model_size) ) then
+                            if pet and (distance-pet.distance:sqrt()) < (ranges[action.range]+new_target.model_size) and not helpers["queue"].typeInQueue(action) and player["vitals"].mp >= action.mp_cost then
                                 bpq:push({action=action, target=new_target, priority=priority, attempts=0})
                             end
                             
                         else
                             
-                            if distance < (ranges[action.range]+new_target.model_size) then
+                            if distance < (ranges[action.range]+new_target.model_size) and player["vitals"].mp >= action.mp_cost then
                                 bpq:push({action=action, target=new_target, priority=priority, attempts=0})
                             end
                             
                         end
+                        
                     end
                     
                 elseif action_type == "Magic" then
 
                     if bpcore:canCast() and not helpers["queue"].inQueue(action, new_target) and player["vitals"].mp > action.mp_cost then
                         
-                        if distance < (ranges[action.range]+new_target.model_size) then
-                            bpq:push({action=action, target=new_target, priority=priority, attempts=0})
+                        if distance < ((ranges[action.range]+new_target.model_size) + 2) then
+                            
+                            if action.prefix == "/song" and new_target.id ~= player.id then
+                                
+                                if (("Requiem"):match(action.en) == nil or ("Nocturne"):match(action.en) == nil or ("Finale"):match(action.en) == nil) and bpcore:isJAReady(JA["Pianissimo"].recast_id) and bpcore:getAvailable("JA", "Pianissimo") then
+                                    bpq:push({action=JA["Pianissimo"], target=windower.ffxi.get_mob_by_target("me"), priority=priority, attempts=0})
+                                    bpq:push({action=action, target=new_target, priority=priority, attempts=0})
+                                    
+                                else
+                                    bpq:push({action=action, target=new_target, priority=priority, attempts=0})
+                                    
+                                end
+                                
+                            elseif action.prefix == "/song" and new_target.id == player.id then
+                                bpq:push({action=action, target=new_target, priority=priority, attempts=0})
+                                
+                            elseif player["vitals"].mp >= action.mp_cost then
+                                bpq:push({action=action, target=new_target, priority=priority, attempts=0})
+                                
+                            end
+                            
                         end
                         
                     end
@@ -302,23 +383,30 @@ function queue.new()
                     if bpcore:canItem() and not helpers["queue"].inQueue(action, new_target) then
                         
                         if (bpcore:findItemByName(action.en, 0) or bpcore:findItemByName(action.en, 8) or bpcore:findItemByName(action.en, 10) or bpcore:findItemByName(action.en, 11) or bpcore:findItemByName(action.en, 12)) then
-                            bpq:push({action=action, target=new_target, priority=priority, attempts=0})                            
+                            bpq:push({action=action, target=new_target, priority=priority, attempts=0})
                         end
                         
                     end
                     
                 elseif action_type == "Ranged" then
                         
-                    if bpcore:canAct() and not helpers["queue"].inQueue({id=65536,en="Ranged",prefix="/ra",type="Ranged"}, new_target) then
+                    if bpcore:canAct() and not helpers["queue"].inQueue({id=65536,en="Ranged",prefix="/ra",type="Ranged", range=14}, new_target) then
                         
                         if distance < (ranges[action.range]+new_target.model_size) then
-                            bpq:push({action={id=65536,en="Ranged",element=-1,prefix="/ra",type="Ranged"}, target=new_target, priority=priority, attempts=0})
+                            bpq:push({action={id=65536,en="Ranged",element=-1,prefix="/ra",type="Ranged", range=14}, target=new_target, priority=priority, attempts=0})
                         end
                         
                     end
-                
+                    
                 end
             
+            elseif action_type == "Movement" and target and target.name and target.x and target.y then
+            
+                --if bpcore:canMove() and not helpers["queue"].inQueue({id=65535,en="Movement",prefix="/move",type="Movement", range=255}, target) then
+                if bpcore:canMove() then
+                    bpq:push({action={id=65535,en="Movement",element=-1,prefix="/move",type="Movement", range=255}, target=target, priority=priority, attempts=0})                    
+                end
+                
             end
         
         end
@@ -330,7 +418,9 @@ function queue.new()
     --------------------------------------------------------------------------------
     self.remove = function(action, target)
         local action, target = action or false, target or false
-        local data = bpq.data
+        local data  = bpq.data
+        local cures = T{1,2,3,4,5,6,7,8,9,10,11,549,645,578,593,711,581,690}
+        local waltz = T{190,191,192,193,311,195,262}
         
         if action and target then
             
@@ -338,7 +428,13 @@ function queue.new()
                 
                 if type(v) == "table" and type(target) == "table" and v.action then
                     
-                    if v.action.id == action.id then
+                    if (cures):contains(action.id) and (cures):contains(v.action.id) and action.prefix == "/magic" then
+                        bpq:remove(i)
+                            
+                    elseif (waltz):contains(action.id) and (waltz):contains(v.action.id) and action.prefix == "/jobability" then
+                        bpq:remove(i)
+                    
+                    elseif v.action.id == action.id and action.en ~= "Pianissimo" then
                         
                         if v.action.type == "Weapon" then
                             bpq:remove(i)
@@ -347,6 +443,10 @@ function queue.new()
                             bpq:remove(i)
                             
                         end
+                    
+                    elseif action.en == "Pianissimo" then
+                        bpq:remove(i)
+                        break
                         
                     end
                     
@@ -419,26 +519,45 @@ function queue.new()
                     if helpers["queue"].getNextAttempts() == 15 then
                         helpers["queue"].remove(res.job_abilities[action.id], target)
                         
-                    elseif not bpcore:canAct() or not bpcore:getAvailable("JA", action.en) or not bpcore:isJAReady(JA[action.en].recast_id) then
+                    elseif not bpcore:canAct() or not bpcore:getAvailable("JA", action.en) or not bpcore:isJAReady(JA[action.en].recast_id) and action.en ~= "Pianissimo" then
                         helpers["queue"].remove(res.job_abilities[action.id], target)
                     
                     elseif action.prefix == "/pet" then
                         local pet = windower.ffxi.get_mob_by_target("pet") or false
                         
-                        if pet and ( (pet.distance:sqrt()-distance) < (ranges[action.range]+target.model_size) ) then
-                            windower.send_command(string.format('input %s "%s" %s', action.prefix, action.en, target.id))
-                            helpers["queue"].attempt()
+                        if action.type == "BloodPactRage" then
+                            local distance = ((pet.distance):sqrt()-distance)
                             
-                        elseif pet and ( (pet.distance:sqrt()-distance) > (ranges[action.range]+target.model_size) ) then
-                            helpers["queue"].remove(res.job_abilities[action.id], target)
+                            if pet and distance < (ranges[action.range]+target.model_size) then
+                                windower.send_command(string.format('input %s "%s" %s', action.prefix, action.en, target.id))
+                                helpers["queue"].attempt()
+                                
+                            elseif pet and distance > (ranges[action.range]+target.model_size) then
+                                helpers["queue"].remove(res.job_abilities[action.id], target)
+                                
+                            elseif not pet then
+                                helpers["queue"].remove(res.job_abilities[action.id], target)
+                                
+                            end
                             
-                        elseif not pet then
-                            helpers["queue"].remove(res.job_abilities[action.id], target)
+                        else
+                        
+                            if pet and distance < (ranges[action.range]+target.model_size) then
+                                windower.send_command(string.format('input %s "%s" %s', action.prefix, action.en, target.id))
+                                helpers["queue"].attempt()
+                                
+                            elseif pet and distance > (ranges[action.range]+target.model_size) then
+                                helpers["queue"].remove(res.job_abilities[action.id], target)
+                                
+                            elseif not pet then
+                                helpers["queue"].remove(res.job_abilities[action.id], target)
+                                
+                            end
                         
                         end
-                    
+                        
                     else
-                    
+                        
                         if distance < (ranges[action.range]+target.model_size) then
                             windower.send_command(string.format('input %s "%s" %s', action.prefix, action.en, target.id))
                             helpers["queue"].attempt()
@@ -471,7 +590,7 @@ function queue.new()
                         windower.send_command(string.format('input %s "%s" %s', action.prefix, action.en, target.id))
                         helpers["queue"].attempt()
                     
-                    elseif distance < (ranges[action.range]+target.model_size) then
+                    elseif distance > (ranges[action.range]+target.model_size) then
                         helpers["queue"].remove(res.spells[action.id], target)
                         
                     end
@@ -554,7 +673,15 @@ function queue.new()
                     
                     
                 end
+            
+            elseif type == "Movement" then
                 
+                if bpcore:canMove() and target.x ~= nil and target.y ~= nil then
+                    helpers["actions"].move(target.x, target.y)
+                    helpers["queue"].remove({id=65535,en="Movement",prefix="/move",type="Movement", range=255}, target)
+                    
+                end
+            
             end
         
         end
@@ -571,7 +698,7 @@ function queue.new()
         
         if action and target and data then
             
-            for i,v in ipairs(data) do
+            for _,v in ipairs(data) do
                 
                 if type(v) == "table" and type(action) == "table" and type(target) == "table" and v.action and v.target then
                     
@@ -597,7 +724,7 @@ function queue.new()
         
         if action and data then
             
-            for i,v in ipairs(data) do
+            for _,v in ipairs(data) do
                 
                 if type(v) == "table" and type(action) == "table" and v.action then
                     local prefix = v.action.prefix or ""
@@ -608,6 +735,111 @@ function queue.new()
                     
                 end
             
+            end
+            
+        end
+        return false
+        
+    end
+    
+    --------------------------------------------------------------------------------
+    -- See if the same Action Type is already in the queue.
+    --------------------------------------------------------------------------------
+    self.typeInQueue = function(action)
+        local action = action or false
+        local data   = bpq.data
+        
+        if action and data and action.type then
+            
+            for _,v in ipairs(data) do
+                
+                if type(v) == "table" and type(action) == "table" and v.action and v.action.type then
+                    
+                    if v.action.type == action.type then
+                        return true
+                    end
+                    
+                end
+            
+            end
+            
+        end
+        return false
+        
+    end
+    
+    --------------------------------------------------------------------------------
+    -- Check if an action is already in the queue.
+    --------------------------------------------------------------------------------
+    self.replace = function(action, target, name)
+        local action_type = helpers["queue"].getType(action)
+        local action = action or false
+        local target = target or false
+        local name   = name or ""
+        local data   = bpq.data
+        
+        if action and target and data and name ~= "" then
+            
+            if #data > 0 then
+            
+                for i,v in ipairs(data) do
+    
+                    if type(v) == "table" and type(action) == "table" and type(target) == "table" and v.action and v.target then
+    
+                        if v.target.id == target.id and (name):match(v.action.en) and v.action.id ~= action.id then
+                            local player   = windower.ffxi.get_player() or false
+    
+                            -- Convert to self target.
+                            if player and helpers["target"].onlySelf(action) and target.id ~= player.id then
+                                target = windower.ffxi.get_mob_by_target("me")
+                            end
+                            
+                            if action_type == "JobAbility" then
+                                helpers["queue"].remove(JA[v.action.en], target)
+                                bpq:insert(i, {action=action, target=target, priority=0, attempts=0})
+                                break
+                                
+                            elseif action_type == "Magic" then
+                                helpers["queue"].remove(MA[v.action.en], target)
+                                bpq:insert(i, {action=action, target=target, priority=0, attempts=0})
+                                break
+                                
+                            elseif action_type == "WeaponSkill" then
+                                helpers["queue"].remove(WS[v.action.en], target)
+                                bpq:insert(i, {action=action, target=target, priority=0, attempts=0})
+                                break
+                                
+                            end
+                        
+                        elseif v.target.id == target.id and not (name):match(v.action.en) and v.action.id ~= action.id then
+                            local player = windower.ffxi.get_player() or false
+                            
+                            -- Convert to self target.
+                            if player and helpers["target"].onlySelf(action) and target.id ~= player.id then
+                                target = windower.ffxi.get_mob_by_target("me")
+                            end
+                            
+                            -- Add new action.
+                            helpers["queue"].add(action, target)
+                            break
+                        
+                        end
+                        
+                    end
+                
+                end
+            
+            elseif #data == 0 then
+                local player = windower.ffxi.get_player() or false
+                    
+                -- Convert to self target.
+                if player and helpers["target"].onlySelf(action) and target.id ~= player.id then
+                    target = windower.ffxi.get_mob_by_target("me")
+                end
+                
+                -- Add new action.
+                helpers["queue"].add(action, target)
+                
             end
             
         end
@@ -652,6 +884,7 @@ function queue.new()
         local wskill_types   = "WeaponSkill"
         local item_type      = "Item"
         local ranged_type    = "Ranged"
+        local movement       = "Movement"
         
         if ability_types:contains(action_type) then
             return "JobAbility"
@@ -667,6 +900,9 @@ function queue.new()
             
         elseif action_type == ranged_type then
             return "Ranged"
+            
+        elseif action_type == movement then
+            return "Movement"
         
         end
         return false

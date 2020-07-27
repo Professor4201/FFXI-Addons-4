@@ -3,14 +3,11 @@
 --------------------------------------------------------------------------------
 local guilds = {}
 function guilds.run()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local status = ""
     
-    --------------------------------------------------------------------------------------
-    -- Handle the execution of all helper commands.
-    --------------------------------------------------------------------------------------
     self.execute = function(params)
         local command = params[2] or false
         

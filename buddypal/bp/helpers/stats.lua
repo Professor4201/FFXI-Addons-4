@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local stats = {}
 function stats.new()
-    self = {}
+    local self = {}
     
     local name   = windower.ffxi.get_player().name:lower()
     local server = res.servers[windower.ffxi.get_info().server].en:lower()

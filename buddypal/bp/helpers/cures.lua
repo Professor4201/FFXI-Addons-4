@@ -3,843 +3,234 @@
 --------------------------------------------------------------------------------
 local cures = {}
 function cures.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
-    local power       = 1.0
+    local multiplier  = (0.15)
     local majesty     = false
-    local tiers       = {1,2,3,4,5,6}
     local cure_data   = dofile(string.format("%sbp/helpers/cures/cure_data.lua", windower.addon_path))
+    local needed      = {}
     local party       = {}
     local alliance    = {}
-    local curaga      = {}
+    local mFloor      = math.floor
     
-    self.handleParty = function()
-        local party  = party
-        local needed = helpers["cures"].curesNeeded()
-        local player = windower.ffxi.get_player()
+    self.handleCuring = function()
+        local party    = party or false
+        local alliance = alliance or false
+        local mode     = system["Core"].current("CURES")
+        local count    = helpers["cures"].curesNeeded()
         
-        
-        if needed > 2 and (player.main_job == "WHM" or player.sub_job == "WHM") then
+        if party and alliance and mode ~= 1 then
+            local player = windower.ffxi.get_player() or false
             
-            for _,v in ipairs(party) do
-                local spell  = helpers["cures"].estimateCuraga(v.missing) or false
-                local target = windower.ffxi.get_mob_by_id(v.id) or false
+            if mode == 2 and count > 2 and (player.main_job == "WHM" or player.sub_job == "WHM") then
+                local party = T(party)
+                local missing = 0
+                local id = false
                 
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
+                for _,v in ipairs(party) do
+                    missing = (missing + v.missing)
                     
-                    if spell.en == "Curaga" and player.main_job_level < 75 then
+                    if not id and v.id ~= player.id then
+                        id = v.id
+                    end
+                    
+                end
+
+                if missing > 0 then
+                    local cure   = helpers["cures"].estimateCuraga(missing, count) or false
+                    local target = windower.ffxi.get_mob_by_id(id) or false
+                    
+                    if cure and target and not helpers["queue"].inQueue(cure.spell, target) then
+                    
+                        if cure.priority then
+                            helpers["queue"].addToFront(cure.spell, target)
                         
-                        if helpers["queue"].getQueued(MA["Curaga II"], target) then
-                            helpers["queue"].remove(MA["Curaga II"], target)                        
+                        elseif not cure.priority then
+                            helpers["queue"].replace(cure.spell, target, (cure.spell.en):sub(1,4))
+                        
                         end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga III"], target) then
-                            helpers["queue"].remove(MA["Curaga III"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga IV"], target) then
-                            helpers["queue"].remove(MA["Curaga IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga V"], target) then
-                            helpers["queue"].remove(MA["Curaga V"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Curaga II" then
-                        
-                        if helpers["queue"].getQueued(MA["Curaga"], target) then
-                            helpers["queue"].remove(MA["Curaga"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga III"], target) then
-                            helpers["queue"].remove(MA["Curaga III"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga IV"], target) then
-                            helpers["queue"].remove(MA["Curaga IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga V"], target) then
-                            helpers["queue"].remove(MA["Curaga V"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Curaga III" then
-                        
-                        if helpers["queue"].getQueued(MA["Curaga"], target) then
-                            helpers["queue"].remove(MA["Curaga"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga II"], target) then
-                            helpers["queue"].remove(MA["Curaga II"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga IV"], target) then
-                            helpers["queue"].remove(MA["Curaga IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga V"], target) then
-                            helpers["queue"].remove(MA["Curaga V"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Curaga IV" then
-                        
-                        if helpers["queue"].getQueued(MA["Curaga"], target) then
-                            helpers["queue"].remove(MA["Curaga"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga II"], target) then
-                            helpers["queue"].remove(MA["Curaga II"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga III"], target) then
-                            helpers["queue"].remove(MA["Curaga III"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga V"], target) then
-                            helpers["queue"].remove(MA["Curaga V"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Curaga V" then
-                        
-                        if helpers["queue"].getQueued(MA["Curaga"], target) then
-                            helpers["queue"].remove(MA["Curaga"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Curaga II"], target) then
-                            helpers["queue"].remove(MA["Curaga II"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Curaga III"], target) then
-                            helpers["queue"].remove(MA["Curaga III"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Curaga IV"], target) then
-                            helpers["queue"].remove(MA["Curaga IV"], target)
-                        end
-                        helpers["queue"].addToFront(MA[spell.en], target)
-                        
+                    
                     end
                     
                 end
                 
-            end
-            
-        elseif needed < 3 and (player.main_job == "WHM" or player.main_job == "RDM" or player.sub_job == "WHM") then
-            
-            for _,v in ipairs(party) do
-                local spell  = helpers["cures"].estimateCure(v.missing) or false
-                local target = windower.ffxi.get_mob_by_id(v.id) or false
+            elseif mode == 2 then
+                local party = T(party)
                 
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
-                
-                    if spell.en == "Cure" and player.main_job_level < 75 then
+                if (player.main_job == "WHM" or player.main_job == "RDM" or player.main_job == "SCH" or player.main_job == "PLD" or player.sub_job == "WHM" or player.sub_job == "RDM" or player.sub_job == "SCH" or player.sub_job == "PLD") then
+                    
+                    for i,v in ipairs(party) do
+                        local cure   = helpers["cures"].estimateCure(v.missing) or false
+                        local target = windower.ffxi.get_mob_by_id(v.id) or false
                         
-                        if helpers["queue"].getQueued(MA["Cure II"], target) then
-                            helpers["queue"].remove(MA["Cure II"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure III"], target) then
-                            helpers["queue"].remove(MA["Cure III"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure IV"], target) then
-                            helpers["queue"].remove(MA["Cure IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure V"], target) then
-                            helpers["queue"].remove(MA["Cure V"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure VI"], target) then
-                            helpers["queue"].remove(MA["Cure VI"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Cure II" and player.main_job_level < 75 then
-                        
-                        if helpers["queue"].getQueued(MA["Cure"], target) then
-                            helpers["queue"].remove(MA["Cure"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure III"], target) then
-                            helpers["queue"].remove(MA["Cure III"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure IV"], target) then
-                            helpers["queue"].remove(MA["Cure IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure V"], target) then
-                            helpers["queue"].remove(MA["Cure V"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure VI"], target) then
-                            helpers["queue"].remove(MA["Cure VI"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Cure III" then
-                        
-                        if helpers["queue"].getQueued(MA["Cure"], target) then
-                            helpers["queue"].remove(MA["Cure"], target)
-                        end
+                        if cure and target and not helpers["queue"].inQueue(cure.spell, target) then
                             
-                        if helpers["queue"].getQueued(MA["Cure II"], target) then
-                            helpers["queue"].remove(MA["Cure II"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure IV"], target) then
-                            helpers["queue"].remove(MA["Cure IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure V"], target) then
-                            helpers["queue"].remove(MA["Cure V"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure VI"], target) then
-                            helpers["queue"].remove(MA["Cure VI"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Cure IV" then
-                        
-                        if helpers["queue"].getQueued(MA["Cure"], target) then
-                            helpers["queue"].remove(MA["Cure"], target)
-                        end
+                            if cure.priority then
+                                helpers["queue"].addToFront(cure.spell, target)
+                                
+                            elseif not cure.priority then
+                                helpers["queue"].replace(cure.spell, target, (cure.spell.en):sub(1,4))
+                                
+                            end
                             
-                        if helpers["queue"].getQueued(MA["Cure II"], target) then
-                            helpers["queue"].remove(MA["Cure II"], target)
                         end
-                        
-                        if helpers["queue"].getQueued(MA["Cure III"], target) then
-                            helpers["queue"].remove(MA["Cure III"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure V"], target) then
-                            helpers["queue"].remove(MA["Cure V"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure VI"], target) then
-                            helpers["queue"].remove(MA["Cure VI"], target)
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Cure V" then
-                        
-                        if helpers["queue"].getQueued(MA["Cure"], target) then
-                            helpers["queue"].remove(MA["Cure"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Cure II"], target) then
-                            helpers["queue"].remove(MA["Cure II"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Cure III"], target) then
-                            helpers["queue"].remove(MA["Cure III"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Cure IV"], target) then
-                            helpers["queue"].remove(MA["Cure IV"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure VI"], target) then
-                            helpers["queue"].remove(MA["Cure VI"], target)
-                        end
-                        helpers["queue"].addToFront(MA[spell.en], target)
-                        
-                    elseif spell.en == "Cure VI" then
-                        
-                        if helpers["queue"].getQueued(MA["Cure"], target) then
-                            helpers["queue"].remove(MA["Cure"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure II"], target) then
-                            helpers["queue"].remove(MA["Cure II"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure III"], target) then
-                            helpers["queue"].remove(MA["Cure III"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure IV"], target) then
-                            helpers["queue"].remove(MA["Cure IV"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure V"], target) then
-                            helpers["queue"].remove(MA["Cure V"], target)
-                        end
-                        helpers["queue"].addToFront(MA[spell.en], target)
                         
                     end
                     
                 end
-                
-            end
             
-        elseif needed < 3 and (player.main_job == "DNC" or player.sub_job == "DNC") then
-            
-            for _,v in ipairs(party) do
-                local spell  = helpers["cures"].estimateWaltz(v.missing) or false
-                local target = windower.ffxi.get_mob_by_id(v.id) or false
-                
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
+            elseif mode == 3 and count > 2 and (player.main_job == "WHM" or player.sub_job == "WHM") then
+                local party = T(party):extend(T(alliance))
                     
-                    if spell.en == "Curing Waltz" and player.main_job_level < 75 then
-                        helpers["queue"].add(MA[spell.en], target)
+                for i,v in ipairs(party) do
+                    local cure   = helpers["cures"].estimateCuraga(v.missing) or false
+                    local target = windower.ffxi.get_mob_by_id(v.id) or false
+                    
+                    if cure and target and not helpers["queue"].inQueue(cure.spell, target) then
                         
-                    elseif spell.en == "Curing Waltz II" and player.main_job_level < 75 then
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz"], target)                        
-                        end
-                        helpers["queue"].add(JA[spell.en], target)
-                        
-                    elseif spell.en == "Curing Waltz III" then
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz"], target)
-                        end
+                        if cure.priority then
+                            helpers["queue"].addToFront(cure.spell, target)
                             
-                        if helpers["queue"].getQueued(JA["Curing Waltz II"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz II"], target)                        
-                        end
-                        helpers["queue"].add(JA[spell.en], target)
-                        
-                    elseif spell.en == "Curing Waltz IV" then
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz"], target)
-                        end
+                        elseif not cure.priority then
+                            helpers["queue"].replace(cure.spell, target, (cure.spell.en):sub(1,4))
                             
-                        if helpers["queue"].getQueued(JA["Curing Waltz II"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz II"], target)
                         end
                         
-                        if helpers["queue"].getQueued(JA["Curing Waltz III"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz"], target)
+                    end
+                    
+                end            
+            
+            elseif mode == 3 then
+                local party = T(party):extend(T(alliance))
+                
+                if (player.main_job == "WHM" or player.main_job == "RDM" or player.main_job == "SCH" or player.main_job == "PLD" or player.sub_job == "WHM" or player.sub_job == "RDM" or player.sub_job == "SCH" or player.sub_job == "PLD") then
+                    
+                    for i,v in ipairs(party) do
+                        local cure   = helpers["cures"].estimateCure(v.missing) or false
+                        local target = windower.ffxi.get_mob_by_id(v.id) or false
+                        
+                        if cure and target then
+                            
+                            if cure.priority and not helpers["queue"].inQueue(cure.spell, target) then
+                                helpers["queue"].addToFront(cure.spell, target)
+                                
+                            elseif cure.priority and not helpers["queue"].inQueue(cure.spell, target) then
+                                helpers["queue"].replace(cure.spell, target, (cure.spell.en):sub(1,4))
+                                
+                            end
+                            
                         end
-                        helpers["queue"].addToFront(JA[spell.en], target)
-                        
-                    elseif spell.en == "Curing Waltz V" then
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz II"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz II"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz III"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz III"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz IV"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz IV"], target)
-                        end
-                        helpers["queue"].addToFront(JA[spell.en], target)
                         
                     end
                     
                 end
-                
-            end
-        
-        elseif needed > 2 and (player.main_job == "DNC" or player.sub_job == "DNC") then
             
-            for _,v in ipairs(party) do
-                local spell  = helpers["cures"].estimateWaltzga(v.missing) or false
-                local target = windower.ffxi.get_mob_by_id(v.id) or false
-                
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
-                    
-                    if spell.en == "Divine Waltz" and player.main_job_level < 75 then
-                        helpers["queue"].add(JA[spell.en], target)
-                        
-                    elseif spell.en == "Divine Waltz II" and player.main_job < 75 then
-                        
-                        if helpers["queue"].getQueued(JA["Divine Waltz"], target) then
-                            helpers["queue"].remove(JA["Divine Waltz"], target)                        
-                        end
-                        helpers["queue"].add(JA[spell.en], target)
-                        
-                    end
-                    
-                end
-                
-            end
-        
-        elseif needed < 3 and player.main_job == "BLU" then
-            
-            for _,v in ipairs(party) do
-                local spell  = helpers["cures"].estimateBlue(v.missing) or false
-                local target = windower.ffxi.get_mob_by_id(v.id) or false
-                
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
-                    
-                    if (spell.en == "Pollen" or spell.en == "Exuviation") and player.main_job < 75 and player.name == target.name then
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en ~= "Pollen" then
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    end
-                    
-                end
-                
             end
             
-        elseif needed > 2 and player.main_job == "BLU" then
-            
-            for _,v in ipairs(party) do
-                local spell  = helpers["cures"].estimateBluega(v.missing) or false
-                local target = windower.ffxi.get_mob_by_id(v.id) or false
-                
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
-                    
-                    if player.name == target.name then
-                        helpers["queue"].add(MA[spell.en], target)                        
-                    end
-                    
-                end
-                
-            end
-        
         end
         
-    end
-    
-    self.handleAlliance = function()
-        local alliance = alliance
-        local needed   = helpers["cures"].curesNeeded()
-        local player   = windower.ffxi.get_player() or false
-        
-        if player and needed > 2 and (player.main_job == "WHM" or player.sub_job == "WHM") then
-            
-            for _,v in ipairs(alliance) do
-                local spell  = helpers["cures"].estimateCuraga(v.missing)
-                local target = windower.ffxi.get_mob_by_id(v.id)
-                
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
-                    
-                    if spell.en == "Curaga" and player.main_job < 75 then
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Curaga II" then
-                        
-                        if helpers["queue"].getQueued(MA["Curaga"], target) then
-                            helpers["queue"].remove(MA["Curaga"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Curaga III" then
-                        
-                        if helpers["queue"].getQueued(MA["Curaga"], target) then
-                            helpers["queue"].remove(MA["Curaga"], target)
-                        end
-                            
-                        if helpers["queue"].getQueued(MA["Curaga II"], target) then
-                            helpers["queue"].remove(MA["Curaga II"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Curaga IV" then
-                        
-                        if helpers["queue"].getQueued(MA["Curaga"], target) then
-                            helpers["queue"].remove(MA["Curaga"], target)
-                        end
-                            
-                        if helpers["queue"].getQueued(MA["Curaga II"], target) then
-                            helpers["queue"].remove(MA["Curaga II"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Curaga III"], target) then
-                            helpers["queue"].remove(MA["Curaga"], target)
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Curaga V" then
-                        
-                        if helpers["queue"].getQueued(MA["Curaga"], target) then
-                            helpers["queue"].remove(MA["Curaga"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Curaga II"], target) then
-                            helpers["queue"].remove(MA["Curaga II"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Curaga III"], target) then
-                            helpers["queue"].remove(MA["Curaga III"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Curaga IV"], target) then
-                            helpers["queue"].remove(MA["Curaga IV"], target)
-                        end
-                        helpers["queue"].addToFront(MA[spell.en], target)
-                        
-                    end
-                    
-                end
-                
-            end
-        
-        elseif needed < 3 and (player.main_job == "WHM" or player.main_job == "RDM" or player.sub_job == "WHM") then
-            
-            for _,v in ipairs(alliance) do
-                local spell  = helpers["cures"].estimateCure(v.missing)
-                local target = windower.ffxi.get_mob_by_id(v.id)
-                
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, false) then
-                    
-                    if spell.en == "Cure" and player.main_job_level < 75 then
-                        
-                        if helpers["queue"].getQueued(MA["Cure II"], target) then
-                            helpers["queue"].remove(MA["Cure II"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure III"], target) then
-                            helpers["queue"].remove(MA["Cure III"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure IV"], target) then
-                            helpers["queue"].remove(MA["Cure IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure V"], target) then
-                            helpers["queue"].remove(MA["Cure V"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure VI"], target) then
-                            helpers["queue"].remove(MA["Cure VI"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Cure II" and player.main_job_level < 75 then
-                        
-                        if helpers["queue"].getQueued(MA["Cure"], target) then
-                            helpers["queue"].remove(MA["Cure"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure III"], target) then
-                            helpers["queue"].remove(MA["Cure III"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure IV"], target) then
-                            helpers["queue"].remove(MA["Cure IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure V"], target) then
-                            helpers["queue"].remove(MA["Cure V"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure VI"], target) then
-                            helpers["queue"].remove(MA["Cure VI"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Cure III" then
-                        
-                        if helpers["queue"].getQueued(MA["Cure"], target) then
-                            helpers["queue"].remove(MA["Cure"], target)
-                        end
-                            
-                        if helpers["queue"].getQueued(MA["Cure II"], target) then
-                            helpers["queue"].remove(MA["Cure II"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure IV"], target) then
-                            helpers["queue"].remove(MA["Cure IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure V"], target) then
-                            helpers["queue"].remove(MA["Cure V"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure VI"], target) then
-                            helpers["queue"].remove(MA["Cure VI"], target)                        
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Cure IV" then
-                        
-                        if helpers["queue"].getQueued(MA["Cure"], target) then
-                            helpers["queue"].remove(MA["Cure"], target)
-                        end
-                            
-                        if helpers["queue"].getQueued(MA["Cure II"], target) then
-                            helpers["queue"].remove(MA["Cure II"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure III"], target) then
-                            helpers["queue"].remove(MA["Cure III"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure V"], target) then
-                            helpers["queue"].remove(MA["Cure V"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure VI"], target) then
-                            helpers["queue"].remove(MA["Cure VI"], target)
-                        end
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Cure V" then
-                        
-                        if helpers["queue"].getQueued(MA["Cure"], target) then
-                            helpers["queue"].remove(MA["Cure"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Cure II"], target) then
-                            helpers["queue"].remove(MA["Cure II"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Cure III"], target) then
-                            helpers["queue"].remove(MA["Cure III"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(MA["Cure IV"], target) then
-                            helpers["queue"].remove(MA["Cure IV"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure VI"], target) then
-                            helpers["queue"].remove(MA["Cure VI"], target)
-                        end
-                        helpers["queue"].addToFront(MA[spell.en], target)
-                        
-                    elseif spell.en == "Cure VI" then
-                        
-                        if helpers["queue"].getQueued(MA["Cure"], target) then
-                            helpers["queue"].remove(MA["Cure"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure II"], target) then
-                            helpers["queue"].remove(MA["Cure II"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure III"], target) then
-                            helpers["queue"].remove(MA["Cure III"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure IV"], target) then
-                            helpers["queue"].remove(MA["Cure IV"], target)
-                        end
-                        
-                        if helpers["queue"].getQueued(MA["Cure V"], target) then
-                            helpers["queue"].remove(MA["Cure V"], target)
-                        end
-                        helpers["queue"].addToFront(MA[spell.en], target)
-                        
-                    end
-                    
-                end
-                
-            end
-            
-        elseif needed < 3 and (player.main_job == "DNC" or player.sub_job == "DNC") then
-            
-            for _,v in ipairs(alliance) do
-                local spell  = helpers["cures"].estimateWaltz(v.missing)
-                local target = windower.ffxi.get_mob_by_id(v.id)
-                
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
-                    
-                    if spell.en == "Curing Waltz" and player.main_job < 75 then
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz II"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz II"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz III"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz III"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz IV"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz V"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz V"], target)                        
-                        end                        
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en == "Curing Waltz II" and player.main_job < 75 then
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz III"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz III"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz IV"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz V"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz V"], target)                        
-                        end
-                        helpers["queue"].add(JA[spell.en], target)
-                        
-                    elseif spell.en == "Curing Waltz III" then
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz II"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz II"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz IV"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz IV"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz V"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz V"], target)                        
-                        end
-                        helpers["queue"].add(JA[spell.en], target)
-                        
-                    elseif spell.en == "Curing Waltz IV" then
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz II"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz II"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz III"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz III"], target)                        
-                        end
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz V"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz V"], target)                        
-                        end
-                        helpers["queue"].addToFront(JA[spell.en], target)
-                        
-                    elseif spell.en == "Curing Waltz V" then
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz II"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz II"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz III"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz III"], target)
-                        end    
-                        
-                        if helpers["queue"].getQueued(JA["Curing Waltz IV"], target) then
-                            helpers["queue"].remove(JA["Curing Waltz IV"], target)
-                        end
-                        helpers["queue"].addToFront(JA[spell.en], target)
-                        
-                    end
-                    
-                end
-                
-            end
-        
-        elseif needed > 2 and (player.main_job == "DNC" or player.sub_job == "DNC") then
-            
-            for _,v in ipairs(alliance) do
-                local spell  = helpers["cures"].estimateWaltzga(v.missing)
-                local target = windower.ffxi.get_mob_by_id(v.id)
-                
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
-                    
-                    if spell.en == "Divine Waltz" and player.main_job < 75 then
-                        
-                        if helpers["queue"].getQueued(JA["Divine Waltz II"], target) then
-                            helpers["queue"].remove(JA["Divine Waltz II"], target)                        
-                        end
-                        helpers["queue"].add(JA[spell.en], target)
-                        
-                    elseif spell.en == "Divine Waltz II" and player.main_job < 75 then
-                        
-                        if helpers["queue"].getQueued(JA["Divine Waltz"], target) then
-                            helpers["queue"].remove(JA["Divine Waltz"], target)                        
-                        end
-                        helpers["queue"].add(JA[spell.en], target)
-                        
-                    end
-                    
-                end
-                
-            end
-        
-        elseif needed < 3 and player.main_job == "BLU" then
-            
-            for _,v in ipairs(party) do
-                local spell  = helpers["cures"].estimateBlue(v.missing)
-                local target = windower.ffxi.get_mob_by_id(v.id)
-                
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
-                    
-                    if (spell.en == "Pollen" or spell.en == "Exuviation") and player.main_job < 75 and player.name == target.name then
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    elseif spell.en ~= "Pollen" then
-                        helpers["queue"].add(MA[spell.en], target)
-                        
-                    end
-                    
-                end
-                
-            end
-            
-        elseif needed > 2 and player.main_job == "BLU" then
-            
-            for _,v in ipairs(party) do
-                local spell  = helpers["cures"].estimateBluega(v.missing)
-                local target = windower.ffxi.get_mob_by_id(v.id)
-                
-                if spell and target and helpers["cures"].validTarget(spell.id, target) and bpcore:isInParty(target, true) then
-                    
-                    if player.name == target.name then
-                        helpers["queue"].add(MA[spell.en], target)                        
-                    end
-                    
-                end
-                
-            end
-        
-        end
-        
-    end
+    end        
     
     self.estimateCure = function(amount)
-        local player = windower.ffxi.get_player()
-        local amount = amount or 0
-        local cure   = false
+        local player  = windower.ffxi.get_player()
+        local amount  = amount or 0
+        local cure    = false
         
         if amount > 0 then
             local selected = nil
-            
-            for i=1, 6 do
-                
-                if cure_data[i] then
+            local spells   = res.spells:type("WhiteMagic")
                     
-                    for base, data in pairs(cure_data[i]) do
+            for i,v in ipairs(cure_data[1]) do
+                
+                if type(v) == "table" then
+                    
+                    for _,vv in ipairs(v.powers) do
+                        local base, rate, floor = vv.power or false, vv.rate or false, vv.floor or false
+                        local power = helpers["cures"].getCurePower()
+                        local spell = spells[v.id]
                         
-                        if type(data) == "table" then
-                            local power = helpers["cures"].getCurePower()
-                            local spell = res.spells[cure_data[i].id]
+                        if base and rate and floor and base > power and bpcore:isMAReady(MA[spell.en].recast_id) and bpcore:getAvailable("MA", spell.en) then
+                            local estimate = ( mFloor((power-base)/rate)+floor )
                             
-                            if base > power and bpcore:getAvailable("MA", spell.en) then
-                                local estimate = ( math.floor((power-base)/data.rate)+data.floor )
+                            if (estimate+(estimate*multiplier)) <= amount then
+
+                                if spell.en == "Cure" then
+                                    
+                                    if (player.main_job == "WHM" and player.main_job_level >= 1) or (player.sub_job == "WHM" and player.sub_job_level >= 1) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "RDM" and player.main_job_level >= 3) or (player.sub_job == "RDM" and player.sub_job_level >= 3) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "SCH" and player.main_job_level >= 5) or (player.sub_job == "SCH" and player.sub_job_level >= 5) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "PLD" and player.main_job_level >= 5) or (player.sub_job == "PLD" and player.sub_job_level >= 5) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    end
+                                    
+                                elseif spell.en == "Cure II" then
+                                    
+                                    if (player.main_job == "WHM" and player.main_job_level >= 11) or (player.sub_job == "WHM" and player.sub_job_level >= 11) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "RDM" and player.main_job_level >= 14) or (player.sub_job == "RDM" and player.sub_job_level >= 14) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "SCH" and player.main_job_level >= 17) or (player.sub_job == "SCH" and player.sub_job_level >= 17) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "PLD" and player.main_job_level >= 17) or (player.sub_job == "PLD" and player.sub_job_level >= 17) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    end
+                                    
+                                elseif spell.en == "Cure III" then
+                                    
+                                    if (player.main_job == "WHM" and player.main_job_level >= 21) or (player.sub_job == "WHM" and player.sub_job_level >= 21) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "RDM" and player.main_job_level >= 26) or (player.sub_job == "RDM" and player.sub_job_level >= 26) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "SCH" and player.main_job_level >= 30) or (player.sub_job == "SCH" and player.sub_job_level >= 30) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "PLD" and player.main_job_level >= 30) or (player.sub_job == "PLD" and player.sub_job_level >= 30) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    end
+                                    
+                                elseif spell.en == "Cure IV" then
+                                    
+                                    if (player.main_job == "WHM" and player.main_job_level >= 41) or (player.sub_job == "WHM" and player.sub_job_level >= 41) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "RDM" and player.main_job_level >= 48) or (player.sub_job == "RDM" and player.sub_job_level >= 48) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "SCH" and player.main_job_level >= 55) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    elseif (player.main_job == "PLD" and player.main_job_level >= 55) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                        
+                                    end
+                                    
+                                elseif spell.en == "Cure V" then
+                                    
+                                    if (player.main_job == "WHM" and player.main_job_level >= 61) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}                                        
+                                    end
+                                    
+                                elseif spell.en == "Cure VI" then
+                                    
+                                    if (player.main_job == "WHM" and player.main_job_level >= 80) then
+                                        cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}                                        
+                                    end
                                 
-                                if estimate <= amount then
-                                    cure = res.spells[cure_data[i].id]
                                 end
                                 
                             end
@@ -853,33 +244,52 @@ function cures.new()
             end
             
         end
-        return cure
+        
+        if cure then
+            return cure
+        end
         
     end
     
-    self.estimateCuraga = function(amount)
+    self.estimateCuraga = function(amount, count)
         local player = windower.ffxi.get_player()
         local amount = amount or 0
+        local count  = count or 0
         local cure   = false
         
-        if amount > 0 then
+        if amount > 0 and count > 2 then
             local selected = nil
-            
-            for i=7, 11 do
-                
-                if cure_data[i] then
+            local spells   = res.spells:type("WhiteMagic")
                     
-                    for base, data in pairs(cure_data[i]) do
+            for i,v in ipairs(cure_data[2]) do
+                
+                if type(v) == "table" then
+                    
+                    for _,vv in ipairs(v.powers) do
+                        local base, rate, floor = (vv.power+(vv.power*multiplier)) or false, vv.rate or false, vv.floor or false
+                        local power = helpers["cures"].getCuragaPower()
+                        local spell = spells[v.id]
                         
-                        if type(data) == "table" then
-                            local power = helpers["cures"].getCuragaPower()
-                            local spell = res.spells[cure_data[i].id]
-
-                            if base > power and bpcore:getAvailable("MA", spell.en) then
-                                local estimate = ( math.floor((power/2)/data.rate)+data.floor )
+                        if base and rate and floor and base <= power and bpcore:isMAReady(MA[spell.en].recast_id) and bpcore:getAvailable("MA", spell.en) and player.main_job == "WHM" and player["vitals"].mp > spell.mp_cost then
+                            local estimate = ( mFloor((power/2)/rate)+floor )
+                            
+                            if ((estimate*count) <= amount) then
                                 
-                                if estimate <= amount then
-                                    cure = spell
+                                if spell.en == "Curaga" and (player.main_job_level >= 16 or player.sub_job_level >= 16) then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+
+                                elseif spell.en == "Curaga II" and (player.main_job_level >= 31 or player.sub_job_level >= 31) then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+
+                                elseif spell.en == "Curaga III" and player.main_job_level >= 51 then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+
+                                elseif spell.en == "Curaga IV" and player.main_job_level >= 71 then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+
+                                elseif spell.en == "Curaga V" and player.main_job_level >= 91 then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+
                                 end
                                 
                             end
@@ -893,7 +303,10 @@ function cures.new()
             end
             
         end
-        return cure
+        
+        if cure then
+            return cure
+        end
         
     end
     
@@ -904,25 +317,56 @@ function cures.new()
         
         if amount > 0 then
             local selected = nil
-            
-            for i=19, 23 do
-                
-                if cure_data[i] then
+            local spells   = res.job_abilities:type("Waltz")
                     
-                    for base, data in pairs(cure_data[i]) do
+            for i,v in ipairs(cure_data[5]) do
+                
+                if type(v) == "table" then
+                    
+                    for _,vv in ipairs(v.powers) do
+                        local base, rate, floor = (vv.power+(vv.power*multiplier)) or false, vv.rate or false, vv.floor or false
+                        local spell = spells[v.id]
                         
-                        if type(data) == "table" then
-                            local power = helpers["cures"].getCuragaPower()
-                            local spell = res.spells[cure_data[i].id]
-
-                            if base > power and bpcore:getAvailable("JA", spell.en) then
-                                local estimate = ( math.floor((power/2)/data.rate)+data.floor )
+                        if base and rate and floor and bpcore:isJAReady(JA[spell.en].recast_id) and bpcore:getAvailable("JA", spell.en) and (player.main_job == "DNC" or player.sub_job == "DNC") and player["vitals"].tp > spell.tp_cost then
+                            local player = windower.ffxi.get_player()
+                            local CHR    = system["Stats"].CHR                                
+                                
+                            if spell.en == "Curing Waltz" and (player.main_job_level >= 15 or player.sub_job_level >= 15) then
+                                local estimate = ( mFloor((CHR+220)/4) + 60 )
                                 
                                 if estimate <= amount then
-                                    cure = spell
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
                                 end
                                 
-                            end
+                            elseif spell.en == "Curing Waltz II" and (player.main_job_level >= 30 or player.sub_job_level >= 30) then
+                                local estimate = ( mFloor((CHR+220)/2) + 130 )
+                                
+                                if estimate <= amount then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                end
+                                
+                            elseif spell.en == "Curing Waltz III" and (player.main_job_level >= 45 or player.sub_job_level >= 45) then
+                                local estimate = ( mFloor((CHR+220)*0.75) + 270 )
+                                
+                                if estimate <= amount then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                end
+                                
+                            elseif spell.en == "Curing Waltz IV" and player.main_job_level >= 70 then
+                                local estimate = ( CHR + 220 + 450 )
+                                
+                                if estimate <= amount then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                end
+                                
+                            elseif spell.en == "Curing Waltz V" and player.main_job_level >= 87 then
+                                local estimate = ( mFloor((CHR+220)*1.25) + 600 )
+                                
+                                if estimate <= amount then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                end
+                                
+                            end                            
                             
                         end
                         
@@ -933,7 +377,10 @@ function cures.new()
             end
             
         end
-        return cure
+        
+        if cure then
+            return cure
+        end
         
     end
     
@@ -944,22 +391,32 @@ function cures.new()
         
         if amount > 0 then
             local selected = nil
+            local spells   = res.job_abilities:type("Waltz")
             
-            for i=24, 25 do
+            for i,v in ipairs(cure_data[6]) do
                 
-                if cure_data[i] then
+                if type(v) == "table" then
                     
-                    for base, data in pairs(cure_data[i]) do
+                    for _,vv in ipairs(v.powers) do
+                        local base, rate, floor = (vv.power+(vv.power*multiplier)) or false, vv.rate or false, vv.floor or false
+                        local spell = spells[v.id]
                         
-                        if type(data) == "table" then
-                            local power = helpers["cures"].getCuragaPower()
-                            local spell = res.spells[cure_data[i].id]
-
-                            if base > power and bpcore:getAvailable("JA", spell.en) then
-                                local estimate = ( math.floor((power/2)/data.rate)+data.floor )
+                        if base and rate and floor and bpcore:isJAReady(JA[spell.en].recast_id) and bpcore:getAvailable("JA", spell.en) and (player.main_job == "DNC" or player.sub_job == "DNC") and player["vitals"].tp > spell.tp_cost then
+                            local player = windower.ffxi.get_player()
+                            local CHR    = system["Stats"].CHR                                
+                                
+                            if spell.en == "Divine Waltz" and (player.main_job_level >= 25 or player.sub_job_level >= 25) then
+                                local estimate = ( mFloor((CHR+220)/4) + 60 )
                                 
                                 if estimate <= amount then
-                                    cure = spell
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+                                end
+                                
+                            elseif spell.en == "Divine Waltz II" and player.main_job_level >= 78 then
+                                local estimate = ( mFloor((CHR+220)*0.75) + 270 )
+                                
+                                if estimate <= amount then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
                                 end
                                 
                             end
@@ -984,6 +441,7 @@ function cures.new()
         
         if amount > 0 then
             local selected = nil
+            local spells   = res.spells:type("BlueMagic")
             
             for i=12, 16 do
                 
@@ -993,10 +451,10 @@ function cures.new()
                         
                         if type(data) == "table" then
                             local power = helpers["cures"].getCuragaPower()
-                            local spell = res.spells[cure_data[i].id]
+                            local spell = spells[cure_data[i].id]
 
                             if base > power and bpcore:getAvailable("MA", spell.en) then
-                                local estimate = ( math.floor((power/2)/data.rate)+data.floor )
+                                local estimate = ( mFloor((power/2)/data.rate)+data.floor )
                                 
                                 if estimate <= amount then
                                     cure = spell
@@ -1017,29 +475,36 @@ function cures.new()
         
     end
     
-    self.estimateBluega = function(amount)
+    self.estimateBluega = function(amount, count)
         local player = windower.ffxi.get_player()
         local amount = amount or 0
+        local count  = count or 0
         local cure   = false
         
-        if amount > 0 then
+        if amount > 0 and count > 2 then
             local selected = nil
-            
-            for i=17, 18 do
-                
-                if cure_data[i] then
+            local spells   = res.spells:type("BlueMagic")
                     
-                    for base, data in pairs(cure_data[i]) do
+            for i,v in ipairs(cure_data[4]) do
+                
+                if type(v) == "table" then
+                    
+                    for _,vv in ipairs(v.powers) do
+                        local base, rate, floor = (vv.power+(vv.power*multiplier)) or false, vv.rate or false, vv.floor or false
+                        local power = helpers["cures"].getCuragaPower()
+                        local spell = spells[v.id]
                         
-                        if type(data) == "table" then
-                            local power = helpers["cures"].getCuragaPower()
-                            local spell = res.spells[cure_data[i].id]
-
-                            if base > power and bpcore:getAvailable("JA", spell.en) then
-                                local estimate = ( math.floor((power/2)/data.rate)+data.floor )
+                        if base and rate and floor and base <= power and bpcore:isMAReady(MA[spell.en].recast_id) and bpcore:getAvailable("MA", spell.en) and player.main_job == "WHM" and player["vitals"].mp > spell.mp_cost then
+                            local estimate = ( mFloor((power/2)/rate)+floor )
+                            
+                            if ((estimate*count) <= amount) then
                                 
-                                if estimate <= amount then
-                                    cure = spell
+                                if spell.en == "Healing Breeze" and (player.main_job_level >= 16 or player.sub_job_level >= 16) then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+
+                                elseif spell.en == "White Wind" and (player.main_job_level >= 94 or player.sub_job_level >= 94) then
+                                    cure = {spell=spell, base=base, rate=rate, floor=floor, priority=v.priority}
+
                                 end
                                 
                             end
@@ -1053,7 +518,10 @@ function cures.new()
             end
             
         end
-        return cure
+        
+        if cure then
+            return cure
+        end
         
     end
     
@@ -1105,7 +573,7 @@ function cures.new()
             for i,v in ipairs(cure_data) do
                 
                 if v.id == id then
-                    return i
+                    return (i + (i * multiplier))
                 end
                 
             end
@@ -1121,7 +589,7 @@ function cures.new()
         local VIT    = system["Stats"].VIT
         local skill  = player["skills"].healing_magic
         
-        return ( (math.floor(MND/2))+(math.floor(VIT/2))+(skill) )
+        return ( (mFloor(MND/2))+(mFloor(VIT/2))+(skill) )
         
     end
     
@@ -1131,7 +599,7 @@ function cures.new()
         local VIT    = system["Stats"].VIT
         local skill  = player["skills"].healing_magic
         
-        return ( (3*MND)+VIT+(3*(math.floor(skill/5))) )
+        return ( (3*MND)+VIT+(3*(mFloor(skill/5))) )
         
     end
     
@@ -1140,7 +608,7 @@ function cures.new()
         local CHR    = system["Stats"].CHR
         local VIT    = 220 --Using flat rate here; this was the median between my WHM and my RUN.
 
-        return ( math.floor((CHR+VIT)/4)+60 )
+        return ( mFloor((CHR+VIT)/4)+60 )
         
     end
     
@@ -1154,14 +622,14 @@ function cures.new()
             for i,v in pairs(temp) do
                 
                 if i:sub(1,1) == "p" and tonumber(i:sub(2)) ~= nil and type(v) == "table" then
-                    local hp, hpp, max  = v.hp, v.hpp, math.floor(v.hp/((v.hpp)/100))
+                    local hp, hpp, max  = v.hp, v.hpp, mFloor(v.hp/((v.hpp)/100))
                     
                     if v.mob then
                         table.insert(inside, {id=v.mob.id, hp=hp, hpp=hpp, max=max, missing=(max-hp)})
                     end
                     
                 elseif i:sub(1,1) == "a" and type(v) == "table" then
-                    local hp, hpp, max  = v.hp, v.hpp, math.floor(v.hp/((v.hpp)/100))
+                    local hp, hpp, max  = v.hp, v.hpp, mFloor(v.hp/((v.hpp)/100))
                     
                     if v.mob then
                         table.insert(outside, {id=v.mob.id, hp=hp, hpp=hpp, max=max, missing=(max-hp)})
@@ -1178,33 +646,12 @@ function cures.new()
         
     end
     
-    self.curagaData = function()
-        local needed  = helpers["cures"].curesNeeded()
-        local data    = {hp=0, max=0, percent=0, power=0}
-        
-        if needed > 3 then
-            
-            for _,v in ipairs(party) do
-                data.hp  = (data.hp + v.hp)
-                data.max = (data.max + v.max)
-            
-            end
-            data.percent = math.floor((data.hp/data.max)*100)
-            data.power   = math.floor((data.max-data.hp)/needed)
-            curaga       = data
-            return true
-            
-        end
-        return false
-        
-    end
-    
     self.curesNeeded = function()
         local count = 0
         
         for _,v in ipairs(party) do
 
-            if v.hpp < 80 and v.hpp ~= 0 then
+            if v.hpp < 95 and v.hpp ~= 0 then
                 count = (count + 1)
             end
             
@@ -1275,6 +722,15 @@ function cures.new()
             
         end
         return false
+        
+    end
+    
+    self.setMultiplier = function(value)
+        local value = value or 0
+        
+        if value and tonumber(value) ~= nil then
+            multiplier = (value / 100)            
+        end            
         
     end
     

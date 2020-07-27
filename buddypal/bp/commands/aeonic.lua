@@ -3,11 +3,8 @@
 --------------------------------------------------------------------------------
 local aeonic = {}
 function aeonic.run()
-    self = {}
+    local self = {}
     
-    --------------------------------------------------------------------------------------
-    -- Handle the execution of all helper commands.
-    --------------------------------------------------------------------------------------
     self.execute = function(commands)
         local target   = windower.ffxi.get_mob_by_target("t") or false
         local commands = commands or false

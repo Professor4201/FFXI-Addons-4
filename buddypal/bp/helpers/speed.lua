@@ -3,12 +3,12 @@
 --------------------------------------------------------------------------------
 local speed = {}
 function speed.new()
-    self = {}
+    local self = {}
     
     --Private Variables.
     local toggle = I{false,true}
-    local base   = 55
-    local speed  = 75
+    local base   = 50
+    local speed  = 70
     local data   = nil
     
     self.toggle = function()

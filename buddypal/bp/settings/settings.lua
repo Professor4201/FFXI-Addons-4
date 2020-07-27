@@ -12,7 +12,7 @@ function settings:initializeSettings()
     
     if bpcore:fileExists(string.format("../equipviewer/pets/%s.png", (windower.ffxi.get_player().name):lower())) then
         windower.send_command(string.format("ev %s", (windower.ffxi.get_player().name):lower()))
-        
+
     elseif bpcore:fileExists(string.format("../equipviewer/pets/%s.png", "moogle")) then
         windower.send_command(string.format("ev %s", "moogle"))
         
@@ -98,19 +98,21 @@ function settings:initializeSettings()
     system["Party"]                 = {["Alliance"]={}, ["Parties"]={}, ["Players"]={}, ["Pets"]={}}
     system["Buffs"]                 = {["Player"]={}, ["Party"]={}}
     system["Stats"]                 = {STR=0,DEX=0,AGI=0,VIT=0,INT=0,MND=0,CHR=0}
+    system["Pet"]                   = {hpp=0, mpp=0, tp=0, target=0}
     system["Weapon"]                = 0
     system["Ranged"]                = 0
     system["Ammo"]                  = 0
     
     -- Autoload Addons.         
-    system["Addons"]                = {"equipviewer"}
+    system["Addons"]                = {"interactbruh","skillchains","equipviewer"}
+    system["Plugins"]               = {"config"}
     
     -- Addon Settings.          
     system["BP Enabled"]            = I{true,false}
     system["Ping Delay"]            = c_settings["Ping Delay"]
     system["Last Action"]           = {}
     system["Next Allowed"]          = os.clock()
-    system["Zone Delay"]            = 15
+    system["Zone Delay"]            = 17
     system["Last Ping"]             = 0
     system["Last Keyboard"]         = 0
     system["Facing Blocked"]        = false
@@ -229,57 +231,61 @@ function settings:initializeSettings()
     -- Commands List.
     system["Commands"] = {
         
-        {name="reload",         allowed=true},        {name="controls",       allowed=true},
-        {name="speed",          allowed=true},        {name="currencies",     allowed=true},
-        {name="missions",       allowed=false},       {name="mode",           allowed=true},
-        {name="schedule",       allowed=false},       {name="events",         allowed=true},
-        {name="items",          allowed=true},        {name="megawarp",       allowed=false},
-        {name="menus",          allowed=true},        {name="ciphers",        allowed=true},
-        {name="orders",         allowed=true},        {name="follow",         allowed=true},
-        {name="party",          allowed=true},        {name="ally",           allowed=true},
-        {name="wkr",            allowed=false},       {name="guilds",         allowed=false},
-        {name="coalitions",     allowed=false},       {name="items",          allowed=true},
-        {name="sparks",         allowed=true},        {name="target",         allowed=true},
-        {name="millioncorn",    allowed=true},        {name="zincore",        allowed=true},
-        {name="magicmaps",      allowed=true},        {name="jobs",           allowed=true},
-        {name="trust",          allowed=true},        {name="shops",          allowed=true},
-        {name="mogexit",        allowed=true},        {name="bluspell",       allowed=true},
-        {name="interact",       allowed=true},        {name="helm",           allowed=false},
-        {name="craft",          allowed=false},       {name="fastcraft",      allowed=true},
-        {name="trade",          allowed=true},        {name="clusters",       allowed=false},
-        {name="repo",           allowed=false},       {name="moghouse",       allowed=true},
-        {name="use_warpring",   allowed=true},        {name="warp",           allowed=false},
-        {name="crystals",       allowed=false},       {name="thumb",          allowed=true},
-        {name="aeonic",         allowed=false},        
+        {name="reload",         allowed=true},          {name="controls",        allowed=true},
+        {name="speed",          allowed=true},          {name="currencies",      allowed=true},
+        {name="missions",       allowed=false},         {name="mode",            allowed=true},
+        {name="schedule",       allowed=true},          {name="events",          allowed=true},
+        {name="items",          allowed=true},          {name="megawarp",        allowed=true},
+        {name="menus",          allowed=true},          {name="ciphers",         allowed=true},
+        {name="orders",         allowed=true},          {name="follow",          allowed=true},
+        {name="party",          allowed=true},          {name="ally",            allowed=true},
+        {name="wkr",            allowed=true},          {name="guilds",          allowed=true},
+        {name="coalitions",     allowed=true},          {name="items",           allowed=true},
+        {name="sparks",         allowed=true},          {name="target",          allowed=true},
+        {name="millioncorn",    allowed=true},          {name="zincore",         allowed=true},
+        {name="magicmaps",      allowed=true},          {name="jobs",            allowed=true},
+        {name="trust",          allowed=true},          {name="shops",           allowed=true},
+        {name="mogexit",        allowed=true},          {name="bluspell",        allowed=true},
+        {name="interact",       allowed=true},          {name="buffer",          allowed=true},
+        {name="craft",          allowed=true},          {name="fastcraft",       allowed=true},
+        {name="trade",          allowed=true},          {name="clusters",        allowed=true},
+        {name="repo",           allowed=false},         {name="moghouse",        allowed=true},
+        {name="warp",           allowed=true},          {name="nav",             allowed=false},
+        {name="crystals",       allowed=true},          {name="thumb",           allowed=true},
+        {name="aeonic",         allowed=true},          {name="kits",            allowed=true},
         
     }
     
     -- Helper List.
     system["Helpers"] = {
         
-        {name="actions",        allowed=true},        {name="assaults",       allowed=false},
-        {name="controls",       allowed=true},        {name="popchat",        allowed=true},
-        {name="queue",          allowed=true},        {name="currencies",     allowed=true},
-        {name="missions",       allowed=false},       {name="npcupdater",     allowed=false},
-        {name="target",         allowed=true},        {name="events",         allowed=true},
-        {name="schedule",       allowed=false},       {name="stats",          allowed=true},
-        {name="keybinds",       allowed=true},        {name="megawarp",       allowed=false},
-        {name="orders",         allowed=true},        {name="guilds",         allowed=false},
-        {name="sparks",         allowed=true},        {name="distance",       allowed=true},
-        {name="millioncorn",    allowed=true},        {name="zincore",        allowed=true},
-        {name="trust",          allowed=true},        {name="shops",          allowed=true},
-        {name="bluspell",       allowed=true},        {name="interact",       allowed=true},
-        {name="helm",           allowed=false},       {name="craft",          allowed=false},
-        {name="fastcraft",      allowed=true},        {name="trade",          allowed=true},
-        {name="repo",           allowed=false},       {name="alias",          allowed=true},
-        {name="warp",           allowed=false},       {name="crystals",       allowed=false},
-        {name="speed",          allowed=true},        {name="chatcommands",   allowed=true},
-        {name="notifications",  allowed=true},        {name="thumb",          allowed=true},
-        {name="aeonic",         allowed=false},       {name="coalitions",     allowed=false},
-        {name="trove",          allowed=false},       {name="songs",          allowed=true},
-        {name="rolls",          allowed=true},        {name="runes",          allowed=true},
-        {name="ciphers",        allowed=true},        {name="status",         allowed=true},
-        {name="cures",          allowed=true},        {name="filter",         allowed=true},
+        {name="actions",        allowed=true},          {name="assaults",       allowed=false},
+        {name="controls",       allowed=true},          {name="popchat",        allowed=true},
+        {name="queue",          allowed=true},          {name="currencies",     allowed=true},
+        {name="missions",       allowed=false},         {name="resourcer",      allowed=true},
+        {name="target",         allowed=true},          {name="events",         allowed=true},
+        {name="schedule",       allowed=true},          {name="stats",          allowed=true},
+        {name="keybinds",       allowed=true},          {name="megawarp",       allowed=true},
+        {name="orders",         allowed=true},          {name="guilds",         allowed=true},
+        {name="sparks",         allowed=true},          {name="distance",       allowed=true},
+        {name="millioncorn",    allowed=true},          {name="zincore",        allowed=true},
+        {name="trust",          allowed=true},          {name="shops",          allowed=true},
+        {name="bluspell",       allowed=true},          {name="interact",       allowed=true},
+        {name="craft",          allowed=true},          {name="ui",             allowed=false},
+        {name="fastcraft",      allowed=true},          {name="trade",          allowed=true},
+        {name="repo",           allowed=false},         {name="alias",          allowed=true},
+        {name="warp",           allowed=true},          {name="crystals",       allowed=true},
+        {name="speed",          allowed=true},          {name="chatcommands",   allowed=true},
+        {name="notifications",  allowed=true},          {name="thumb",          allowed=false},
+        {name="aeonic",         allowed=true},          {name="coalitions",     allowed=true},
+        {name="trove",          allowed=true},          {name="songs",          allowed=true},
+        {name="rolls",          allowed=true},          {name="runes",          allowed=true},
+        {name="ciphers",        allowed=true},          {name="status",         allowed=true},
+        {name="cures",          allowed=true},          {name="filter",         allowed=true},
+        {name="discord",        allowed=true},          {name="corecommands",   allowed=true},
+        {name="kits",           allowed=true},          {name="bits",           allowed=true},
+        {name="ambuscade",      allowed=false},         {name="party",          allowed=true},
+        {name="buffer",         allowed=true},          {name="nav",            allowed=false},
         
     }
     
@@ -333,7 +339,7 @@ function settings:initializeSettings()
         ["Dark"]       = {list={"Aspir","Aspir II","Bio","Bio II","Drain","Drain II"}, target="t"},
         ["Singing"]    = {list={"Mage's Ballad","Mage's Ballad II","Mage's Ballad III"}, target="me"},
         ["Summoning"]  = {list={"Carbuncle"}, target="me"},
-        ["Blue"]       = {list={"Cocoon"}, target="me"},
+        ["Blue"]       = {list={"Cocoon","Pollen"}, target="me"},
         ["Geomancy"]   = {list={"Indi-Refresh"}, target="me"},
         
         

@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local distance = {}
 function distance.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local player        = windower.ffxi.get_player()
@@ -14,7 +14,7 @@ function distance.new()
     local stroke        = system["Distance Stroke"]
     local settings = {
         ['pos']={['x']=pos.x-85,['y']=pos.y},
-        ['bg']={['alpha']=155,['red']=0,['green']=0,['blue']=0,['visible']=false},
+        ['bg']={['alpha']=200,['red']=0,['green']=0,['blue']=0,['visible']=false},
         ['flags']={['right']=false,['bottom']=false,['bold']=false,['draggable']=draggable,['italic']=false},
         ['padding']=7,
         ['text']={['size']=font.size,['font']=font.font,['fonts']={},['alpha']=font.alpha,['red']=font.r,['green']=font.g,['blue']=font.b,
@@ -56,7 +56,7 @@ function distance.new()
             end
             
             local distance  = string.format("%02d.%d%d", whole, tenths, hundreths)
-            local text      = "{ " .. bpcore:colorize(distance, "255,51,0") .. " }"
+            local text      = "{ " .. bpcore:colorize(distance, "25,200,230") .. " }"
             
             display:text(text)
             display:bg_visible(true)

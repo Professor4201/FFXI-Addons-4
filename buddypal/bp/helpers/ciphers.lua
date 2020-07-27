@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local ciphers = {}
 function ciphers.new()
-    self = {}
+    local self = {}
     
     -- Private BP Binds.
     local npc       = {17744187}

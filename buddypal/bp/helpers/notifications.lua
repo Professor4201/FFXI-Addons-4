@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local notifications = {}
 function notifications.new()
-    self = {}
+    local self = {}
     
     -- Private Variables.
     local toggle = I{false,true}

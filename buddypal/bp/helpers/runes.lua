@@ -3,11 +3,12 @@
 --------------------------------------------------------------------------------
 local runes = {}
 function runes.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
-    local valid = {523,524,525,526,527,528,529,530}
-    local runes = {
+    local valid  = {523,524,525,526,527,528,529,530}
+    local active = Q{}
+    local runes  = {
         
         ["fire"]     = "Ignis",
         ["ice"]      = "Gelus",
@@ -45,11 +46,37 @@ function runes.new()
         
         if name and type(name) == "string" then
             local list = res.job_abilities:type("Rune")
+            local name = name:lower()
             
             for _,v in pairs(list) do
                 
-                if v and ((v.en):lower() == (name):lower() or (v.en):lower() == (helpers["runes"].getShort(name)):lower()) then
+                if v and (v.en):lower() == (name):lower() then
                     return v
+                    
+                elseif v and (v.en):lower() == helpers["runes"].getShort(name) then
+                    return v
+                    
+                end
+                
+            end            
+            
+        end
+        return false
+        
+    end
+    
+    -- Returns the rune buff by name.
+    self.getBuff = function(name)
+        local name = name or false
+        
+        if name and type(name) == "string" then
+            local name = name:lower()
+            
+            for _,v in pairs(valid) do
+                local buff = res.buffs[v]
+                
+                if buff and (buff.en):lower() == (name):lower() then
+                    return buff                    
                 end
                 
             end            
@@ -69,7 +96,7 @@ function runes.new()
             for _,v in ipairs(buffs) do
                 
                 if helpers["runes"].valid(v) then
-                    count = count + 1
+                    count = (count + 1)
                 end
             
             end
@@ -97,6 +124,48 @@ function runes.new()
         end
         return false
         
+    end
+    
+    -- Add rune to active runes queue for players.
+    self.add = function(id)
+        local id = id or false
+        
+        if id and tonumber(id) ~= nil and helpers["runes"].valid(id) then
+            
+            if active:length() == 0 then
+                active:push({id=id,name=res.buffs[id].en,position=1})
+                
+            elseif active:length() > 0 and active:length() < 3 then
+                local last = active[active:length()]
+                
+                if last.position == 1 then
+                    active:push({id=id,name=res.buffs[id].en,position=2})
+                    
+                elseif last.position == 2 then
+                    active:push({id=id,name=res.buffs[id].en,position=3})
+                    
+                elseif last.position == 3 then
+                    active:push({id=id,name=res.buffs[id].en,position=1})
+                    
+                end
+                
+            end
+                
+        end
+        
+    end
+    
+    -- Remove the last rune you lost from the table.
+    self.remove = function()
+        
+        if active:length() > 0 then
+            active:remove(1)
+        end
+        
+    end
+    
+    self.getRunes = function()
+        return active
     end
     
     return self

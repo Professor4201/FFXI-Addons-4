@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local orders = {}
 function orders.new()
-    self = {}
+    local self = {}
     
     self.buildCommand = function(commands, start)
         local start = start or 4
@@ -287,7 +287,6 @@ function orders.new()
                 else
                     
                     if windower.ffxi.get_mob_by_target("me") then
-                    
                         local name      = windower.ffxi.get_mob_by_target("me").name
                         local build     = table.concat( { helpers["orders"].buildCommand(command:split(" "), 1) }, " ")
                         local deliver   = ""
@@ -335,23 +334,33 @@ function orders.new()
                 
                 if commands[1]:sub(1,1) == "!" and windower.ffxi.get_mob_by_target("me") then
                     local name      = windower.ffxi.get_mob_by_target("me").name
+                    local party     = windower.ffxi.get_party()
                     local blacklist = commands[1]:sub(2):lower()
                     local build     = table.concat( { helpers["orders"].buildCommand(command:split(" "), 2) }, " ")
                     local deliver   = ""
                     local passed    = false
                     
-                    for _,v in ipairs(system["Characters"]) do
+                    for _,v in pairs(system["Characters"]) do
                         
-                        if v and v ~= "" and system["Party"]["Players"][v] then
-
-                            if name:lower() == v:lower() and not (name:lower():sub(1, #blacklist)):match(blacklist) then
-                                passed = true
+                        for player=1, 6 do
                             
-                            elseif not (v:lower():sub(1, #blacklist)):match(blacklist) then
-                                deliver = (deliver .. table.concat({ ("+"..v:lower()), commands[1], ("wait "..delay..";"), (helpers["orders"].buildCommand(command:split(" "), 2)..";"), "" }, " "))
+                            if party[string.format("p%s", player)] then
+                                local member = party[string.format("p%s", player)]
                                 
-                                if delay ~= 0 then
-                                    delay = (delay + 0.8)
+                                if member.name and v == member.name then
+                                
+                                    if name:lower() == v:lower() and not (name:lower():sub(1, #blacklist)):match(blacklist) then
+                                        passed = true
+                            
+                                    elseif not (v:lower():sub(1, #blacklist)):match(blacklist) then
+                                        deliver = (deliver .. table.concat({ ("+"..v:lower()), commands[1], ("wait "..delay..";"), (helpers["orders"].buildCommand(command:split(" "), 2)..";"), "" }, " "))
+                                    
+                                    end
+                                
+                                    if delay ~= 0 then
+                                        delay = (delay + 0.8)
+                                    end
+                                    
                                 end
                                 
                             end
@@ -368,7 +377,7 @@ function orders.new()
                 else
                     
                     if windower.ffxi.get_mob_by_target("me") then
-                    
+                        local party     = windower.ffxi.get_party()
                         local name      = windower.ffxi.get_mob_by_target("me").name
                         local build     = table.concat( { helpers["orders"].buildCommand(command:split(" "), 1) }, " ")
                         local deliver   = ""
@@ -376,11 +385,20 @@ function orders.new()
                         
                         for _,v in ipairs(system["Characters"]) do
                             
-                            if v and v ~= "" and system["Party"]["Players"][v] then
-                                deliver = (deliver .. table.concat({ ("+"..v:lower()), ("wait "..delay..";"), (helpers["orders"].buildCommand(command:split(" "), 1)..";"), "" }, " "))
+                            for player=0, 5 do
                                 
-                                if delay ~= 0 then
-                                    delay = (delay + 0.8)
+                                if party[string.format("p%s", player)] then
+                                    local member = party[string.format("p%s", player)]
+                                    
+                                    if member.name and v == member.name then
+                                        deliver = (deliver .. table.concat({ ("+"..v:lower()), ("wait "..delay..";"), (helpers["orders"].buildCommand(command:split(" "), 1)..";"), "" }, " "))
+                                        
+                                        if delay ~= 0 then
+                                            delay = (delay + 0.8)
+                                        end
+                                        
+                                    end
+                                    
                                 end
                                 
                             end

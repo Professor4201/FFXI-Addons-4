@@ -24,6 +24,12 @@ function chatcommands.new()
                 if command == "warpout" then
                     helpers["actions"].tryWarping()
                     
+                elseif command == "invite" then
+                    windower.send_command(string.format("pcmd add %s", sender))
+                    
+                elseif command == "bpfollow" then
+                    windower.send_command(string.format("follow %s", sender))
+                    
                 end
             
             -- Multiple Commands were sent.
@@ -126,6 +132,19 @@ function chatcommands.new()
                     elseif command == "regen" and helpers["target"].castable(target, MA["Regen"]) then
                         helpers["queue"].add(MA["Regen IV"], target)
                         
+                    elseif command == "erase" and helpers["target"].castable(target, MA["Erase"]) and bpcore:isInParty(target, true) then
+                        helpers["queue"].add(MA["Erase"], target)
+                        
+                    elseif command == "zzz" then
+                        
+                        if helpers["target"].castable(target, MA["Curaga"]) and bpcore:isInParty(target, true) then
+                            helpers["queue"].add(MA["Curaga"], target)
+                            
+                        elseif helpers["target"].castable(target, MA["Cure"]) and bpcore:isInParty(target, false) then
+                            helpers["queue"].add(MA["Cure"], target)
+                        
+                        end
+                        
                     elseif command == "firebuff" and helpers["target"].castable(player, MA["Auspice"]) and bpcore:isInParty(target, true) then
                         helpers["queue"].add(MA["Protectra V"], player)
                         helpers["queue"].add(MA["Shellra V"], player)
@@ -174,7 +193,7 @@ function chatcommands.new()
                         helpers["queue"].add(MA["Barsilencera"], player)
                         helpers["queue"].add(MA["Auspice"], player)
                         
-                    elseif command == "raise" and helpers["target"].castable(player, MA["Raise"]) and helpers["target"].isDead(target) then
+                    elseif (command == "raise" or command == "arise") and helpers["target"].castable(player, MA["Raise"]) and helpers["target"].isDead(target) then
                         
                         if bpcore:isMAReady(MA["Arise"].recast_id) and bpcore:getAvailable("MA", "Arise") then
                             helpers["queue"].add(MA["Arise"], player)
@@ -190,23 +209,95 @@ function chatcommands.new()
                             
                         end
                         
-                    elseif command == "aoeregen" and helpers["target"].castable(target, MA["Regen"]) then
+                    elseif command == "aoeregen" and helpers["target"].castable(target, MA["Regen"]) and bpcore:isInParty(target, true) then
                         
-                        if bpcore:isMAReady(MA["Regen IV"].recast_id) and bpcore:isJAReady(JA["Accession"].recast_id) and bpcore:getAvailable("MA", "Regen IV") and bpcore:getAvailable("JA", "Accession") then
-                            helpers["queue"].add(MA["Arise"], player)
+                        if bpcore:isMAReady(MA["Regen IV"].recast_id) and bpcore:isJAReady(JA["Accession"].recast_id) and bpcore:getAvailable("MA", "Regen IV") and bpcore:getAvailable("JA", "Accession") and player.sub_job == "SCH" then
+                            helpers["queue"].add(JA["Accession"], "me")
+                            helpers["queue"].add(MA["Regen IV"], player)
                             
                         end
+                    
+                    elseif command == "holla" and helpers["party"].isInParty(target) then
+                        helpers["queue"].add(MA["Teleport-Holla"], player)
                         
+                    elseif command == "dem" and helpers["party"].isInParty(target) then
+                        helpers["queue"].add(MA["Teleport-Dem"], player)
+                        
+                    elseif command == "mea" and helpers["party"].isInParty(target) then
+                        helpers["queue"].add(MA["Teleport-Mea"], player)
+                        
+                    elseif command == "yhoat" and helpers["party"].isInParty(target) then
+                        helpers["queue"].add(MA["Teleport-Yhoat"], player)
+                        
+                    elseif command == "altepa" and helpers["party"].isInParty(target) then
+                        helpers["queue"].add(MA["Teleport-Altepa"], player)
+                        
+                    elseif command == "vazhl" and helpers["party"].isInParty(target) then
+                        helpers["queue"].add(MA["Teleport-Vahzl"], player)
+                        
+                    elseif command == "jugner" and helpers["party"].isInParty(target) then
+                        helpers["queue"].add(MA["Recall-Jugner"], player)
+                        
+                    elseif command == "pash" and helpers["party"].isInParty(target) then
+                        helpers["queue"].add(MA["Recall-Pashh"], player)
+                        
+                    elseif command == "meriph" and helpers["party"].isInParty(target) then
+                        helpers["queue"].add(MA["Recall-Meriph"], player)
+                    
                     end
                 
                 -- Multiple Commands were sent.
                 elseif count > 1 then
-    
-                    if message[1] and message[2] and (message[1]):sub(1, #message[1]):lower() == (player.name):sub(1, #message[1]):lower() then
-                        local command = message[2]:lower()
+                    
+                    for i=1, count do
                         
-                        if command == "warpout" then
-                            helpers["actions"].tryWarping()
+                        if message[1] and message[i+1] and (message[1]):sub(1, #message[1]):lower() == (player.name):sub(1, #message[1]):lower() then
+                            local command = message[i+1]:lower()
+                            
+                            if command == "haste" and helpers["target"].castable(target, MA["Haste"]) then
+                                helpers["queue"].add(MA["Haste"], target)
+                                
+                            elseif command == "protect" and helpers["target"].castable(target, MA["Protect"]) then
+                                helpers["queue"].add(MA["Protect V"], target)
+                                
+                            elseif command == "protectra" and helpers["target"].castable(player, MA["Protectra"]) and bpcore:isInParty(target, true) then
+                                helpers["queue"].add(MA["Protectra V"], player)
+                            
+                            elseif command == "shell" and helpers["target"].castable(target, MA["Shell"]) then
+                                helpers["queue"].add(MA["Shell V"], target)
+                                
+                            elseif command == "shellra" and helpers["target"].castable(player, MA["Shellra"]) and bpcore:isInParty(target, true) then
+                                helpers["queue"].add(MA["Shellra V"], player)
+                                
+                            elseif command == "auspice" and helpers["target"].castable(player, MA["Auspice"]) and bpcore:isInParty(target, true) then
+                                helpers["queue"].add(MA["Auspice"], player)
+                                
+                            elseif command == "regen" and helpers["target"].castable(target, MA["Regen"]) then
+                                helpers["queue"].add(MA["Regen IV"], target)
+                                
+                            elseif command == "erase" and helpers["target"].castable(target, MA["Erase"]) and bpcore:isInParty(target, true) then
+                                helpers["queue"].add(MA["Erase"], target)
+                                
+                            elseif command == "zzz" then
+                                
+                                if helpers["target"].castable(target, MA["Curaga"]) and bpcore:isInParty(target, true) then
+                                    helpers["queue"].add(MA["Curaga"], target)
+                                    
+                                elseif helpers["target"].castable(target, MA["Cure"]) and bpcore:isInParty(target, false) then
+                                    helpers["queue"].add(MA["Cure"], target)
+                                
+                                end
+                                
+                            elseif command == "aoeregen" and helpers["target"].castable(target, MA["Regen"]) and bpcore:isInParty(target, true) then
+                                
+                                if bpcore:isMAReady(MA["Regen IV"].recast_id) and bpcore:isJAReady(JA["Accession"].recast_id) and bpcore:getAvailable("MA", "Regen IV") and bpcore:getAvailable("JA", "Accession") and player.sub_job == "SCH" then
+                                    helpers["queue"].add(JA["Accession"], "me")
+                                    helpers["queue"].add(MA["Regen IV"], player)
+                                    
+                                end
+                                
+                            end
+                            
                             
                         end
                     

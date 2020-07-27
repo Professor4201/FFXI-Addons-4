@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local warp = {}
 function warp.run()
-    self = {}
+    local self = {}
     
     -- Private variables.
     local player = windower.ffxi.get_mob_by_target("me")
@@ -11,7 +11,7 @@ function warp.run()
     self.execute = function(commands)
         local name = commands[2] or false
         
-        if name and name ~= "index" and tostring(name) ~= nil then
+        if name and name ~= "index" and name ~= "ring" and tostring(name) ~= nil then
             helpers["warp"].find(name)
             
         elseif name and name == "index" then
@@ -21,7 +21,10 @@ function warp.run()
                 helpers["warp"].findIndex(index)
             end
             
-            
+        
+        elseif commands[2] and commands[2]:lower() == "ring" then
+            helpers["actions"].tryWarping()
+        
         elseif not name then
             helpers["warp"].clearAll()
             

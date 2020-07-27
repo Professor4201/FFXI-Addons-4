@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local songs = {}
 function songs.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local current = {}
@@ -77,7 +77,7 @@ function songs.new()
             for i,v in ipairs(queue) do
                 
                 if type(v) == "table" then
-
+                    
                     if (os.clock()-v.time) > delay then
                         windower.send_command(string.format("bp %s", table.concat(v.command, " ")))
                         
@@ -108,7 +108,7 @@ function songs.new()
         local slot    = slot or false
         
         -- If Clarion Call is in the queue, add an extra song slot.
-        if (helpers["queue"].inQueue(JA["Clarion Call"], windower.ffxi.get_mob_by_name(target)) or bpcore:buffActive(499) or helpers["songs"].getActive() == 5) then
+        if (helpers["queue"].inQueue(JA["Clarion Call"], windower.ffxi.get_mob_by_id(player.id)) or bpcore:buffActive(499) or helpers["songs"].getActive() == 5) then
             max = (max + 1)
         end
         
@@ -136,9 +136,10 @@ function songs.new()
             end
             
             -- Determine the song target.
-            if type(target) == "table" and windower.ffxi.get_mob_by_id(target.id) then
+            if type(target) == "table" and windower.ffxi.get_mob_by_id(target.mob.id) then
+                local target = windower.ffxi.get_mob_by_id(target.mob.id)
                 
-                if target and slot <= max and (target.distance):sqrt() < 18 and bpcore:canAct() and bpcore:canCast() and bpcore:isJAReady(JA["Pianissimo"].recast_id) and bpcore:getAvailable("JA", "Pianissimo") then
+                if target and slot <= max and bpcore:canAct() and bpcore:canCast() and bpcore:isJAReady(JA["Pianissimo"].recast_id) and bpcore:getAvailable("JA", "Pianissimo") then
                     
                     for _,v in ipairs(allowed) do
                 
@@ -538,13 +539,13 @@ function songs.new()
         end
         return false
         
-    end        
+    end
     
     self.handleChat = function(sender, commands)
         local player = windower.ffxi.get_player()
         
         if not system["BP Allowed"][windower.ffxi.get_info().zone] then
-        
+            
             if player and commands[1] and commands[2] and (player.name):sub(1, #commands[1]):lower():match((commands[1]):sub(1, #commands[1]):lower()) and (commands[2] == "songs" or commands[2] == "loop") then
                 local max  = helpers["songs"].getSongMax()
                 local slot = 1
@@ -553,7 +554,7 @@ function songs.new()
                     helpers["songs"].queueSongs(commands)
                     
                     if not system["Core"].getSetting("REPEAT") then
-                        system["Core"].setSetting("REPEAT", true)
+                        system["Core"].set("REPEAT", true)
                     end
                     
                 end
@@ -586,7 +587,7 @@ function songs.new()
                     helpers["songs"].queueSongs(commands)
     
                     if not system["Core"].getSetting("REPEAT") then
-                        system["Core"].setSetting("REPEAT", true)
+                        system["Core"].set("REPEAT", true)
                     end
                     
                 end
@@ -620,7 +621,7 @@ function songs.new()
     -- Handles incoming commands for songs.
     self.handleCommands = function(commands)
         local player = windower.ffxi.get_player()
-        
+
         if not system["BP Allowed"][windower.ffxi.get_info().zone] then
         
             if player and commands[1] and commands[2] and (player.name):sub(1, #commands[1]):lower():match((commands[1]):sub(1, #commands[1]):lower()) and (commands[2] == "songs" or commands[2] == "loop") then
@@ -631,16 +632,16 @@ function songs.new()
                     helpers["songs"].queueSongs(commands)
                     
                     if not system["Core"].getSetting("REPEAT") then
-                        system["Core"].setSetting("REPEAT", true)
+                        system["Core"].set("REPEAT", true)
                     end
                     
                 end
                 
                 for i=3, #commands do
-                    local piano = bpcore:findPartyMember(commands[#commands]) or false
+                    local piano = bpcore:findPartyMember(commands[#commands], true) or false
                     
                     if piano then
-                    
+                        
                         if commands[i] and i ~= #commands then
                             helpers["songs"].playSong(commands[i], slot, piano)
                             slot = (slot + 1)
@@ -664,13 +665,13 @@ function songs.new()
                     helpers["songs"].queueSongs(commands)
     
                     if not system["Core"].getSetting("REPEAT") then
-                        system["Core"].setSetting("REPEAT", true)
+                        system["Core"].set("REPEAT", true)
                     end
                     
                 end
                 
                 for i=2, #commands do
-                    local piano = bpcore:findPartyMember(commands[#commands]) or false
+                    local piano = bpcore:findPartyMember(commands[#commands], true) or false
                     
                     if piano then
                     

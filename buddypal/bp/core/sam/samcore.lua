@@ -7,19 +7,22 @@ local core = {}
 function core.get()
     self = {}
     
-    -- Master Settings
+    -- MASTER SETTINGS.
     local settings = {}
-    settings["TOGGLED"]                            = I{false,true}
     settings["AM"]                                 = I{false,true}
     settings["AM THRESHOLD"]                       = I{3000,2000,1000}
     settings["1HR"]                                = I{false,true}
-    settings["JA"]                                 = I{false,true}
+    settings["JA"]                                 = I{true,false}
     settings["RA"]                                 = I{false,true}
+    settings["CURES"]                              = I{1,2,3}
+    settings["SUBLIMATION"]                        = I{true,false}
     settings["HATE"]                               = I{false,true}
     settings["BUFFS"]                              = I{false,true}
     settings["DEBUFFS"]                            = I{false,true}
+    settings["STATUS"]                             = I{false,true}
     settings["WS"]                                 = I{false,true}
-    settings["WSNAME"]                             = "Tachi: Fudo"
+    settings["WSNAME"]                             = "Resolution"
+    settings["RANGED WS"]                          = "Empyreal Arrow"
     settings["TP THRESHOLD"]                       = 1000
     settings["SC"]                                 = I{false,true}
     settings["BURST"]                              = I{false,true}
@@ -28,19 +31,59 @@ function core.get()
     settings["ALLOW-AOE"]                          = I{false,true}
     settings["DRAINS"]                             = I{false,true}
     settings["STUNS"]                              = I{false,true}
+    settings["TANK MODE"]                          = I{false,true}
     settings["SUPER-TANK"]                         = I{false,true}
+    settings["SEKKA"]                              = "Tachi: Shoha"
     settings["SHADOWS"]                            = I{false,true}
     settings["FOOD"]                               = I{"Sublime Sushi","Sublime Sushi +1"}
     settings["SAMBAS"]                             = I{"Drain Samba II","Haste Samba"}
     settings["STEPS"]                              = I{"Quickstep","Box Step","Stutter Step"}
+    settings["RUNES"]                              = {rune1="",rune2="",rune3=""}
+    settings["RUNE1"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
+    settings["RUNE2"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
+    settings["RUNE3"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
     settings["SKILLUP"]                            = I{false,true}
-    settings["SKILLS"]                             = I{"Enhancing","Elemental","Enfeebling","Dark","Divine"}
-    
-    -- Specialty Settings
-    settings["RANGED WS"]                          = I{"Apex Arrow","Namas Arrow"}
-    settings["HASSO MODE"]                         = I{true,false}
-    settings["TANK MODE"]                          = I{false,true}
-    settings["SEKKA"]                              = "Tachi: Kasha"
+    settings["SKILLS"]                             = I{"Enhancing"}
+    settings["COMPOSURE"]                          = I{true,false}
+    settings["CONVERT"]                            = I{true,false}
+    settings["ENSPELL"]                            = I{"Enfire","Enblizzard","Enaero","Enstone","Enthunder","Enwater"}
+    settings["GAINS"]                              = I{"Gain-DEX","Gain-STR","Gain-MND","Gain-INT","Gain-AGI","Gain-VIT","Gain-CHR"}
+    settings["SPIKES"]                             = I{"None","Blaze Spikes","Ice Spikes","Shock Spikes"}
+    settings["DIA"]                                = I{"Dia","Bio"}
+    settings["SANGUINE"]                           = I{false,true}
+    settings["REPEAT"]                             = I{false,true}
+    settings["LAST REPEAT"]                        = os.clock()
+    settings["ROLL"]                               = I{false,true}
+    settings["QD"]                                 = I{false,true}
+    settings["SHOTS"]                              = I{"Fire Shot","Ice Shot","Wind Shot","Earth Shot","Thunder Shot","Water Shot","Light Shot","Dark Shot"}
+    settings["ROLL1"]                              = false
+    settings["ROLL2"]                              = false
+    settings["INDI"]                               = I{false,true}
+    settings["GEO"]                                = I{false,true}
+    settings["ENTRUST"]                            = I{false,true}
+    settings["ISPELL"]                             = ""
+    settings["GSPELL"]                             = ""
+    settings["ESPELL"]                             = ""
+    settings["ETARGET"]                            = system["Main Character"]
+    settings["BUBBLE BUFF"]                        = I{"Ecliptic Attrition","Lasting Emanation"}
+    settings["BOOST"]                              = I{false,true}
+    settings["PET"]                                = I{false,true}
+    settings["SPIRITS"]                            = T{"Light Spirit","Fire Spirirt","Ice Spirit","Air Spirit","Earth Spirit","Thunder Spirit","Water Spirit","Dark Spirit"}
+    settings["SUMMON"]                             = I{"Carbuncle","Cait Sith","Ifrit","Shiva","Garuda","Titan","Ramuh","Leviathan","Fenrir","Diabolos","Siren"}
+    settings["BPRAGE"]                             = I{false,true}
+    settings["BPWARD"]                             = I{false,true}
+    settings["AUTO SIC"]                           = I{false,true}
+    settings["AOEHATE"]                            = I{false,true}
+    settings["EMBOLDEN"]                           = I{"Palanx","Temper","Regen IV"}
+    settings["BLU MODE"]                           = I{"DPS","NUKE"}
+    settings["MIGHTY GUARD"]                       = I{true,false}
+    settings["CHIVALRY"]                           = I{1000,1500,2000,2500,3000}
+    settings["WEATHER"]                            = I{"Firestorm","Hailstorm","Windstorm","Sandstorm","Thunderstorm","Rainstorm","Voidstorm","Aurorastorm"}
+    settings["ARTS"]                               = I{1,2,3}
+    settings["MISERY"]                             = I{false,true}
+    settings["IMPETUS WS"]                         = "Raging Fists"
+    settings["FOORWORK WS"]                        = "Tornado Kick"
+    settings["DEFAULT WS"]                         = "Howling Fist"
     
     -- DEBUFFS.
     settings["SPELLS"]={
@@ -50,7 +93,7 @@ function core.get()
     }
     
     -- MAGIC BURST.
-    settings["Magic Burst"]={
+    settings["MAGIC BURST"]={
         
         ["Transfixion"]   = T{},
         ["Compression"]   = T{},
@@ -70,7 +113,7 @@ function core.get()
     local display          = I{false, true}
     local display_settings = {
         ['pos']={['x']=system["Job Window X"],['y']=system["Job Window Y"]},
-        ['bg']={['alpha']=155,['red']=0,['green']=0,['blue']=0,['visible']=false},
+        ['bg']={['alpha']=200,['red']=0,['green']=0,['blue']=0,['visible']=false},
         ['flags']={['right']=false,['bottom']=false,['bold']=false,['draggable']=system["Job Draggable"],['italic']=false},
         ['padding']=system["Job Padding"],
         ['text']={['size']=system["Job Font"].size,['font']=system["Job Font"].font,['fonts']={},['alpha']=system["Job Font"].alpha,['red']=system["Job Font"].r,['green']=system["Job Font"].g,['blue']=system["Job Font"].b,
@@ -80,16 +123,18 @@ function core.get()
 
     local window = texts.new(windower.ffxi.get_player().main_job_full, display_settings)
     
+    -- HANDLE PARTY CHAT COMMANDS
     self.handleChat = function(message, sender, mode, gm)
         
         if (mode == 3 or mode == 4) then
+            local player   = windower.ffxi.get_player() or false
             local accounts = T(system["Controllers"])
             
             if (accounts):contains(sender) then
-                local commands = message:split(" ") or false
+                local commands = message:split(" ")
                 
-                if commands then
-
+                if commands[1] and player and player.name:lower():match(commands[1]) then
+                    
                 end
                 
             else
@@ -100,213 +145,61 @@ function core.get()
         
     end
     
+    -- HANDLE CORE JOB COMMANDS.
     self.handleCommands = function(commands)
         local command = commands[1] or false
         
-        if command then
-            command = command:lower()
+        if command and type(command) == "string" then
+            local command = command:lower()
+            
+            if command == "ambuscade" then
+                settings["HATE"]:setTo(false)
+                settings["BUFFS"]:setTo(true)
+                settings["JA"]:setTo(true)
+                settings["WS"]:setTo(true)
+                settings["WSNAME"] = "Tachi: Shoha"
+                helpers["controls"].setEnabled(true)
+                
+                if bpcore:isLeader() and windower.ffxi.get_party().party1_count < 6 then
+                    helpers["trust"].setEnabled(true)
+                end
+                
+            elseif command == "disable" then
+                settings["HATE"]:setTo(true)
+                settings["BUFFS"]:setTo(false)
+                settings["JA"]:setTo(true)
+                settings["WS"]:setTo(true)
+                settings["WSNAME"] = "Tachi: Shoha"
+                helpers["controls"].setEnabled(true)
+                helpers["trust"].setEnabled(false)
+                
+            end
+            
         end
         
-        if command == "on" or command == "toggle" or command == "off" then
-            system["BP Enabled"]:next()
-            helpers['popchat']:pop(("Automation: " .. tostring(system["BP Enabled"]:current())):upper(), system["Popchat Window"])
-            
-            if not system["BP Enabled"]:current() then
-                helpers['queue'].clear()
-            end
-        
-        elseif command == "display" then
-            display:next()
-            helpers['popchat']:pop(("DISPLAY: " .. tostring(display:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "am" then
-            settings["AM"]:next()
-            helpers['popchat']:pop(("Auto-Aftermath: " .. tostring(settings["AM"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "amt" then
-            settings["AM THRESHOLD"]:next()
-            helpers['popchat']:pop(("Aftermath Threshold: " .. tostring(settings["AM THRESHOLD"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "1hr" then
-            settings["1HR"]:next()
-            helpers['popchat']:pop(("Auto-1hour: " .. tostring(settings["1HR"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "ja" then
-            settings["JA"]:next()
-            helpers['popchat']:pop(("Auto-Job Abilities: " .. tostring(settings["JA"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "ra" then
-            settings["RA"]:next()
-            helpers['popchat']:pop(("Auto-Ranged Attacks: " .. tostring(settings["RA"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "hate" then
-            settings["HATE"]:next()
-            helpers['popchat']:pop(("Auto-Enmity: " .. tostring(settings["HATE"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "buffs" then
-            settings["BUFFS"]:next()
-            helpers['popchat']:pop(("Auto-Buffing: " .. tostring(settings["BUFFS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "debuffs" then
-            settings["DEBUFFS"]:next()
-            helpers['popchat']:pop(("Auto-Debuffing: " .. tostring(settings["DEBUFFS"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "tpt" then
-            local number = commands[2] or false
-            
-            if number then
-                number = tonumber(number)
-                
-                if number > 999 and number <= 3000 then
-                    settings["TP THRESHOLD"] = number
-                    helpers['popchat']:pop(("TP THRESHOLD: " .. tostring(number) .. "."):upper(), system["Popchat Window"])
-                
-                else
-                    helpers['popchat']:pop(("Enter a number from 1000 to 3000"):upper(), system["Popchat Window"])
-                    
-                end
-            
-            end
-        
-        elseif command == "ws" then
-            settings["WS"]:next()
-            helpers['popchat']:pop(("Auto-Weapon Skills: " .. tostring(settings["WS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "wsname" then
-            local weaponskill = windower.convert_auto_trans(table.concat(commands, " "):sub(8)):lower()
-            for _,v in pairs(windower.ffxi.get_abilities().weapon_skills) do
-                
-                if v and res.weapon_skills[v].en then
-                    local match = res.weapon_skills[v].en:lower():match(("[%a%s%'%:]+"))
-
-                    if weaponskill:sub(1, #weaponskill) == match:sub(1, #weaponskill) then                        
-                        settings["WSNAME"] = res.weapon_skills[v].en
-                        helpers['popchat']:pop(("Weapon Skill now set to: " .. tostring(settings["WSNAME"])):upper(), system["Popchat Window"])
-                    end
-                    
-                end
-                
-            end
-        
-        elseif command == "sekka" then
-            local weaponskill = windower.convert_auto_trans(table.concat(commands, " "):sub(8)):lower()
-            for _,v in pairs(windower.ffxi.get_abilities().weapon_skills) do
-                
-                if v and res.weapon_skills[v].en then
-                    local match = res.weapon_skills[v].en:lower():match(("[%a%s%'%:]+"))
-
-                    if weaponskill:sub(1, #weaponskill) == match:sub(1, #weaponskill) then
-                        settings["SEKKA"] = res.weapon_skills[v].en
-                        helpers['popchat']:pop(("Sekkanoki Weapon Skill now set to: " .. tostring(settings["SEKKA"])):upper(), system["Popchat Window"])
-                    end
-                    
-                end
-                
-            end
-        
-        elseif command == "rws" then
-            settings["RANGED WS"]:next()
-            helpers['popchat']:pop(("Ranged Weaponskill now set to: " .. tostring(settings["RANGED WS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "tank" then
-            settings["TANK MODE"]:next()
-            helpers['popchat']:pop(("Tank Mode: " .. tostring(settings["TANK MODE"]:current())):upper(), system["Popchat Window"])
-        
-    elseif (command == "hasso" or command == "seigan") then
-            settings["HASSO MODE"]:next()
-            helpers['popchat']:pop(("Hasso Mode: " .. tostring(settings["HASSO MODE"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "sc" then
-            settings["SC"]:next()
-            helpers['popchat']:pop(("Auto-Skillchains: " .. tostring(settings["SC"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "burst" then
-            settings["BURST"]:next()
-            helpers['popchat']:pop(("Auto-Bursting: " .. tostring(settings["BURST"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "element" then
-            local element = windower.convert_auto_trans(commands[2]):lower() or false
-            if element then
-
-                for _,v in pairs(res.elements) do
-
-                    if v and element:sub(1,6) == v.en:sub(1,6):lower() then
-                        settings["ELEMENT"]:setTo(v.en)
-                        helpers['popchat']:pop(("Auto-Burst Element now set to: " .. tostring(settings["ELEMENT"]:current())):upper(), system["Popchat Window"])    
-                    end
-                    
-                end
-                
-            end
-            
-        elseif command == "tier" then
-            settings["TIER"]:next()
-            helpers['popchat']:pop(("Auto-Bursting Tier now set to: " .. tostring(settings["TIER"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "aoe" then
-            settings["ALLOW-AOE"]:next()
-            helpers['popchat']:pop(("AOE-Bursting now: " .. tostring(settings["ALLOW-AOE"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "drains" then
-            settings["DRAINS"]:next()
-            helpers['popchat']:pop(("Auto-Drains: " .. tostring(settings["DRAINS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "stuns" then
-            settings["STUNS"]:next()
-            helpers['popchat']:pop(("Auto-Stunning: " .. tostring(settings["STUNS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "super" then
-            settings["SUPER-TANK"]:next()
-            helpers['popchat']:pop(("Super-tanking: " .. tostring(settings["SUPER-TANK"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "utsu" then
-            settings["SHADOWS"]:next()
-            helpers['popchat']:pop(("Auto-Shadows: " .. tostring(settings["SHADOWS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "food" then
-            settings["FOOD"]:next()
-            helpers['popchat']:pop(("Auto-Food: " .. tostring(settings["FOOD"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "sambas" then
-            settings["SAMBAS"]:next()
-            helpers['popchat']:pop(("Auto-Steps: " .. tostring(settings["SAMBAS"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "steps" then
-            settings["STEPS"]:next()
-            helpers['popchat']:pop(("Auto-Steps: " .. tostring(settings["STEPS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "skillup" then
-            settings["SKILLUP"]:next()
-            helpers['popchat']:pop(("Auto-Skillup: " .. tostring(settings["SKILLUP"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "skills" then
-            settings["SKILLS"]:next()
-            helpers['popchat']:pop(("Skill-Up spell now set to: " .. tostring(settings["SKILLS"]:current())):upper(), system["Popchat Window"])
-        
-        else
-            system["Core"].event(command)
-            
-        end
+        -- HANDLE GLOBAL COMMANDS.
+        helpers["corecommands"].handle(commands)
         
     end
     
+    -- HANDLE ITEM LOGIC.
     self.handleItems = function()
         
         if bpcore:canItem() and bpcore:checkReady() and not system["Midaction"] then
             
             if bpcore:buffActive(15) then
                 
-                if bpcore:findItemByName("Holy Water") then
+                if bpcore:findItemByName("Holy Water") and not helpers["queue"].inQueue(IT["Holy Water"], "me") then
                     helpers["queue"].add(IT["Holy Water"], "me")
                 
-                elseif bpcore:findItemByName("Hallowed Water") then
+                elseif bpcore:findItemByName("Hallowed Water") and not helpers["queue"].inQueue(IT["Hallowed Water"], "me") then
                     helpers["queue"].add(IT["Hallowed Water"], "me")
                     
                 end
             
             elseif bpcore:buffActive(6) then
                 
-                if bpcore:findItemByName("Echo Drops") then
+                if bpcore:findItemByName("Echo Drops") and not helpers["queue"].inQueue(IT["Echo Drops"], "me") then
                     helpers["queue"].add(IT["Echo Drops"], "me")
                 end
                 
@@ -322,11 +215,16 @@ function core.get()
         system["Core"].handleItems()
         
         if bpcore:checkReady() and not helpers["actions"].getMoving() and system["BP Enabled"]:current() then
+            local player  = windower.ffxi.get_player() or false
+            local current = helpers["queue"].getNextAction() or false
+            
+            -- Determine how to handle status debuffs.
+            if settings["STATUS"]:current() then
+                helpers["status"].manangeStatuses()
+            end
             
             -- PLAYER IS ENGAGED.
-            if system["Player"].status == 1 then
-                
-                -- Determine which target is mine.
+            if player.status == 1 then
                 local target = helpers["target"].getTarget() or windower.ffxi.get_mob_by_target("t") or false
                 
                 -- WEAPON SKILL LOGIC.
@@ -446,11 +344,11 @@ function core.get()
                 if settings["BUFFS"]:current() then
                     
                     -- HASSO.
-                    if bpcore:canAct() and settings["HASSO MODE"]:current() and bpcore:isJAReady(JA["Hasso"].recast_id) and not bpcore:buffActive(353) and bpcore:getAvailable("JA", "Hasso") then
+                    if bpcore:canAct() and not settings["TANK MODE"]:current() and bpcore:isJAReady(JA["Hasso"].recast_id) and not bpcore:buffActive(353) and bpcore:getAvailable("JA", "Hasso") then
                         helpers['queue'].add(JA["Hasso"], "me")
                     
                     -- SEIGAN.
-                    elseif bpcore:canAct() and not settings["HASSO MODE"]:current() and bpcore:isJAReady(JA["Seigan"].recast_id) and not bpcore:buffActive(354) and bpcore:getAvailable("JA", "Seigan") then
+                    elseif bpcore:canAct() and settings["TANK MODE"]:current() and bpcore:isJAReady(JA["Seigan"].recast_id) and not bpcore:buffActive(354) and bpcore:getAvailable("JA", "Seigan") then
                         helpers['queue'].add(JA["Seigan"], "me")
                     
                     -- MEDITATE.
@@ -532,9 +430,7 @@ function core.get()
                 end
             
             -- PLAYER IS DISENGAGED LOGIC.
-            elseif system["Player"].status == 0 then
-                
-                -- Determine which target is mine.
+            elseif (player.status == 0 or settings["SUPER-TANK"]:current()) then
                 local target = helpers["target"].getTarget()
                 
                 -- WEAPON SKILL LOGIC.
@@ -599,11 +495,11 @@ function core.get()
                 if settings["BUFFS"]:current() then
                     
                     -- HASSO.
-                    if bpcore:canAct() and settings["HASSO MODE"]:current() and bpcore:isJAReady(JA["Hasso"].recast_id) and not bpcore:buffActive(353) and bpcore:getAvailable("JA", "Hasso") then
+                    if bpcore:canAct() and not settings["TANK MODE"]:current() and bpcore:isJAReady(JA["Hasso"].recast_id) and not bpcore:buffActive(353) and bpcore:getAvailable("JA", "Hasso") then
                         helpers['queue'].add(JA["Hasso"], "me")
                     
                     -- SEIGAN.
-                    elseif bpcore:canAct() and not settings["HASSO MODE"]:current() and bpcore:isJAReady(JA["Seigan"].recast_id) and not bpcore:buffActive(354) and bpcore:getAvailable("JA", "Seigan") then
+                    elseif bpcore:canAct() and settings["TANK MODE"]:current() and bpcore:isJAReady(JA["Seigan"].recast_id) and not bpcore:buffActive(354) and bpcore:getAvailable("JA", "Seigan") then
                         helpers['queue'].add(JA["Seigan"], "me")
                     
                     -- MEDITATE.
@@ -667,6 +563,7 @@ function core.get()
             end
             
             -- HANDLE EVERYTHING INSIDE THE QUEUE.
+            helpers["cures"].handleCuring()
             helpers['queue'].handleQueue()
         
         end
@@ -717,34 +614,57 @@ function core.get()
         display:next()
     end
     
-    self.setSetting = function(setting, value)
-        name:setTo(value)
+    self.getDisplay = function()
+        return display:current()
     end
     
-    self.event = function(name)
+    self.next = function(name)
         local name = name or false
         
         if name then
-            local msg = string.format("TOGGLING CORE SETTING FOR EVENT: ( %s ), NOW %s.", name, tostring(settings["TOGGLED"]:current()))
-            
-            if name == "trash" then
-                
-            elseif name == "domaininvasion" then
-                settings["TOGGLED"]:next()
-                settings["JA"]:setTo(settings["TOGGLED"]:current())
-                settings["WS"]:setTo(settings["TOGGLED"]:current())
-                settings["BUFFS"]:setTo(settings["TOGGLED"]:current())
-                settings["SANGUINE"]:setTo(settings["TOGGLED"]:current())
-                helpers["controls"].setEnabled(settings["TOGGLED"]:current())
-                helpers["trust"].setEnabled(settings["TOGGLED"]:current())
-                
-            end
-            
-            local msg = string.format("TOGGLING CORE SETTING FOR EVENT: ( %s ), NOW %s.", name, tostring(settings["TOGGLED"]:current()))
-            helpers['popchat']:pop((msg):upper(), system["Popchat Window"])
-            
+            settings[name]:next()
         end
         
+    end
+    
+    self.current = function(name)
+        local name = name or false
+        
+        if name then        
+            return settings[name]:current()
+        end
+        
+    end
+    
+    self.set = function(name, value)
+        local name, value = name or false, value or false
+        
+        if name and value then
+            settings[name]:setTo(value)
+        end
+        
+    end
+    
+    self.value = function(name, value)
+        local name, value = name or false, value or false
+        
+        if name and value then
+            settings[name] = (value)
+        end
+        
+    end
+    
+    self.get = function(name)
+        local name = name or false
+        
+        if name then        
+            return settings[name]
+        end
+        
+    end
+    
+    self.getSettings = function()
+        return settings
     end
     
     return self

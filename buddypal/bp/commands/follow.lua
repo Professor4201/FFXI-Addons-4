@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local follow = {}
 function follow.run()
-    self = {}
+    local self = {}
     
     -- Private variables.
     local player = windower.ffxi.get_mob_by_target("me")

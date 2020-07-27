@@ -25,6 +25,27 @@ end
 --------------------------------------------------------------------------------
 globals[2] = function()
     
+    -- Handle Chat Input for UI.
+    if helpers["ui"] ~= nil then
+        helpers["ui"].getChatInput()
+    end
+    
+    -- Update Target helper.
+    if helpers["target"] ~= nil then
+        local target = windower.ffxi.get_mob_by_target("t") or false
+        
+        if target and windower.ffxi.get_player().status == 1 and not helpers["target"].getPlayerTarget() then
+            helpers["target"].setPlayerTarget(target)
+        end
+        helpers["target"].ping()
+        
+    end
+    
+    -- Build Nav Points.
+    if helpers["nav"] ~= nil then
+        helpers["nav"].buildMap()
+    end
+    
     -- Handle Core Display.
     helpers["actions"].setMoving()
     helpers["distance"].update()
@@ -34,7 +55,7 @@ globals[2] = function()
     if system["BP Enabled"]:current() and os.clock()-system["Last Ping"] > system["Ping Delay"] and not system["BP Allowed"][windower.ffxi.get_info().zone] and not system["Shutdown"][windower.ffxi.get_info().zone] and windower.ffxi.get_player() then
         
         -- Build Custom Party Tables.
-        bpcore.buildPartyData()
+        --bpcore.buildPartyData()
         
         -- Update Curing Data, and Action Queue.
         helpers["cures"].buildData()
@@ -57,27 +78,32 @@ globals[2] = function()
             helpers["currencies"].ping()
         end
         
-        -- Update Target helper.
-        if helpers["target"] ~= nil then
-            helpers["target"].ping()
-        end
-        
-        -- HELM Farming.
-        if helpers["helm"] ~= nil and helpers["helm"].getToggle() then
-            helpers["helm"].ping()
-        end
-        
         -- Handle CORE Automation.
         helpers["controls"].ping()
         helpers["trust"].ping()
         system["Core"].handleAutomation()
+        
+        -- Handle discord bazaar data update.
+        if helpers["discord"] ~= nil then
+            local update = helpers["discord"].getUpdate()
+            
+            if update.trigger and (os.clock()-update.time) > 5 then
+                helpers["discord"].reset()
+            end
+            
+        end
+        
+        -- Handle NAV Path.
+        if helpers["nav"] ~= nil then
+            helpers["nav"].handlePath()
+        end
         
         -- Update ping.
         system["Last Ping"] = os.clock()
     
     -- BP pinger sequence inside towns.
     elseif system["BP Enabled"]:current() and os.clock()-system["Last Ping"] > system["Ping Delay"] and windower.ffxi.get_player() then
-        
+
         -- Build Custom Party Tables.
         bpcore.buildPartyData()
         
@@ -113,17 +139,20 @@ globals[2] = function()
         -- Handle any actions allowed in the queue not related to CORE system.
         helpers["queue"].handleQueue()
         
-        --[[
-        if windower.ffxi.get_player() and windower.ffxi.get_player().name == "ffff" and windower.ffxi.get_player().status == 0 and system["HQ HACK"]:current() then
-            helpers["popchat"]:pop(("ATTEMPTING HQ..."):upper(), system["Popchat Window"])
-            helpers["actions"].synthItem(bpcore:findItemByName("Inferno Crystal"), 5,
-                bpcore:findItemByName("Koh-I-Noor"),
-                bpcore:findItemByName("Dark Matter"),
-                bpcore:findItemByName("Dark Matter"),
-                bpcore:findItemByName("Tartarian Chain"),
-                bpcore:findItemByName("Tartarian Chain")
-            )
-        ]]--
+        -- Handle discord bazaar data update.
+        if helpers["discord"] ~= nil then
+            local update = helpers["discord"].getUpdate()
+            
+            if update.trigger and (os.clock()-update.time) > 5 then
+                helpers["discord"].reset()
+            end
+            
+        end
+        
+        -- Handle NAV Path.
+        if helpers["nav"] ~= nil then
+            helpers["nav"].handlePath()
+        end
         
         -- Update ping.
         system["Last Ping"] = os.clock()

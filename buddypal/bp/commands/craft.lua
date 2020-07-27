@@ -3,11 +3,8 @@
 --------------------------------------------------------------------------------
 local craft = {}
 function craft.run()
-    self = {}
+    local self = {}
     
-    --------------------------------------------------------------------------------------
-    -- Handle the execution of all helper commands.
-    --------------------------------------------------------------------------------------
     self.execute = function(commands)
         local command = commands[2] or false
         
@@ -15,28 +12,28 @@ function craft.run()
             local command = command:lower()
             
             if command == "gold" then
-                helpers["events"].register("Craft", "Gold")
+                helpers["events"].register("craft", "gold")
             
             elseif command == "smithing" then
-                helpers["events"].register("Craft", "Smithing")
+                helpers["events"].register("craft", "smithing")
             
             elseif command == "leathercraft" then
-                helpers["events"].register("Craft", "Leathercraft")
+                helpers["events"].register("craft", "leathercraft")
             
             elseif command == "clothcraft" then
-                helpers["events"].register("Craft", "Clothcraft")
+                helpers["events"].register("craft", "clothcraft")
             
             elseif command == "woodworking" then
-                helpers["events"].register("Craft", "Woodworking")
+                helpers["events"].register("craft", "woodworking")
             
             elseif command == "alchemy" then
-                helpers["events"].register("Craft", "Alchemy")
+                helpers["events"].register("craft", "alchemy")
             
             elseif command == "bonecraft" then
-                helpers["events"].register("Craft", "Bonecraft")
+                helpers["events"].register("craft", "bonecraft")
             
             elseif command == "cooking" then
-                helpers["events"].register("Craft", "Cooking")
+                helpers["events"].register("craft", "cooking")
             
             end
         

@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local shops = {}
 function shops.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local packed = {}

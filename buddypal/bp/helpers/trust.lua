@@ -3,14 +3,12 @@
 --------------------------------------------------------------------------------
 local trust = {}
 function trust.new()
-    self = {}
+    local self = {}
     
     -- Private Variables.
     local party_size = 0
+    local max        = 5
     local toggle     = I{false,true}
-    
-    -- Public Variables.
-    local max_trust  = 4
     local trust      = {system["Default Trust"].trust1, system["Default Trust"].trust2, system["Default Trust"].trust3, system["Default Trust"].trust4, system["Default Trust"].trust5}
     
     self.toggle = function()
@@ -40,37 +38,39 @@ function trust.new()
     end
     
     self.getPartySize = function()
-        party_size = system["Party"]["Parties"].count1
-        return party_size
+        return windower.ffxi.get_party().party1_count
     end
     
     self.getMaxTrust = function()
-        return max_trust
+        return max
     end
     
     self.setMaxTrust = function(value)
-        
+        local value = value or 4
         if tonumber(value) ~= nil then
-            max_trust = tonumber(value)
+            max = tonumber(value)
         end
         
     end
     
     self.getTrustExists = function(name)
-        local check = false
         
         if name and type(name) == "string" then
             
-            for i,_ in pairs(system["Party"]["Players"]) do
+            for i,v in pairs(windower.ffxi.get_party()) do
                 
-                if i == name then
-                    check = true
+                if (i):sub(1,1) == "p" and #i == 2 then
+                    
+                    if v.name == name then
+                        return true
+                    end
+                    
                 end
                 
             end
         
         end
-        return check
+        return false
         
     end
     
@@ -93,25 +93,23 @@ function trust.new()
     
     self.ping = function()
         local player  = windower.ffxi.get_mob_by_target("me")
-        local allowed = 0
         
         if player and toggle:current() and bpcore:canCast() and (player.status == 0 or bpcore:buffActive(603) or bpcore:buffActive(511) or bpcore:buffActive(257) or bpcore:buffActive(267)) then
 
             for _,v in ipairs(trust) do
+                local size = helpers["trust"].getPartySize()
                 
                 if v ~= "" then
                     local true_name = v
-                    local party_size = helpers["trust"].getPartySize()
                         true_name = true_name:gsub("[%s+]", "")
                         true_name = true_name:gsub("%(UC%)", "")
                         true_name = true_name:gsub("(II)", "")
-                        
-                    if not helpers["trust"].getTrustExists(true_name) and party_size ~= 6 and party_size <= max_trust and party_size ~= 0 and allowed < max_trust then
+
+                    if not helpers["trust"].getTrustExists(true_name) and size <= 6  then
                         
                         if MA[v] and bpcore:isMAReady(MA[v].recast_id) and bpcore:getAvailable("MA", MA[v].en) then
                             helpers["queue"].add(MA[v], "me")
-                            allowed = (allowed + 1)
-                            
+                            break
                         end
                         
                     end

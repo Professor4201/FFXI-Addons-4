@@ -1,270 +1,195 @@
 --------------------------------------------------------------------------------
--- Nav helper: Nav handles everything related to creating nav files, and coordinating how navigation files are handled.
+-- Nav Helper: Library of functions to handle BP Navigation system.
 --------------------------------------------------------------------------------
 local nav = {}
+function nav.load()
+    local f = files.new(string.format("/bp/resources/maps/%s.lua", windower.ffxi.get_info().zone))
+    
+    if f:exists() then
+        return dofile(string.format("%sbp/resources/maps/%s.lua", windower.addon_path, windower.ffxi.get_info().zone))
+    
+    elseif not f:exists() then
+        f:write("return " .. T({}):tovstring())
+        return {}
+    
+    end
+
+end
+
 function nav.new()
-    self = {}
+    local self = {}
     
     -- Private Variables.
-    local zone       = res.zones[windower.ffxi.get_info().zone] or false
-    local dir        = "bp/helpers/nav/"
-    local path       = false
-    local record     = I{false, true}
-    local running    = I{false, true}
-    local old_coords = {x=0, y=0, z=0}
-    local post       = false
-    local reverse    = false
-    local first      = true
-    local file       = bpcore:fileExists(dir..system["Player"].name.."/"..zone.id..".lua")
-    local map
+    local record = I{false,true}
+    local map    = nav.load()
+    local path   = {}
+    local index  = 1
+    local range  = 6
+    local math   = math
     
-    -- Public Variables.
-    local pings    = {delay=0.2, last=os.clock()}
-    local coords   = {x=0, y=0, z=0}
-    local range    = 7
-    local mode     = I{"CIRCLE","REVERSE"}
+    self.calculatePath = function(x, y)
+        local x, y = x or false, y or false
+        local map  = map
+        local path = {}
         
-    if file then
-        map = dofile(windower.addon_path..dir..system["Player"].name.."/"..zone.id..".lua")
-    
-    elseif not file then
-        bpcore:writeSettings(dir..system["Player"].name.."/"..zone.id, {})
-        map = {}
-        
-    end
-    
-    self.loadPath = function(name)
-        local name = name or false
-        
-        if name and map[name] then
-            helpers["popchat"]:pop((string.format("Now loading %s to current map.", name)):upper(), system["Popchat Window"])
-            path = map[name]
-            
-        end
-        return false
-    
-    end
-    
-    self.list = function()
-        local list = ""
-        
-        if map then
-            local temp = {}
-            
-            for i,v in pairs(map) do
-                table.insert(temp, i)
-            end
-           
-            list = table.concat(temp, "; ")
-            windower.add_to_chat(10, "Current Paths for this zone are: " .. list)
-           
-        end
-        
-    end
-    
-    self.new = function(name)
-        local name = name or false
-        
-        if name and map then
-            map[name:lower()] = {}
-            helpers["popchat"]:pop((string.format("Adding %s to current map.", name)):upper(), system["Popchat Window"])
-            helpers["nav"].save()
-            
-        end
-        
-    end
-    
-    self.delete = function(name)
-        local name = name or false
-        local temp = {}
-        
-        if name and map and map[name] then
-            
-            for i,v in pairs(map) do
-                
-                if i ~= name then
-                    temp[i] = v
-                    
-                elseif map == name then
-                    helpers["popchat"]:pop((string.format("Now deleting %s from current map.", i)):upper(), system["Popchat Window"])
-                    return
-                end
-                
-            end
-            
-            map = temp
-            helpers["nav"].save()
-            
-        end
-        helpers["popchat"]:pop((string.format("{ %s } is not a valid path on this map.", name)):upper(), system["Popchat Window"])
-        return false
-    end
-    
-    self.save = function()
-        
-        if map then
-            bpcore:writeSettings(dir..system["Player"].name.."/"..zone.id, map)
-            coroutine.sleep(1)
-            helpers["nav"].updateMap()
-        
-        end
-    
-    end
-    
-    self.record = function()
-        if map and path then
-            record:next()
-            
-            if not record:current() then
-                helpers["nav"].save()
-            end
-            
-        end
-        
-    end
-    
-    self.recordPath = function()
-        
-        if record:current() and path ~= nil then
-            local pos = helpers["actions"].getCoordinates()
-            local old = old_coords
-            
-            if (math.abs(pos.x-old.x) > range or math.abs(pos.y-old.y) > range) then
-                helpers["popchat"]:pop((string.format("Adding new position to path @{ %s %s %s }.", pos.x, pos.y, pos.z)):upper(), system["Popchat Window"])
-                table.insert(path, {x=pos.x, y=pos.y, z=pos.z})
-                old_coords = {x=pos.x, y=pos.y, z=pos.z}
-                
-            end
-            
-        end
-        
-    end
-    
-    self.runPath = function()
-        
-        if map and path and post and running:current() and system["Player"].status == 0 and not helpers["target"].getTarget() then
-            
-            if first then
-                helpers["actions"].moveToPosition(path[post].x, path[post].y)
-            end
-            
-            if helpers["actions"].rangeCheck(path[post].x, path[post].y, 1) and not reverse then
-                
-                if path[(post+1)] then
-                    helpers["actions"].moveToPosition(path[post+1].x, path[post+1].y)
-                    post = (post + 1)
-                    
-                elseif not path[(post+1)] and mode:current() == "CIRCLE" then
-                    helpers["actions"].moveToPosition(path[1].x, path[1].y)
-                    post = 1
-                
-                elseif not path[(post+1)] and mode:current() == "REVERSE" then
-                    helpers["actions"].moveToPosition(path[(#path - 1)].x, path[(#path - 1)].y)
-                    post, reverse = (#path - 1), true
-                    
-                end
-            
-            elseif helpers["actions"].rangeCheck(path[post].x, path[post].y, 1) and reverse then
-                
-                if path[(post-1)] then
-                    helpers["actions"].moveToPosition(path[post-1].x, path[post-1].y)
-                    post = (post - 1)
-                
-                elseif not path[(post-1)] and mode:current() == "REVERSE" then
-                    helpers["actions"].moveToPosition(path[2].x, path[2].y)
-                    post, reverse = 2, false
-                    
-                end
-                
-            end
-            
-        end
-        
-    end
-    
-    self.runOnce = function(name)
-    end
-    
-    self.findCoord = function()
-        local pos   = helpers["actions"].getCoordinates() or false
-        local temp  = {}
-        local dist  = 999
-        local found
-        
-        for i,v in ipairs(path) do
-            
-            if type(v) == "table" then
-                local temp = ( ( (v.x-pos.x)^2 + (v.y-pos.y)^2 ) )
+        if x and y then
+            local player   = windower.ffxi.get_mob_by_target("me")
+            local start    = {x=player.x, y=player.y}
+            local current  = {x=player.x, y=player.y}
+            local attempts = {count=0, failed=false}
+            local complete = false
+            local temp     = nil
 
-                if type(temp) == "number" then
-                    temp = temp:abs():sqrt()
+            while (not complete or not attempts.failed) do
+                
+                for i,v in ipairs(map) do
 
-                    if temp < dist then
-                        found = i
-                        dist  = bpcore:round(temp, 3)
+                    if helpers["nav"].distance(v.x, current.x, v.y, current.y, range+2) and (helpers["nav"].getDistance(current.x, x, current.y, y) or temp == nil) then
+                        temp = helpers["nav"].getDistance(current.x, x, current.y, y)
+                        attempts.count = 0
+                        table.remove(map, i)
+                        table.insert(path, v)
+                        current = {x=v.x, y=v.y}
+                        
+                        if helpers["nav"].distance(x, current.x, y, current.y, 6) then
+                            complete = true
+                        end
+                    
+                    end
+                
+                end
+                
+                if not attempts.attemped then
+                    attempts.count = (attempts.count + 1)
+                    
+                    if attempts.count > 5 then
+                        attempts.failed = true
                     end
                     
                 end
                 
             end
+            
+        end
+        return path
+        
+    end
+    
+    self.distance = function(x1, x2, y1, y2, r, outside)
+        local x1, x2, y1, y2 = x1 or false, x2 or false, y1 or false, y2 or false
+        local outside = outside or false
+        
+        if x1 and x2 and y1 and y2 then
+            
+            if (( (x1-x2)^2 + (y1-y2)^2) < r^2) and not outside then
+                return true
+                
+            elseif (( (x1-x2)^2 + (y1-y2)^2) > r^2) and outside then
+                return true
+                
+            end
         
         end
+        return false
         
-        if dist < 35 then
-            return found
-        
-        else
-            helpers["popchat"]:pop(string.format("Closest Node is %s, please find a closer Node.", dist):upper(), system["Popchat Window"])
-        
+    end
+    
+    self.getDistance = function(x1, x2, y1, y2)
+        return ( ((x1-x2)^2) + ((y1-y2)^2) ):sqrt()
+    end
+    
+    self.buildMap = function()        
+        local player = windower.ffxi.get_mob_by_target("me") or false
+            
+        if player and record:current() then
+            local current = string.format("%s|%s", bpcore:round(player.x, 2), bpcore:round(player.y, 2)):gsub("%.", "")
+            
+            if #map > 0 then
+                local pass = true
+                
+                for _,v in ipairs(map) do
+                    
+                    if helpers["actions"].rangeCheck(v.x, v.y, range) then
+                        pass = false
+                    end
+                        
+                end
+                
+                if pass then
+                    table.insert(map, {x=player.x, y=player.y, z=player.z})
+                end
+                
+            else
+                table.insert(map, {x=player.x, y=player.y, z=player.z})
+            
+            end
         end
         
     end
     
     self.updateMap = function()
-        map = dofile(windower.addon_path..dir..system["Player"].name.."/"..zone.id..".lua")
+        map = nav.load()
     end
     
-    self.update = function()
-        local me = windower.ffxi.get_mob_by_target("me")
-        
-        if me and (os.clock() - pings.last) > pings.delay then
-            helpers["nav"].recordPath()
-            
-            if system["Player"].status == 0 then
-                helpers["nav"].runPath()
-            end
-            pings.last = os.clock()
-            
-        end
-        
-    end    
+    self.saveMap = function()
+        local f = files.new(string.format("/bp/resources/maps/%s.lua", windower.ffxi.get_info().zone))
     
-    self.mode = function()
-        mode:next()
-        helpers["popchat"]:pop(string.format("Pathing Mode is now set to: %s", tostring(mode:current())):upper(), system["Popchat Window"])
+        if f:exists() then
+            f:write("return " .. T(map):tovstring())
+            helpers["popchat"]:pop(("CURRENT MAP COORDINATES SAVED!"):upper(), system["Popchat Window"])
+        end
     
     end
     
-    self.toggle = function()
-        running:next()
+    self.record = function()
+        record:next()
+        helpers["popchat"]:pop(string.format("NAVIGATION RECORDING: %s", tostring(record:current())):upper(), system["Popchat Window"])
         
-        if path then
-            helpers["popchat"]:pop(string.format("Activate Navigation: %s", tostring(running:current())):upper(), system["Popchat Window"])
-            
-            if not running:current() then
-                helpers["actions"].stopMovement()
-                post, first = false, true
-                
-            else
-                post = helpers["nav"].findCoord()
-                
-            end
-        
-        else
-            helpers["popchat"]:pop(("There are no paths currently loaded!!"):upper(), system["Popchat Window"])
-            
+        if not record:current() then
+            helpers["nav"].saveMap()
         end
         
+    end
+    
+    self.handlePath = function()
+
+        if #path > 0 then
+            local move = helpers["actions"].getTemplate("Movement")
+            
+            if helpers["actions"].rangeCheck(path[index].x, path[index].y, 2) and index ~= 1 then
+                
+                if index < #path then
+                    helpers["queue"].add(move, {name="Movement", x=path[index].x, y=path[index].y})
+                    index = (index + 1)
+                
+                elseif index == #path then
+                    helpers["actions"].stopMovement()
+                    helpers["nav"].setPath({})
+                
+                end
+                
+            elseif index == 1 then
+                helpers["queue"].add(move, {name="Movement", x=path[index].x, y=path[index].y})                                
+                index = (index + 1)
+                
+            end
+            
+        end            
+        --helpers["queue"].add(move, {name="Movement", x=v.x, y=v.y})
+        
+    end
+    
+    self.setPath = function(t)
+        local t = t or false
+        if type(t) == "table" then
+            index = 1
+            path  = t
+        end
+        
+    end
+    
+    self.getPath = function()
+        return path
     end
     
     return self

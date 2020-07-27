@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local coalitions = {}
 function coalitions.run()
-    self = {}
+    local self = {}
     
     self.execute = function(commands)
         local commands = commands or false

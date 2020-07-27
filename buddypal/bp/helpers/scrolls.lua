@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local scrolls = {}
 function scrolls.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local packed    = {}

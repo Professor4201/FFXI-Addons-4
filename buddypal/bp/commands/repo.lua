@@ -6,9 +6,7 @@ function repo.run()
     self = {}
     
     self.execute = function(commands)
-        local x  = commands[2] or false
-        local y  = commands[3] or false
-        local z  = commands[4] or false
+        local x, y, z  = commands[2] or false, commands[3] or false, commands[4] or false
         local me = windower.ffxi.get_mob_by_target("me") or false
         
         if x and y and z and me then

@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local rolls = {}
 function rolls.new()
-    self = {}
+    local self = {}
     
     -- Private Variables.
     local rolling = {name="", dice=0}

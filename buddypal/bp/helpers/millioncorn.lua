@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local millioncorn = {}
 function millioncorn.new()
-    self = {}
+    local self = {}
     
     -- Public Variables.
     local injecting = false

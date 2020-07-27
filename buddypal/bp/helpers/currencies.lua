@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local currencies = {}
 function currencies.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local string        = ""
@@ -13,23 +13,40 @@ function currencies.new()
     local update        = os.clock()
     local currency      = {
         
-        ["Sparks"]           = 0,
-        ["Accolades"]        = 0,
-        ["Ichor"]            = 0,
-        ["Tokens"]           = 0,
-        ["Voidstones"]       = 0,
-        ["Bayld"]            = 0,
-        ["Zeni"]             = 0,
-        ["Plasm"]            = 0,
-        ["Imps"]             = 0,
-        ["Beads"]            = 0,
-        ["Silt"]             = 0,
-        ["Potpourri"]        = 0,
-        ["Hallmarks"]        = 0,
-        ["Gallantry"]        = 0,
-        ["Crafter"]          = 0,
-        ["Silver Vouchers"]  = 0,
-        ["Canteens"]         = 0,
+        ["Sparks"]                  = 0,
+        ["Accolades"]               = 0,
+        ["Ichor"]                   = 0,
+        ["Tokens"]                  = 0,
+        ["Voidstones"]              = 0,
+        ["Bayld"]                   = 0,
+        ["Zeni"]                    = 0,
+        ["Plasm"]                   = 0,
+        ["Imps"]                    = 0,
+        ["Beads"]                   = 0,
+        ["Silt"]                    = 0,
+        ["Potpourri"]               = 0,
+        ["Hallmarks"]               = 0,
+        ["Gallantry"]               = 0,
+        ["Crafter"]                 = 0,
+        ["Silver Vouchers"]         = 0,
+        ["Canteens"]                = 0,
+        ["Fire Crystals"]           = 0,
+        ["Ice Crystals"]            = 0,
+        ["Wind Crystals"]           = 0,
+        ["Earth Crystals"]          = 0,
+        ["Lightng. Crystals"]       = 0,
+        ["Water Crystals"]          = 0,
+        ["Light Crystals"]          = 0,
+        ["Dark Crystals"]           = 0,
+        ["Fishing (GP)"]            = 0,
+        ["Woodworking (GP)"]        = 0,
+        ["Smithing (GP)"]           = 0,
+        ["Goldsmithing (GP)"]       = 0,
+        ["Clothcraft (GP)"]         = 0,
+        ["Leathercraft (GP)"]       = 0,
+        ["Bonecraft (GP)"]          = 0,
+        ["Alchemy (GP)"]            = 0,
+        ["Cooking (GP)"]             = 0,
         
     }
     
@@ -83,19 +100,16 @@ function currencies.new()
     -- Set the currency value.
     self.setCurrency = function(name, value)
         currency[name] = value
-        
     end
     
     -- Return currency value.
     self.getCurrency = function(name)
         return tonumber(currency[name])
-        
     end
     
     -- Return currency value.
     self.getAllCurrency = function()
         return currency
-        
     end
     
     -- Handle ping for the helper.

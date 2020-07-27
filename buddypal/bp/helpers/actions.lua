@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local actions = {}
 function actions.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local player     = windower.ffxi.get_player()
@@ -21,7 +21,7 @@ function actions.new()
     local buffer     = 3
     local categories = {[6]="JobAbility",[7]="WeaponSkill",[8]="Magic",[9]="Item",[12]="Ranged",[13]="JobAbility",[14]="JobAbility",[15]="JobAbility"}
     local types      = {["Magic"]={res="spells"},["Trust"]={res="spells"},["JobAbility"]={res="job_abilities"},["WeaponSkill"]={res="weapon_skills"},["Item"]={res="items"},["Ranged"]={res="none"}}
-    local ranges     = {[0]=255,[1]=1.56,[2]=3.12,[3]=4.68,[4]=6.24,[5]=7.80,[6]=9.36,[7]=10.92,[8]=12.48,[9]=14.04,[10]=15.60,[11]=17.16,[12]=18.72,[13]=20.28,[14]=21.84,[15]=23.4}
+    local ranges     = {[0]=255,[1]=1.7,[2]=3.4,[3]=5.1,[4]=6.8,[5]=8.5,[6]=10.2,[7]=11.9,[8]=13.6,[9]=15.3,[10]=17.0,[11]=18.7,[12]=20.4,[13]=22.1,[14]=23.8,[15]=25.5}
     local actions    = {
         
         ["interact"]        = 0,          ["engage"]          = 2,          ["/magic"]          = 3,          ["magic"]           = 3,          ["/mount"] = 26,
@@ -48,6 +48,13 @@ function actions.new()
         
     }
     
+    -- Custom Action Resource
+    local template = {
+        ["Interact"] = {id=65534,en="Interact",element=-1,prefix="/interact",type="Interact", range=6},
+        ["Movement"] = {id=65535,en="Movement",element=-1,prefix="/move",type="Movement", range=255},
+        ["Ranged"]   = {id=65536,en="Ranged",element=-1,prefix="/ra",type="Ranged", range=14},
+    }
+    
     --------------------------------------------------------------------------------
     -- Command player to do an outgoing action.
     --------------------------------------------------------------------------------
@@ -55,14 +62,9 @@ function actions.new()
         local midaction = midaction
         
         if target and action and not midaction then
-            
-            local header = 0x00001A00
             local param = param or 0
-            
             if actions[action] and bpcore:checkReady() and not midaction then
-                local inject = 'iIHHHHfff':pack(0x01a, target.id, target.index, actions[action], param, 0, 0, 0, 0)
-                windower.packets.inject_outgoing(0x01a, inject)
-                
+                windower.packets.inject_outgoing(0x01a, ("iIHHHHfff"):pack(0x00001A00, target.id, target.index, actions[action], param, 0, 0, 0, 0))                
             end
         
         end
@@ -74,14 +76,105 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.reposition = function(x, y, z)
         local player = windower.ffxi.get_player()
-        local header = 0x00006500
-        
         if x and y and z and player then
-            local inject = 'ifffIHCCCC':pack(header, x, z, y, player.id, player.index, 1, 0, 0, 0)
-            windower.packets.inject_incoming(0x065, inject)
-        
+            windower.packets.inject_incoming(0x065, ("ifffIHCCCC"):pack(0x00006500, (x+0.321), z, (y+0.321), player.id, player.index, 1, 0, 0, 0))        
+            helpers["actions"].setMidaction(false)
         end
     
+    end
+    
+    --------------------------------------------------------------------------------
+    -- Jump to coordinates in front of a position.
+    --------------------------------------------------------------------------------
+    self.jumpTo = function(target)
+        local player = windower.ffxi.get_player()
+        local target = target or false
+        
+        if target then
+            local facing = math.floor(target.facing or 0)
+            local position = {x=0,y=0,z=0}
+            
+            if facing == 0 then
+                position = {x=(target.x+1), y=(target.y-1), z=target.z}
+                
+            elseif facing == 1 then
+                position = {x=target.x, y=(target.y-1), z=target.z}
+                
+            elseif facing == 2 then
+                position = {x=(target.x-1), y=(target.y-1), z=target.z}
+                
+            elseif (facing == 3 or facing == -4) then
+                position = {x=(target.x-1), y=target.y, z=target.z}
+                
+            elseif (facing == -3 or facing == 4) then
+                position = {x=(target.x-1), y=(target.y+1), z=target.z}
+                
+            elseif facing == -2 then
+                position = {x=target.x, y=(target.y+1), z=target.z}
+            
+            elseif (facing == -1 or facing == 5) then
+                position = {x=(target.x+1), y=(target.y+1), z=target.z}
+                
+            end
+
+            if position.x ~= 0 and position.y ~= 0 and position.z ~= 0 then                
+                windower.packets.inject_incoming(0x065, ("ifffIHCCCC"):pack(0x00006500, position.x, position.z, position.y, player.id, player.index, 1, 0, 0, 0))        
+            end
+            
+        end
+    
+    end
+    
+    --------------------------------------------------------------------------------
+    -- Jump to coordinates in front of a position.
+    --------------------------------------------------------------------------------
+    self.jumpBehind = function(target)
+        local player = windower.ffxi.get_player()
+        local target = target or false
+        
+        if target then
+            local facing = math.floor(target.facing)
+            local position = {x=0,y=0,z=0}
+            
+            if facing == 0 then
+                position = {x=(target.x-1), y=(target.y+1), z=target.z}
+                
+            elseif facing == 1 then
+                position = {x=target.x, y=(target.y+1), z=target.z}
+                
+            elseif facing == 2 then
+                position = {x=(target.x+1), y=(target.y+1), z=target.z}
+                
+            elseif (facing == 3 or facing == -4) then
+                position = {x=(target.x+1), y=target.y, z=target.z}
+                
+            elseif (facing == -3 or facing == 4) then
+                position = {x=(target.x+1), y=(target.y-1), z=target.z}
+                
+            elseif facing == -2 then
+                position = {x=target.x, y=(target.y-1), z=target.z}
+            
+            elseif (facing == -1 or facing == 5) then
+                position = {x=(target.x-1), y=(target.y-1), z=target.z}
+                
+            end
+
+            if position.x ~= 0 and position.y ~= 0 and position.z ~= 0 then                
+                windower.packets.inject_incoming(0x065, ("ifffIHCCCC"):pack(0x00006500, position.x, position.z, position.y, player.id, player.index, 1, 0, 0, 0))        
+            end
+            
+        end
+    
+    end
+    
+    --------------------------------------------------------------------------------
+    -- Ping a mob from anywhere in the zone to receive a update packet.
+    --------------------------------------------------------------------------------
+    self.pingMob = function(index)
+        local index = index or false
+        if index then
+            packets.inject(packets.new("outgoing", 0x016, {["Target Index"]=index}))
+        end            
     end
     
     --------------------------------------------------------------------------------
@@ -93,14 +186,11 @@ function actions.new()
         local bag       = bag or 0
         
         if target and item and bpcore:checkReady() and not midaction then
-            local header = 0x00003700
             local temp   = bpcore:findItemByName(item)
             local index  = select(1, bpcore:findItemById(temp.id))
             
-            if type(index) == 'number' then
-                local inject = 'iIIHCCCCCC':pack(header, target.id, 1, target.index, index, bag, 0, 0, 0, 0)
-                windower.packets.inject_outgoing(0x037, inject)
-                
+            if type(index) == "number" then
+                windower.packets.inject_outgoing(0x037, ("iIIHCCCCCC"):pack(0x00003700, target.id, 1, target.index, index, bag, 0, 0, 0, 0))                
             end
         
         end
@@ -138,9 +228,9 @@ function actions.new()
             index[5], index[6], index[7], index[8] = index[5] or 0, index[6] or 0, index[7] or 0, index[8] or 0
             
             -- Build _unknown1 packet data.
-            local c = ((crystal.id % 6506) % 4238) % 4096
-            local m = (c + 1) * 6 + 77
-            local b = (c + 1) * 42 + 31
+            local c  = ((crystal.id % 6506) % 4238) % 4096
+            local m  = (c + 1) * 6 + 77
+            local b  = (c + 1) * 42 + 31
             local m2 = (8 * c + 26) + (id[1] - 1) * (c + 35)
             
             local synth = packets.new("outgoing", 0x096, {
@@ -169,14 +259,11 @@ function actions.new()
         local bag = bpcore:findBag(name) or 0
     
         if name and bag and bpcore:findItemByName(name, bag) and bpcore:checkReady() and not midaction then
-            local header = 0x00003700
             local temp   = bpcore:findItemByName(name)
             local index  = select(1, bpcore:findItemById(temp.id))
             
-            if type(index) == 'number' then
-                local inject = 'iIIHCCCCCC':pack(header, target.id, 1, target.index, index, bag, 0, 0, 0, 0)
-                windower.packets.inject_outgoing(0x037, inject)
-            
+            if type(index) == "number" then
+                windower.packets.inject_outgoing(0x037, ("iIIHCCCCCC"):pack(0x00003700, target.id, 1, target.index, index, bag, 0, 0, 0, 0))            
             end
         
         end
@@ -206,8 +293,7 @@ function actions.new()
                 end
 
                 if type(select(1, item)) == "number" then
-                    windower.packets.inject_outgoing(0x050, ("iCCCC"):pack(0x00005000, select(1, item), slot, bag, 0))
-                    
+                    windower.packets.inject_outgoing(0x050, ("iCCCC"):pack(0x00005000, select(1, item), slot, bag, 0))                    
                 end
                 
             end
@@ -219,10 +305,8 @@ function actions.new()
     --------------------------------------------------------------------------------
     -- Force player to open a shop menu.
     --------------------------------------------------------------------------------
-    self.openShop = function()
-        local inject = ("CCCC"):pack(29,0,0,0)
-        windower.packets.inject_incoming(0x03e, inject)
-        
+    self.openShop = function(shop)
+        windower.packets.inject_incoming(0x03e, ("iCCCC"):pack(0x00003e08, shop or 13, 0, 16, 01))        
     end
     
     --------------------------------------------------------------------------------
@@ -232,9 +316,7 @@ function actions.new()
         local item = item or false
         
         if item and bpcore:findItemIndexByName(item.en) then
-            local inject = ("iIHCC"):pack(0x00008408, 1, item.id, bpcore:findItemIndexByName(item.en) ,0)
-            windower.packets.inject_outgoing(0x084, inject)
-        
+            windower.packets.inject_outgoing(0x084, ("iIHCC"):pack(0x00008408, 1, item.id, bpcore:findItemIndexByName(item.en), 0))        
         end
         
     end
@@ -289,12 +371,9 @@ function actions.new()
     -- Force a menu injection during npc interaction.
     --------------------------------------------------------------------------------
     self.injectMenu = function(id, index, zone, option, menuid, automated, _u1, _u2)
-        local _u1 = _u1 or 0
-        local _u2 = _u2 or 0
+        local _u1, _u2 = _u1 or 0, _u2 or 0
         if id and index and option and zone and menuid and (automated or not automated) then
-            local inject = ("iIHHHBCHH"):pack(0x05b, id, option, _u1, index, automated, _u2, zone, menuid)
-            windower.packets.inject_outgoing(0x05b, inject)
-            
+            windower.packets.inject_outgoing(0x05b, ("iIHHHBCHH"):pack(0x05b, id, option, _u1, index, automated, _u2, zone, menuid))            
         end
         
     end
@@ -303,18 +382,16 @@ function actions.new()
     -- Get advanced synth support from the NPC.
     --------------------------------------------------------------------------------
     self.injectSynthSupport = function()
-        local header = 0x00003e00
-        local inject = 'iCC3':pack(header, 43, 0, 0, 0)
-        windower.packets.inject_incoming(0x03e, inject)
-        
+        windower.packets.inject_incoming(0x03e, ("iCC3"):pack(0x00003e00, 43, 0, 0, 0))        
     end
     
     --------------------------------------------------------------------------------
     -- Get Crystals from Ephemeral Moogle
     --------------------------------------------------------------------------------
     self.getCrystals = function(target, quantity, type)
-        local zone      = {id=res['zones'][windower.ffxi.get_info().zone].id, name=res['zones'][windower.ffxi.get_info().zone].name}
-        local crystals  = {
+        local zone     = {id=res['zones'][windower.ffxi.get_info().zone].id, name=res['zones'][windower.ffxi.get_info().zone].name}
+        local menus    = {[17723846]={menu=913},[17723847]={menu=914},[17740211]={menu=617},[17736015]={menu=617},[17719925]={menu=3549},[17752529]={menu=1098},[17764826]={menu=895},[17764827]={menu=896}}
+        local crystals = {
             
             ["Fire Crystal"]        = {unknown1=16385},
             ["Ice Crystal"]         = {unknown1=16386},
@@ -326,25 +403,15 @@ function actions.new()
             ["Dark Crystal"]        = {unknown1=16392},
             
         }
-        
-        local menus = {
+
+        if target and quantity and type and zone and crystals[type] and menus[target.id] and helpers["currencies"].getCurrency(string.format("%ss", type)) >= tonumber(quantity) then
+            windower.packets.inject_outgoing(0x05b, ("iIHHHBCHH"):pack(0x00005b00, target.id, quantity, crystals[type].unknown1, target.index, false, 0, zone.id, menus[target.id].menu))
+            helpers["popchat"]:pop(string.format("Pulling %s of %s %ss.", quantity, helpers["currencies"].getCurrency(string.format("%ss", type)), type), system["Popchat Window"])
             
-            [17723846] = {menu=913},
-            [17723847] = {menu=914},
-            [17740167] = {menu=617},
-            [17736015] = {menu=617},
-            [17719925] = {menu=3549},
-            [17752529] = {menu=1098},
-            [17764826] = {menu=895},
-            [17764827] = {menu=896},
+        else
+            helpers["actions"].injectMenu(target.id, target.index, zone.id, 1, menus[target.id].menu, false,  0, 0)
+            helpers["popchat"]:pop(string.format("Unable to get crystals. Attempting to pull %s of %s %ss.", quantity, helpers["currencies"].getCurrency(string.format("%ss", type)), type), system["Popchat Window"])
         
-        }
-    
-        if target and quantity and type and zone and crystals[type] and menus[target.id] then
-            local header = 0x00005b00
-            local inject = 'iIHHHBCHH':pack(header, target.id, quantity, crystals[type].unknown1, target.index, false, 0, zone.id, menus[target.id].menu)
-            windower.packets.inject_outgoing(0x05b, inject)
-            
         end
         
     end
@@ -371,7 +438,6 @@ function actions.new()
             end
             
         else
-
             helpers["actions"].doExitMenu(packets, target)
             
         end
@@ -583,44 +649,6 @@ function actions.new()
     end
     
     --------------------------------------------------------------------------------
-    -- Inject a Easy (114) ambuscade start.
-    --------------------------------------------------------------------------------
-    self.startAmbusEasy = function(packets, target)
-        local player = windower.ffxi.get_mob_by_target("me")
-        
-        if packets and target then
-            helpers["popchat"]:pop(("Starting Ambuscade: Normal (Easy [114]) "), system["Popchat Window"])
-            helpers["actions"].injectMenu(target.id, target.index, packets["Zone"], 9, packets["Menu ID"], true,  0, 0)
-            helpers["actions"].injectMenu(target.id, target.index, packets["Zone"], 9, packets["Menu ID"], true,  0, 0)
-            
-        else
-
-            helpers["actions"].doExitMenu(packets, target)
-            
-        end
-        
-    end
-    
-    --------------------------------------------------------------------------------
-    -- Inject a Easy (114) ambuscade enter.
-    --------------------------------------------------------------------------------
-    self.enterAmbusEasy = function(packets, target)
-        local player = windower.ffxi.get_mob_by_target("me")
-        
-        if packets and target then
-            helpers["popchat"]:pop(("Starting Ambuscade: Normal (Easy [114]) "), system["Popchat Window"])
-            helpers["actions"].injectMenu(target.id, target.index, packets["Zone"], 1, packets["Menu ID"], true,  0, 0)
-            helpers["actions"].injectMenu(target.id, target.index, packets["Zone"], 2, packets["Menu ID"], true,  0, 0)
-            
-        else
-
-            helpers["actions"].doExitMenu(packets, target)
-            
-        end
-        
-    end
-    
-    --------------------------------------------------------------------------------
     -- Get Imperial Tag.
     --------------------------------------------------------------------------------
     self.getTags = function(packets, target)
@@ -727,6 +755,36 @@ function actions.new()
     end
     
     --------------------------------------------------------------------------------
+    -- Reserve Ambuscade.
+    --------------------------------------------------------------------------------
+    self.reserveAmbuscade = function(packets, target, option)
+        local packets, target, option = packets or false, target or false, option or false
+        
+        if packets and target and option then
+            helpers["actions"].injectMenu(target.id, target.index, packets["Zone"], option, packets["Menu ID"], true, 0, 0)
+            helpers["actions"].injectMenu(target.id, target.index, packets["Zone"], option, packets["Menu ID"], false, 0, 0)
+        else
+            helpers["actions"].doExitMenu(packets, target)
+        end
+        
+    end
+    
+    --------------------------------------------------------------------------------
+    -- Reserve Ambuscade.
+    --------------------------------------------------------------------------------
+    self.enterAmbuscade = function(packets, target)
+        local packets, target = packets or false, target or false
+        
+        if packets and target then
+            helpers["actions"].injectMenu(target.id, target.index, packets["Zone"], 1, packets["Menu ID"], true, 0, 0)
+            helpers["actions"].injectMenu(target.id, target.index, packets["Zone"], 2, packets["Menu ID"], false, 0, 0)
+        else
+            helpers["actions"].doExitMenu(packets, target)
+        end
+        
+    end
+    
+    --------------------------------------------------------------------------------
     -- Buy Orb (BCNM).
     --------------------------------------------------------------------------------
     self.buyOrb = function(packets, target, name)
@@ -750,12 +808,8 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.doExitMenu = function(packets, target)
         if packets then
-            local header = 0x00005b00
-            local inject = 'iIHHHBCHH':pack(header, target.id, 0, 16384, target.index, false, 0, packets["Zone"], packets["Menu ID"])
-            windower.packets.inject_outgoing(0x05b, inject)
-            
-        end
-        
+            windower.packets.inject_outgoing(0x05b, ("iIHHHBCHH"):pack(0x00005b00, target.id, 0, 16384, target.index, false, 0, packets["Zone"], packets["Menu ID"]))            
+        end        
     end
 
     --------------------------------------------------------------------------------
@@ -795,7 +849,7 @@ function actions.new()
                 ['Target Index'] = npc.index,
                 ['Number of Items'] = count,
             })
-            windower.packets.inject(trade)
+            packets.inject(trade)
             
         end
         return false
@@ -809,12 +863,9 @@ function actions.new()
         local midaction = midaction
         local quantity = quantity or 1
             
-            local header = 0x00008308
-            if quantity and shop_slot and bpcore:checkReady() and not midaction then
-                local inject = 'iIHCCI':pack(header, quantity, 0, shop_slot, 0, 0)
-                windower.packets.inject_outgoing(0x083, inject)
-                
-            end
+        if quantity and shop_slot and bpcore:checkReady() and not midaction then
+            windower.packets.inject_outgoing(0x083, ("iIHCCI"):pack(0x00008308, quantity, 0, shop_slot, 0, 0))                
+        end
             
     end
 
@@ -845,7 +896,7 @@ function actions.new()
     -- Make a player walk to coordinates. (Wanted to thank Ivaar for some issues with the windower function itself.)
     --------------------------------------------------------------------------------
     self.move = function(x, y)
-        local me = windower.ffxi.get_mob_by_target("me")
+        local me = windower.ffxi.get_mob_by_target("me") or false
         
         if me then
             windower.ffxi.turn(-math.atan2(y-me.y, x-me.x))
@@ -859,7 +910,7 @@ function actions.new()
     -- Face away from the current mob.
     --------------------------------------------------------------------------------
     self.turn = function(x, y)
-        local me = windower.ffxi.get_mob_by_target("me")
+        local me = windower.ffxi.get_mob_by_target("me") or false
         
         if me then
             windower.ffxi.turn(-math.atan2(y-me.y, x-me.x))
@@ -872,9 +923,8 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.zone = function(zone, u2, u3, type)
         local zone, u2, u3, type = zone or false, u2 or 0, u3 or 0, type or 0
-        
         if zone then
-            windower.packets.inject_outgoing(0x05e, ("iII3HCC"):pack(0x00005e00, 0, 0, 0, u2, u3, type))
+            windower.packets.inject_outgoing(0x05e, ("iII3HCC"):pack(0x00005e00, zone, 0, 0, 0, u2, u3, type))
         end
         
     end
@@ -989,92 +1039,12 @@ function actions.new()
         return false
         
     end
-
-    ---------------------------------------------------------------------------
-    -- Run through a navigation table.
-    ---------------------------------------------------------------------------
-    self.startNavigation = function(target, nav, count, buffer)
-        local buffer = buffer or 0
-        
-        if target and nav and count ~= (#nav + 1) then
-        
-            if helpers['actions'].rangeCheck(target.x, target.y, system["Buffer POS"]+buffer) then
-                
-                if count == 0 then
-                    count = (count + 1)
-                    helpers['actions'].moveToPosition(nav[count].x, nav[count].y)
-                    return count
-                end
-                
-            elseif nav[count] and helpers['actions'].rangeCheck(nav[count].x, nav[count].y, system["Buffer POS"]) then
-                
-                if count > 0 and count <= #nav then
-                    count = (count + 1)
-                    
-                    if nav[count] then
-                        helpers['actions'].moveToPosition(nav[count].x, nav[count].y)
-                        return count
-                    end
-                    
-                end
-    
-            end
-            
-        end
-        return count
-        
-    end
-
-    ---------------------------------------------------------------------------
-    -- Run through a navigation table in reverse.
-    ---------------------------------------------------------------------------
-    self.reverseNavigation = function(nav, count)
-        local target = target or nav[#nav]
-        
-        if nav then
-        
-            if helpers['actions'].rangeCheck(nav[#nav].x, nav[#nav].y, system["Buffer POS"]) then
-                
-                if (count == #nav + 1) then
-                    count = count - 2
-                    helpers['actions'].moveToPosition(nav[count].x, nav[count].y)
-                    return count
-                    
-                elseif count == #nav then
-                    count = count - 1
-                    helpers['actions'].moveToPosition(nav[count].x, nav[count].y)
-                    return count
-                    
-                end
-                
-            elseif nav[count] and helpers['actions'].rangeCheck(nav[count].x, nav[count].y, system["Buffer POS"]) then
-                
-                if count > 1 and count <= #nav then
-                    count = (count - 1)
-                    
-                    if nav[count] then
-                        helpers['actions'].moveToPosition(nav[count].x, nav[count].y)
-                        return count
-                    end
-                        
-                elseif count == 1 then
-                    return count - 1
-                    
-                end
-    
-            end
-            
-        end
-        return count
-        
-    end
     
     --------------------------------------------------------------------------------
     -- Press Escape.
     --------------------------------------------------------------------------------
     self.pressEscape = function()
         windower.send_command("setkey escape down; wait 0.2; setkey escape up")
-        
     end
     
     --------------------------------------------------------------------------------
@@ -1082,7 +1052,6 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.pressEnter = function()
         windower.send_command("setkey enter down; wait 0.2; setkey enter up")
-        
     end
     
     --------------------------------------------------------------------------------
@@ -1090,7 +1059,6 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.pressUp = function()
         windower.send_command("setkey up down; wait 0.2; setkey up up")
-        
     end
     
     --------------------------------------------------------------------------------
@@ -1098,7 +1066,6 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.pressDown = function()
         windower.send_command("setkey down down; wait 0.2; setkey down up")
-        
     end
     
     --------------------------------------------------------------------------------
@@ -1106,7 +1073,6 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.pressLeft = function()
         windower.send_command("setkey left down; wait 0.2; setkey left up")
-        
     end
     
     --------------------------------------------------------------------------------
@@ -1114,7 +1080,6 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.pressRight = function()
         windower.send_command("setkey right down; wait 0.2; setkey right up")
-        
     end
     
     --------------------------------------------------------------------------------
@@ -1122,7 +1087,6 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.pressF8 = function()
         windower.send_command("setkey f8 down; wait 0.2; setkey f8 up")
-        
     end
     
     --------------------------------------------------------------------------------
@@ -1130,7 +1094,6 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.stepBackwards = function()
         windower.send_command("setkey numpad2 down; wait 0.2; setkey numpad2 up")
-        
     end
     
     --------------------------------------------------------------------------------
@@ -1138,7 +1101,6 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.sidestep = function()
         windower.send_command("setkey numpad4 down; wait 0.2; setkey numpad4 up")
-        
     end
     
     --------------------------------------------------------------------------------
@@ -1146,7 +1108,6 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.stopMovement = function()
         windower.ffxi.run(false)
-        
     end
     
     --------------------------------------------------------------------------------
@@ -1154,11 +1115,8 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.face = function(mob)
         local me = windower.ffxi.get_mob_by_target("me")
-        
         if mob then
-            local angle = (math.atan2((mob.y - me.y), (mob.x - me.x))*180/math.pi)*-1
-            windower.ffxi.turn((angle):radian())
-        
+            windower.ffxi.turn(((math.atan2((mob.y - me.y), (mob.x - me.x))*180/math.pi)*-1):radian())
         end
         
     end
@@ -1167,9 +1125,7 @@ function actions.new()
     -- Accept raise.
     --------------------------------------------------------------------------------
     self.acceptRaise = function()
-        local inject = 'iIHHHHfff':pack(0x1A0E3C0A, player.id, player.index, 13, 0, 0, 0, 0, 0)
-        windower.packets.inject_outgoing(0x01a, inject)
-        
+        windower.packets.inject_outgoing(0x01a, ("iIHHHHfff"):pack(0x1A0E3C0A, player.id, player.index, 13, 0, 0, 0, 0, 0))
     end
     
     --------------------------------------------------------------------------------
@@ -1190,11 +1146,11 @@ function actions.new()
             
         elseif bpcore:checkTimestamp("Warp Ring", "minute", 10) then
             helpers["actions"].equipItem("Warp Ring", 13)
-            helpers["queue"].add(IT["Warp Ring"], "me")
+            helpers["queue"].addToFront(IT["Warp Ring"], "me")
             system["Next Allowed"] = (os.clock() + 13)
             
         elseif bpcore:findItemByName("Instant Warp", 0) then
-            helpers["queue"].add(IT["Instant Warp"], "me")
+            helpers["queue"].addToFront(IT["Instant Warp"], "me")
             
         else
             windower.send_command(string.format("p < %s > : Warps not available yet.", me.name))
@@ -1207,14 +1163,9 @@ function actions.new()
     -- Interact with a target.
     --------------------------------------------------------------------------------
     self.poke = function(target)
-        
+        local target = target or false
         if target then
-            local poke = packets.new('outgoing', 0x1a, {
-                ['Target'] = target.id,
-                ['Target Index'] = target.index,
-            })
-            packets.inject(poke)
-        
+            packets.inject(packets.new("outgoing", 0x1a, {["Target"]=target.id,["Target Index"]=target.index,}))
         end
         
     end
@@ -1223,8 +1174,7 @@ function actions.new()
     -- Set midaction status.
     --------------------------------------------------------------------------------
     self.setMidaction = function(value)
-        midaction = value
-    
+        midaction = value    
     end
     
     --------------------------------------------------------------------------------
@@ -1232,7 +1182,6 @@ function actions.new()
     --------------------------------------------------------------------------------
     self.getMidaction = function()
         return midaction
-    
     end
     
     --------------------------------------------------------------------------------
@@ -1242,18 +1191,17 @@ function actions.new()
         local me = windower.ffxi.get_mob_by_target("me") or false
         
         if me then
-
-            if me.x ~= x or me.y ~= y then
-                moving, x, y, z = true, me.x, me.y, me.z
-                
-            else
-                moving, x, y, z = false, me.x, me.y, me.z
             
+            if me.x ~= x or me.y ~= y then
+                --helpers["actions"].setMidaction(false)
+                moving, x, y, z = true, me.x, me.y, me.z
+            else
+                moving, x, y, z = false, me.x, me.y, me.z            
             end
         
         else
+            --helpers["actions"].setMidaction(false)
             moving, x, y, z = true, 0, 0, 0
-        
         end
     
     end
@@ -1295,6 +1243,16 @@ function actions.new()
     
     self.getDelays = function()
         return delays
+    end
+    
+    self.getTemplate = function(name)
+        local name = name or false
+        
+        if name and template and template[name] then
+            return template[name]
+        end
+        return nil
+    
     end
     
     --------------------------------------------------------------------------------

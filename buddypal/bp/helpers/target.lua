@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local target = {}
 function target.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local targets       = {["player"]=false,["party"]=false,["luopan"]=false,["entrust"]=false,["enmity"]=false}
@@ -18,7 +18,7 @@ function target.new()
     local update        = os.clock()
     local settings = {
         ['pos']={['x']=system["Target Window X"],['y']=system["Target Window Y"]},
-        ['bg']={['alpha']=155,['red']=0,['green']=0,['blue']=0,['visible']=false},
+        ['bg']={['alpha']=200,['red']=0,['green']=0,['blue']=0,['visible']=false},
         ['flags']={['right']=false,['bottom']=false,['bold']=false,['draggable']=draggable,['italic']=false},
         ['padding']=padding,
         ['text']={['size']=font.size,['font']=font.font,['fonts']={},['alpha']=font.alpha,['red']=font.r,['green']=font.g,['blue']=font.b,
@@ -51,12 +51,19 @@ function target.new()
         
         end
         
+        -- If player is the target then clear.
+        if target and target.id == windower.ffxi.get_player().id then
+            helpers["target"].clearTargets()
+            return false
+            
+        end
+        
+        
         if helpers["target"].getTargetMode() == 1 and target and bpcore:canEngage(target) then
             
             if target.distance:sqrt() < 35 then
                 targets.player = target
-                helpers["popchat"]:pop(("Setting current target to: " .. target.name .. "."), system["Popchat Window"])
-                
+                helpers["popchat"]:pop(("Setting current target to: " .. target.name .. "."), system["Popchat Window"])                
             end
             
         elseif helpers["target"].getTargetMode() == 2 and target and bpcore:canEngage(target) then
@@ -91,12 +98,18 @@ function target.new()
         
         end
         
+        -- If player is the target then clear.
+        if target and target.id == windower.ffxi.get_player().id then
+            helpers["target"].clearTargets()
+            return false
+            
+        end
+        
         if target and bpcore:canEngage(target) then
             
             if math.sqrt(target.distance) < 35 then
                 targets.player = target
-                helpers["popchat"]:pop(("Setting current target to: " .. target.name .. "."), system["Popchat Window"])
-                
+                helpers["popchat"]:pop(("Setting current target to: " .. target.name .. "."), system["Popchat Window"])                
             end
         
         end
@@ -124,6 +137,13 @@ function target.new()
         
         end
         
+        -- If player is the target then clear.
+        if target and target.id == windower.ffxi.get_player().id then
+            helpers["target"].clearTargets()
+            return false
+            
+        end
+        
         if target and bpcore:canEngage(target) then
             
             if math.sqrt(target.distance) < 35 then
@@ -147,6 +167,9 @@ function target.new()
             elseif type(target) == "table" then
                 target = windower.ffxi.get_mob_by_id(target.id) or false
                 
+            elseif type(target) == "string" and windower.ffxi.get_mob_by_name(target) then
+                target = windower.ffxi.get_mob_by_name(target) or false
+                
             elseif windower.ffxi.get_mob_by_target("t") then
                 target = windower.ffxi.get_mob_by_target("t")
                 
@@ -159,10 +182,8 @@ function target.new()
         
         if target then
             
-            if math.sqrt(target.distance) < 22 then
-                targets.luopan = target
-                helpers["popchat"]:pop(("Setting current luopan target to: " .. target.name .. "."), system["Popchat Window"])
-                
+            if (target.distance):sqrt() < 22 then
+                targets.luopan = target                
             end
         
         end
@@ -171,31 +192,39 @@ function target.new()
     
     self.setEntrustTarget = function(target)
         local target = target or false
+        local new_target
         
-        if target then
+        if target and target ~= "" then
         
             if type(target) == "number" then
-                target = windower.ffxi.get_mob_by_id(target) or false
+                new_target = windower.ffxi.get_mob_by_id(target) or false
             
             elseif type(target) == "table" then
-                target = windower.ffxi.get_mob_by_id(target.id) or false
+                new_target = windower.ffxi.get_mob_by_id(target.id) or false
+                
+            elseif type(target) == "string" and windower.ffxi.get_mob_by_name(target) and not helpers["target"].isEnemy(windower.ffxi.get_mob_by_name(target)) then
+                new_target = windower.ffxi.get_mob_by_name(target) or false
                 
             elseif windower.ffxi.get_mob_by_target("t") then
-                target = windower.ffxi.get_mob_by_target("t")
-                
+                new_target = windower.ffxi.get_mob_by_target("t")
+            
             else
-                target = false
+                new_target = false
                 
             end
         
         end
         
-        if target then
+        -- If player is the target then clear.
+        if new_target and new_target.id == windower.ffxi.get_player().id then
+            targets.entrust = false            
+        end
+        
+        if new_target then
+            local player = windower.ffxi.get_player()
             
-            if math.sqrt(target.distance) < 22 and target.name ~= system["Player"].name then
-                targets.entrust = target
-                helpers["popchat"]:pop(("Setting current entrust target to: " .. target.name .. "."), system["Popchat Window"])
-                
+            if (new_target.distance):sqrt() < 22 and new_target.name ~= player.name then
+                targets.entrust = new_target                
             end
         
         end
@@ -285,11 +314,29 @@ function target.new()
         return mode:current()
     end
     
-    self.isEnemy = function(mob)
-        local target = windower.ffxi.get_mob_by_id(mob.id) or windower.ffxi.get_mob_by_target("t") or false
+    self.isEnemy = function(target)
+        local target = target or false
     
-        if target.spawn_type == 16 then
-            return true
+        if target then
+            
+            if type(target) == "table" and target.spawn_type then
+                return true
+                
+            elseif type(target) == "number" and tonumber(target) ~= nil then
+                local target = windower.ffxi.get_mob_by_id(target)
+                
+                if type(target) == "table" and target.spawn_type == 16 then
+                    return true
+                end
+                    
+            elseif type(target) == "string" then
+                local target = windower.ffxi.get_mob_by_target(target) or windower.ffxi.get_mob_by_name(target) or false
+                
+                if type(target) == "table" and target.spawn_type == 16 then
+                    return true
+                end
+                
+            end
         
         end
         return false
@@ -324,6 +371,21 @@ function target.new()
                     
                 end
                 
+            end
+            
+        end
+        return false
+        
+    end
+    
+    self.onlySelf = function(spell)
+        local spell = spell or false
+        
+        if spell then
+            local targets = T(spell.targets)
+            
+            if #targets == 1 and targets[1] == "Self" and spell.prefix ~= "/song" then
+                return true
             end
             
         end
@@ -386,6 +448,7 @@ function target.new()
         targets.player = false 
         targets.party  = false
         targets.luopan = false
+        helpers["actions"].stopMovement()
         
     end
     
@@ -532,17 +595,17 @@ function target.new()
             if player.main_job == "GEO" then
                 
                 strings = {
-                    player  = "Player: [" .. bpcore:colorize("N/A", "255,51,0") .. "]",
-                    party   = "Party: [" .. bpcore:colorize("N/A", "255,51,0") .. "]",
-                    luopan  = "Luopan: [" .. bpcore:colorize("N/A", "255,51,0") .. "]",
-                    entrust = "Entrust: [" .. bpcore:colorize("N/A", "255,51,0") .. "]",
+                    player  = "Player: [" .. bpcore:colorize("N/A", "25,200,230") .. "]",
+                    party   = "Party: [" .. bpcore:colorize("N/A", "25,200,230") .. "]",
+                    luopan  = "Luopan: [" .. bpcore:colorize("N/A", "25,200,230") .. "]",
+                    entrust = "Entrust: [" .. bpcore:colorize("N/A", "25,200,230") .. "]",
                 }
                 
             else
                 
                 strings = {
-                    player  = "Player: [" .. bpcore:colorize("N/A", "255,51,0") .. "]",
-                    party   = "Party: [" .. bpcore:colorize("N/A", "255,51,0") .. "]",
+                    player  = "Player: [" .. bpcore:colorize("N/A", "25,200,230") .. "]",
+                    party   = "Party: [" .. bpcore:colorize("N/A", "25,200,230") .. "]",
                 }
                 
             end
@@ -550,9 +613,9 @@ function target.new()
             if target1 ~= "" then
                 
                 if type(target1) == "table" then
-                    strings.player = "Player: [" .. bpcore:colorize(target1.name, "255,51,0") .. "]"
+                    strings.player = "Player: [" .. bpcore:colorize(target1.name, "25,200,230") .. "]"
                 else
-                    strings.player = "Player: [" .. bpcore:colorize(target1, "255,51,0") .. "]"
+                    strings.player = "Player: [" .. bpcore:colorize(target1, "25,200,230") .. "]"
                 end
             
             end
@@ -560,9 +623,9 @@ function target.new()
             if target2 ~= "" then
                 
                 if type(target2) == "table" then
-                    strings.party = "Party: [" .. bpcore:colorize(target2.name, "255,51,0") .. "]"
+                    strings.party = "Party: [" .. bpcore:colorize(target2.name, "25,200,230") .. "]"
                 else
-                    strings.party = "Party: [" .. bpcore:colorize(target2, "255,51,0") .. "]"
+                    strings.party = "Party: [" .. bpcore:colorize(target2, "25,200,230") .. "]"
                 end
             
             end
@@ -570,9 +633,9 @@ function target.new()
             if strings.luopan and target3 ~= "" then
                 
                 if type(target3) == "table" then
-                    strings.luopan = "Luopan: [ " .. bpcore:colorize(target3.name, "255,51,0") .. "]"
+                    strings.luopan = "Luopan: [ " .. bpcore:colorize(target3.name, "25,200,230") .. "]"
                 else
-                    strings.luopan = "Luopan: [ " .. bpcore:colorize(target3, "255,51,0") .. "]"
+                    strings.luopan = "Luopan: [ " .. bpcore:colorize(target3, "25,200,230") .. "]"
                 end
                 
             end
@@ -580,9 +643,9 @@ function target.new()
             if strings.entrust and target4 ~= "" then
                 
                 if type(target4) == "table" then
-                    strings.entrust = "Entrust: [" .. bpcore:colorize(target4.name, "255,51,0") .. "]"
+                    strings.entrust = "Entrust: [" .. bpcore:colorize(target4.name, "25,200,230") .. "]"
                 else
-                    strings.enstrust = "Entrust: [" .. bpcore:colorize(target4, "255,51,0") .. "]"
+                    strings.enstrust = "Entrust: [" .. bpcore:colorize(target4, "25,200,230") .. "]"
                 end
                 
             end

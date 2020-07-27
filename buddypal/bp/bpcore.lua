@@ -1,8 +1,4 @@
--------------------------------------------------------------------------------------
--- This is all of the core functions for buddypal.
--------------------------------------------------------------------------------------
 local bpcore = {}
-
 -------------------------------------------------------------------------------------
 -- Check if file exists.
 -------------------------------------------------------------------------------------
@@ -177,6 +173,28 @@ function bpcore:initializeSpecialEvents(events)
     return false
 end
 
+function bpcore:autoload(system_settings)
+    local system_settings = system_settings or false
+    
+    if system_settings then
+    
+        --Autoload my addons.
+        for _,v in ipairs(system["Addons"]) do
+            windower.send_command(string.format("lua load %s", v))
+        end
+        
+        --Autoload my plugins.
+        for _,v in ipairs(system["Plugins"]) do
+            windower.send_command(string.format("load %s", v))
+        end
+        
+    else
+        helpers["popchat"]:pop(("FAILED TO AUTOLOAD PLUGINS AND ADDONS!"):upper(), system["Popchat Window"])
+    
+    end
+
+end
+
 -------------------------------------------------------------------------------------
 -- Playe a sound file.
 -------------------------------------------------------------------------------------
@@ -344,33 +362,33 @@ end
 -- Determine if a target is a valid target that a player can engage.
 -------------------------------------------------------------------------------------
 function bpcore:canEngage(mob)
+    local mob = mob or false
     
     if mob and mob.spawn_type == 16 and not mob.charmed then
         local player = windower.ffxi.get_mob_by_target("me") or false
+        local party  = windower.ffxi.get_party()
         
-        if player then
+        if player and party then
             
-            if ( mob.claim_id == 0 or bpcore:isInParty(windower.ffxi.get_mob_by_id(mob.claim_id)) or bpcore:buffActive(603) or bpcore:buffActive(511) or bpcore:buffActive(257) or bpcore:buffActive(267) ) then
+            if (mob.claim_id == 0 or bpcore:isInParty(windower.ffxi.get_mob_by_id(mob.claim_id)) or bpcore:buffActive(603) or bpcore:buffActive(511) or bpcore:buffActive(257) or bpcore:buffActive(267)) then
                 return true
-                
+            
             else
                 
-                for _,v in pairs(system["Party"]["Players"]) do
+                for i,v in pairs(party) do
                     
-                    if type(v) == "table" and v.id == mob.claim_id then
+                    if (i:sub(1,1) == "p" or i:sub(1,1) == "a") and tonumber(i:sub(2)) ~= nil and type(v) == "table" and v.id == mob.claim_id then
                         return true
-                    
                     else
                         return false
-                    
                     end
                 
                 end
             
             end
-        
+    
         end
-        
+    
     end
     return false
     
@@ -449,6 +467,43 @@ function bpcore:getParty(player, party_only)
 end
 
 -------------------------------------------------------------------------------------
+-- Return the name of all party members.
+-------------------------------------------------------------------------------------
+function bpcore:getMembers(party_only)
+    local party_only = party_only or false
+    local alliance = windower.ffxi.get_party() or false
+    local members = {}
+    
+    if alliance then
+        
+        if not party_only then
+            
+            for i,v in pairs(alliance) do
+
+                if (i:sub(1,1) == "p" or i:sub(1,1) == "a") and tonumber(i:sub(2)) ~= nil and v.name then
+                    table.insert(members, v.name)
+                end
+                
+            end
+            
+        elseif party_only then
+            
+            for i,v in pairs(alliance) do
+                
+                if i:sub(1,1) == "p" and tonumber(i:sub(2)) ~= nil and v.name then
+                    table.insert(members, v.name)
+                end
+                
+            end
+            
+        end
+        
+    end
+    return members
+    
+end
+
+-------------------------------------------------------------------------------------
 -- Determine if a target is in your alliance.
 -------------------------------------------------------------------------------------
 function bpcore:findPartyMember(name, party_only)
@@ -461,7 +516,7 @@ function bpcore:findPartyMember(name, party_only)
         
             for i,v in pairs(alliance) do
                 
-                if (i:sub(1,1) == "p" or i:sub(1,1) == "a") and tonumber(i:sub(2)) ~= nil and name == v.name then
+                if (i:sub(1,1) == "p" or i:sub(1,1) == "a") and tonumber(i:sub(2)) ~= nil and (name):lower() == (v.name):lower() then
                     return v
                 end
                 
@@ -471,7 +526,7 @@ function bpcore:findPartyMember(name, party_only)
             
             for i,v in pairs(alliance) do
                 
-                if i:sub(1,1) == "p" and tonumber(i:sub(2)) ~= nil and name == v.name then
+                if i:sub(1,1) == "p" and tonumber(i:sub(2)) ~= nil and (name):lower() == (v.name):lower() then
                     return v
                 end
                 
@@ -497,7 +552,7 @@ function bpcore:findMemberByName(name, party_only)
         
             for i,v in pairs(alliance) do
                 
-                if i:sub(1,1) == "p" and tonumber(i:sub(2)) ~= nil and (v.name:lower()):match(name:lower()) then
+                if (i:sub(1,1) == "p" or i:sub(1,1) == "a") and tonumber(i:sub(2)) ~= nil and (v.name:lower()):match(name:lower()) then
                     return v
                 end
                 
@@ -512,6 +567,65 @@ function bpcore:findMemberByName(name, party_only)
                 end
                 
             end
+            
+        end
+        
+    end
+    return false
+    
+end
+
+-------------------------------------------------------------------------------------
+-- Determine if all party members are in range.
+-------------------------------------------------------------------------------------
+function bpcore:membersAreInRange(d)
+    local party = windower.ffxi.get_party()
+    local count = party.party1_count
+    local d     = d or false
+    local check = 0
+    
+    for i,v in pairs(party) do
+        
+        if i:sub(1,1) == "p" and tonumber(i:sub(2)) ~= nil then
+            
+            if d and v.mob and not v.mob.is_npc and (v.mob.distance):sqrt() <= d then
+                check = (check + 1)
+                
+            elseif not d and v.mob then
+                check = (check + 1)
+                
+            end                        
+        
+        end
+        
+    end
+    
+    if check == count then
+        return true
+    end
+    return false
+    
+end
+
+-------------------------------------------------------------------------------------
+-- Determine if players is the current party leader.
+-------------------------------------------------------------------------------------
+function bpcore:isLeader()
+    local party  = windower.ffxi.get_party()
+    local player = windower.ffxi.get_player()
+    
+    if player and party and party.party1_count then
+        local size = party.party1_count
+        
+        if size > 1 then
+            local leader = windower.ffxi.get_mob_by_id(party.party1_leader) or false
+            
+            if player and leader and player.name == leader.name then
+                return true        
+            end
+            
+        elseif size == 1 then
+            return true
             
         end
         
@@ -728,99 +842,6 @@ function bpcore:canMove()
 end
 
 -------------------------------------------------------------------------------------
--- Get Player debuffs.
--------------------------------------------------------------------------------------
-function bpcore:getMyDebuffs()
-    local player = windower.ffxi.get_player() or false
-    local party  = system["Buffs"].Party
-    local ready  = {[0]=0,[1]=1,[10]=10,[11]=11,[85]=85}
-            
-    if player and ready[player.status] then
-        
-        if system["Buffs"].Player then
-            local debuffs  = {[1]={},[2]={},[3]={},[4]={},[5]={},[6]={}}
-            local erase    = T{
-                
-                [11]=11,        [12]=12,        [13]=13,        [21]=21,
-                [128]=128,      [129]=129,      [130]=130,      [131]=131,
-                [132]=132,      [133]=133,      [134]=134,      [135]=135,
-                [136]=136,      [137]=137,      [138]=138,      [139]=139,
-                [140]=140,      [141]=141,      [142]=142,      [144]=144,
-                [145]=145,      [146]=146,      [147]=147,      [148]=148,
-                [149]=149,      [167]=167,      [174]=174,      [175]=175,
-                [186]=186,      [189]=189,      [192]=192,      [194]=194,
-                [557]=557,      [558]=558,      [559]=559,      [560]=560,
-                [561]=561,      [562]=562,      [563]=563,      [564]=564,
-                [565]=565,      [566]=566,      [567]=567,      [540]=540,
-                
-            }
-            local sleep    = T{[14]=14,[17]=17,[193]=193}
-            local na       = T{[3]=3,[4]=4,[5]=5,[6]=6,[7]=7,[8]=8,[9]=9,[15]=15,[31]=31}
-            local priority = {
-        
-                [1] = {[15]=15},
-                [2] = {[6]=6,[149]=149,[167]=167,[7]=7,[9]=9,[20]=20,[144]=144},
-                [3] = {[4]=4,[13]=13,[134]=134,[135]=135,[186]=186,[192]=192,[194]=194,[558]=558,[564]=564},
-                [4] = {[31]=31,[145]=145,[146]=146,[3]=3,[5]=5,[147]=147,[148]=148,[174]=174,[175]=175,[540]=540,[557]=557,[559]=559,[560]=560,[561]=561,[562]=562,[563]=563,[565]=565,[566]=566,[567]=567,},
-                [5] = {[11]=11,[12]=12,[21]=21,[128]=128,[129]=129,[130]=130,[131]=131,[132]=132,[133]=133,[136]=136,[137]=137,[138]=138,[139]=139,[140]=140,[141]=141,[142]=142,[189]=189},
-                
-            }
-            
-            for _,v in ipairs(system["Buffs"].Player) do
-                
-                if na[v] then
-                    
-                    if priority[1][v] then
-                        table.insert(debuffs[1], v)
-                        
-                    elseif priority[2][v] then
-                        table.insert(debuffs[2], v)
-                        
-                    elseif priority[3][v] then
-                        table.insert(debuffs[3], v)
-                        
-                    elseif priority[4][v] then
-                        table.insert(debuffs[4], v)
-                        
-                    elseif priority[5][v] then
-                        table.insert(debuffs[5], v)
-                        
-                    end
-                    
-                elseif erase[v] then
-                    
-                    if priority[1][v] then
-                        table.insert(debuffs[1], v)
-                        
-                    elseif priority[2][v] then
-                        table.insert(debuffs[2], v)
-                        
-                    elseif priority[3][v] then
-                        table.insert(debuffs[3], v)
-                        
-                    elseif priority[4][v] then
-                        table.insert(debuffs[4], v)
-                        
-                    elseif priority[5][v] then
-                        table.insert(debuffs[5], v)
-                        
-                    end
-                    
-                elseif sleep[v] then
-                    table.insert(debuffs[6], v)
-                    
-                end
-                return debuffs
-                
-            end
-        
-        end
-    
-    end
-
-end
-
--------------------------------------------------------------------------------------
 -- Check when the next action is allowed.
 -------------------------------------------------------------------------------------
 function bpcore:checkReady()
@@ -849,7 +870,6 @@ function bpcore:getAvailable(r, name)
             
             if magic[MA[name].id] then
                 return true
-            
             end
             
         elseif r == "JA" then
@@ -1274,7 +1294,7 @@ function bpcore:getSpace(bag)
     if bag.count < bag.max then
         return (bag.max - bag.count)
     end
-    return false
+    return 0
     
 end
 

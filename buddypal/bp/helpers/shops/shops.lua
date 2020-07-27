@@ -7,6 +7,16 @@ return {
         {id=IT["Sleep"].id,                     slot=10,        cost=2300},
     },
     
+    ["brunhilde"] = {
+        {id=IT["Brass Mask"].id,                slot=4,         cost=11776},
+        {id=IT["Sallet"].id,                    slot=5,         cost=29311},
+        {id=IT["Mythril Sallet"].id,            slot=6,         cost=52289},
+        {id=IT["Brass Scale Mail"].id,          slot=9,         cost=17928},
+        {id=IT["Breastplate"].id,               slot=10,        cost=45208},
+        {id=IT["Brass Fng. Gnt."].id,           slot=13,        cost=9479},
+        {id=IT["Gauntlets"].id,                 slot=14,        cost=23846},
+    },
+    
     ["harmodios"] = {
         --{id=IT["Gemshorn"].id,                  slot=0,         cost=4747},
         --{id=IT["Cornette"].id,                  slot=1,         cost=368},
@@ -99,10 +109,15 @@ return {
     
     ["greenthumbmoogle"] = {
         {
-            {id=IT["Goblin Stew 880"].id,       slot=41,         cost=100000},
+            {id=IT["Vegetable Seeds"].id,       slot=49153,      cost=280},
+            {id=IT["Fruit Seeds"].id,           slot=02,         cost=280},
+            {id=IT["Grain Seeds"].id,           slot=03,         cost=280},
+            {id=IT["Herb Seeds"].id,            slot=2820,       cost=280},
             {id=IT["Bronze Bed"].id,            slot=38,         cost=30000},
             {id=IT["Mahogany Bed"].id,          slot=39,         cost=80000},
             {id=IT["Noble's Bed"].id,           slot=40,         cost=200000},
+            {id=IT["Goblin Stew 880"].id,       slot=41,         cost=100000},
+        },{
             {id=IT["Beastman Blood"].id,        slot=05,         cost=2757},
             {id=IT["Adaman Nugget"].id,         slot=06,         cost=5216},
             {id=IT["Adamantoise Shell"].id,     slot=07,         cost=232000},
@@ -127,5 +142,27 @@ return {
             {id=IT["Lynx Collar"].id,           slot=12,         cost=2100},
             {id=IT["Eft Skin"].id,              slot=13,         cost=12000},
         }
-    },    
+    },
+    
+    ["random"] = {
+        
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        {id=math.random(1, 29000),          slot=math.random(1,2800),         cost=1},
+        
+    },
+    
 }

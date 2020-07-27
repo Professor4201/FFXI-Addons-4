@@ -1,9 +1,9 @@
 --------------------------------------------------------------------------------
--- Keybinds helper: Handles registering and clearing all keybinds for the addon..
+-- Keybinds helper: Library of functions to handle the creation of all keybinds for the addon.
 --------------------------------------------------------------------------------
 local keybinds = {}
 function keybinds.new()
-    self = {}
+    local self = {}
     
     -- Private BP Binds.
     local binds = {

@@ -3,11 +3,8 @@
 --------------------------------------------------------------------------------
 local farmer = {}
 function farmer.run()
-    self = {}
-    
-    --------------------------------------------------------------------------------------
-    -- Handle the execution of all helper commands.
-    --------------------------------------------------------------------------------------
+    local self = {}
+
     self.execute = function(commands)
         local command = commands[2] or false
         

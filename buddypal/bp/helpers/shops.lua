@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local shops = {}
 function shops.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local packed    = {}
@@ -113,6 +113,80 @@ function shops.new()
             
             
         end
+        
+    end
+    
+    self.stock = function(shop, size, sub)
+        local sub    = sub or false
+        local packed = {}
+        local page   = 1
+        
+        if shop and size and not sub and shops[shop] then
+            local padding = 273
+            
+            for i=1, #shops[shop] do
+                
+                if not packed[page] then
+                    packed[page] = {}
+                end
+                
+                if i == 1 then
+                    table.insert(packed[page], ("iHHIHHHH"):pack(0x00003c00, 0, 0, shops[shop][i].cost, shops[shop][i].id, shops[shop][i].slot, 0, 0))
+                
+                elseif (i % size) == 0 then
+                    table.insert(packed[page], ("iHHIHHHH"):pack(0x00003c00, i, 0, shops[shop][i].cost, shops[shop][i].id, shops[shop][i].slot, 0, 0))
+                    
+                elseif (i % size) == (size - 1) then
+                    table.insert(packed[page], ("IHHHH"):pack(shops[shop][i].cost, shops[shop][i].id, shops[shop][i].slot, 0, 0))
+                    page = (page + 1)
+                    
+                else
+                    table.insert(packed[page], ("IHHHH"):pack(shops[shop][i].cost, shops[shop][i].id, shops[shop][i].slot, 0, 0))
+                
+                end
+                
+            end
+            
+            for i,v in ipairs(packed) do
+                windower.packets.inject_incoming(0x03c, table.concat(v,""))
+            end
+            
+        elseif shop and size and sub and shops[shop][sub] then
+            local padding = 273
+            
+            for i=1, #shops[shop][sub] do
+                
+                if not packed[page] then
+                    packed[page] = {}
+                end
+                
+                if i == 1 then
+                    table.insert(packed[page], ("iHHIHHHH"):pack(0x00003c00, 0, 0, shops[shop][sub][i].cost, shops[shop][sub][i].id, shops[shop][sub][i].slot, 0, 0))
+                
+                elseif (i % size) == 0 then
+                    table.insert(packed[page], ("iHHIHHHH"):pack(0x00003c00, i, 0, shops[shop][sub][i].cost, shops[shop][sub][i].id, shops[shop][sub][i].slot, 0, 0))
+                    
+                elseif (i % size) == (size - 1) then
+                    table.insert(packed[page], ("IHHHH"):pack(shops[shop][sub][i].cost, shops[shop][sub][i].id, shops[shop][sub][i].slot, 0, 0))
+                    page = (page + 1)
+                    
+                else
+                    table.insert(packed[page], ("IHHHH"):pack(shops[shop][sub][i].cost, shops[shop][sub][i].id, shops[shop][sub][i].slot, 0, 0))
+                
+                end
+                
+            end
+            
+            for i,v in ipairs(packed) do
+                windower.packets.inject_incoming(0x03c, table.concat(v,""))
+            end
+            
+        end
+        
+    end
+    
+    self.GreenThumb = function(rank)
+        helpers["actions"].openShop(6)
         
     end
     

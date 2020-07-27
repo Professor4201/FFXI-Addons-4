@@ -23,30 +23,47 @@ end
 globals[2] = function(id,original,modified,injected,blocked)
     
     -- Currencies Menu.
-    if id == 0x113 and commands["currencies"].settings().toggle and helpers["currencies"] ~= nil then
+    if id == 0x113 and helpers["currencies"] ~= nil then
         local p = packets.parse("incoming", original)
-        
-        helpers["currencies"].setCurrency("Sparks",     p["Sparks of Eminence"])
-        helpers["currencies"].setCurrency("Accolades",  p["Unity Accolades"])
-        helpers["currencies"].setCurrency("Ichor",      p["Therion Ichor"])
-        helpers["currencies"].setCurrency("Tokens",     p["Nyzul Tokens"])
-        helpers["currencies"].setCurrency("Voidstones", p["Voidstones"])
-        helpers["currencies"].setCurrency("Zeni",       p["Zeni"])
+
+        helpers["currencies"].setCurrency("Sparks",                 p["Sparks of Eminence"])
+        helpers["currencies"].setCurrency("Accolades",              p["Unity Accolades"])
+        helpers["currencies"].setCurrency("Ichor",                  p["Therion Ichor"])
+        helpers["currencies"].setCurrency("Tokens",                 p["Nyzul Tokens"])
+        helpers["currencies"].setCurrency("Voidstones",             p["Voidstones"])
+        helpers["currencies"].setCurrency("Zeni",                   p["Zeni"])        
+        helpers["currencies"].setCurrency("Fishing (GP)",           p["Guild Points (Fishing)"])
+        helpers["currencies"].setCurrency("Woodworking (GP)",       p["Guild Points (Woodworking)"])
+        helpers["currencies"].setCurrency("Smithing (GP)",          p["Guild Points (Smithing)"])
+        helpers["currencies"].setCurrency("Goldsmithing (GP)",      p["Guild Points (Goldsmithing)"])
+        helpers["currencies"].setCurrency("Clothcraft (GP)",        p["Guild Points (Weaving)"])
+        helpers["currencies"].setCurrency("Leathercraft (GP)",      p["Guild Points (Leathercraft)"])
+        helpers["currencies"].setCurrency("Bonecraft (GP)",         p["Guild Points (Bonecraft)"])
+        helpers["currencies"].setCurrency("Alchemy (GP)",           p["Guild Points (Alchemy)"])
+        helpers["currencies"].setCurrency("Cooking (GP)",           p["Guild Points (Cooking)"])
+        helpers["currencies"].setCurrency("Fire Crystals",          p["Fire Crystals"])
+        helpers["currencies"].setCurrency("Ice Crystals",           p["Ice Crystals"])
+        helpers["currencies"].setCurrency("Wind Crystals",          p["Wind Crystals"])
+        helpers["currencies"].setCurrency("Earth Crystals",         p["Earth Crystals"])
+        helpers["currencies"].setCurrency("Lightning Crystals",     p["Lightning Crystals"])
+        helpers["currencies"].setCurrency("Water Crystals",         p["Water Crystals"])
+        helpers["currencies"].setCurrency("Light Crystals",         p["Light Crystals"])
+        helpers["currencies"].setCurrency("Dark Crystals",          p["Dark Crystals"])
     
     -- Currencies Menu 2.
-    elseif id == 0x118 and commands["currencies"].settings().toggle and helpers["currencies"] ~= nil then
+    elseif id == 0x118 and helpers["currencies"] ~= nil then
         local p = packets.parse("incoming", original)
         
-        helpers["currencies"].setCurrency("Bayld",           p["Bayld"])
-        helpers["currencies"].setCurrency("Plasm",           p["Mweya Plasm Corpuscles"])
-        helpers["currencies"].setCurrency("Imps",            p["Coalition Imprimaturs"])
-        helpers["currencies"].setCurrency("Beads",           p["Escha Beads"])
-        helpers["currencies"].setCurrency("Silt",            p["Escha Silt"])
-        helpers["currencies"].setCurrency("Potpourri",       p["Potpourri"])
-        helpers["currencies"].setCurrency("Hallmarks",       p["Hallmarks"])
-        helpers["currencies"].setCurrency("Gallantry",       p["Badges of Gallantry"])
-        helpers["currencies"].setCurrency("Crafter",         p["Crafter Points"])
-        helpers["currencies"].setCurrency("Silver Vouchers", p["Silver A.M.A.N. Vouchers Stored"])
+        helpers["currencies"].setCurrency("Bayld",                  p["Bayld"])
+        helpers["currencies"].setCurrency("Plasm",                  p["Mweya Plasm Corpuscles"])
+        helpers["currencies"].setCurrency("Imps",                   p["Coalition Imprimaturs"])
+        helpers["currencies"].setCurrency("Beads",                  p["Escha Beads"])
+        helpers["currencies"].setCurrency("Silt",                   p["Escha Silt"])
+        helpers["currencies"].setCurrency("Potpourri",              p["Potpourri"])
+        helpers["currencies"].setCurrency("Hallmarks",              p["Hallmarks"])
+        helpers["currencies"].setCurrency("Gallantry",              p["Badges of Gallantry"])
+        helpers["currencies"].setCurrency("Crafter",                p["Crafter Points"])
+        helpers["currencies"].setCurrency("Silver Vouchers",        p["Silver A.M.A.N. Vouchers Stored"])
         
     end
     
@@ -57,9 +74,8 @@ end
 --------------------------------------------------------------------------------
 globals[3] = function(id,original,modified,injected,blocked)
     
-    -- Incoming Action Event.
-    if id == 0x028  then
-        local p        = packets.parse("incoming", original)
+    if id == 0x028 then 
+        local p        = packets.parse("incoming", modified)
         local actor    = windower.ffxi.get_mob_by_id(p["Actor"])
         local target   = windower.ffxi.get_mob_by_id(p["Target 1 ID"])
         local category = p["Category"]
@@ -78,11 +94,11 @@ globals[3] = function(id,original,modified,injected,blocked)
                 -- Make sure that I am the one using the weaponskill.
                 if actor.name == windower.ffxi.get_mob_by_target("me").name and actor.name == "Uwu" then
                     local random  = math.random(1, 100)
-                    local select  = math.random(1, 005)
-                    local message = {"Dick", "Kick", "right in the", "Bitch", "Nuts", "Tits"}
-                    
-                    if random > 75 then
-                        windower.add_to_chat(10, message[select])
+                    local select  = math.random(1, 010)
+                    local message = {"Dick!", "Kick you", "right in the", "Bitch!", "the nuts", "the tits", "in yo-", "MNK Life!", "Eat White Rice!~", "Catch deez handzzzzzzz!"}
+
+                    if random > 65 and windower.ffxi.get_player().main_job == "MNK" then
+                        helpers["popchat"]:pop(message[select], system["Popchat Window"])
                     end
                     
                 end
@@ -97,10 +113,6 @@ globals[3] = function(id,original,modified,injected,blocked)
                     helpers["queue"].remove({id=65536,en="Ranged",element=-1,prefix="/ra",type="Ranged", range=14}, actor)
                     helpers["actions"].setMidaction(false)
                     system["Next Allowed"] = (os.clock() + delays["Ranged"])
-                    
-                    if helpers["actions"].getLocked() then
-                        helpers["actions"].setLocked(false)
-                    end
                     
                 end
                 
@@ -130,10 +142,6 @@ globals[3] = function(id,original,modified,injected,blocked)
                         helpers["queue"].remove(spell, actor)
                         helpers["actions"].setMidaction(false)
                         system["Next Allowed"] = (os.clock() + delays[spell.type])
-                        
-                        if helpers["actions"].getLocked() then
-                            helpers["actions"].setLocked(false)
-                        end
                     
                     end
                     
@@ -158,10 +166,6 @@ globals[3] = function(id,original,modified,injected,blocked)
                     helpers["actions"].setMidaction(false)
                     system["Next Allowed"] = (os.clock() + delays["Item"])
                     
-                    if helpers["actions"].getLocked() then
-                        helpers["actions"].setLocked(false)
-                    end
-                    
                     --Timestamp items with cooldowns.
                     if res.items[param] then
                         local item = res.items[param]
@@ -177,12 +181,14 @@ globals[3] = function(id,original,modified,injected,blocked)
             -- Use Job Ability.
             elseif p["Category"] == 6 then
                 local rolls = res.job_abilities:type("CorsairRoll")
+                local runes = res.job_abilities:type("Rune")
                 
                 -- Set Enmity Target.
                 helpers["target"].setPlayerEnmity(actor, target)
                 
                 -- Make sure that I am using the ability.
                 if actor.name == windower.ffxi.get_mob_by_target("me").name then
+                    local player = windower.ffxi.get_player()
                     local action = bpcore:buildAction(category, param)
                     local delay  = bpcore:getActionDelay(action)
                     
@@ -192,8 +198,12 @@ globals[3] = function(id,original,modified,injected,blocked)
                     helpers["queue"].remove(res.job_abilities[param], actor)
                     helpers["actions"].setMidaction(false)
                     
-                    if rolls[param] then
-                        helpers["rolls"].setRolling(res.job_abilities[param].en, p["Target 1 Action 1 Param"])                        
+                    if player.main_job == "COR" and rolls[param] then
+                        helpers["rolls"].setRolling(rolls[param].en, p["Target 1 Action 1 Param"])
+                    
+                    elseif player.main_job == "RUN" and runes[param] and helpers["runes"].getBuff(runes[param].en) and helpers["runes"].valid(helpers["runes"].getBuff(runes[param].en).id) then
+                        helpers["runes"].add(helpers["runes"].getBuff(runes[param].en).id)                        
+                    
                     end
                     
                 end
@@ -220,6 +230,7 @@ globals[3] = function(id,original,modified,injected,blocked)
                         system["Next Allowed"] = (os.clock() + 0.8)
                     end
                     
+                    
                 end
                 
             -- Begin Spell Casting.
@@ -240,17 +251,9 @@ globals[3] = function(id,original,modified,injected,blocked)
                         helpers["actions"].setMidaction(true)
                         system["Next Allowed"] = (os.clock() + delay)
                         
-                        if system["Spell Interrupt"]:current() then
-                            helpers["actions"].lockPosition(me.x, me.y, me.z)
-                        end
-                        
                     elseif param == 28787 then
                         helpers["actions"].setMidaction(false)
                         system["Next Allowed"] = (os.clock() + 0.8)
-                        
-                        if helpers["actions"].getLocked() then
-                            helpers["actions"].setLocked(false)
-                        end
                         
                     end
                     
@@ -274,10 +277,6 @@ globals[3] = function(id,original,modified,injected,blocked)
                     elseif param == 28787 then
                         helpers["actions"].setMidaction(false)
                         system["Next Allowed"] = (os.clock() + 0.8)
-                        
-                        if helpers["actions"].getLocked() then
-                            helpers["actions"].setLocked(false)
-                        end
                         
                     end
                     
@@ -306,10 +305,6 @@ globals[3] = function(id,original,modified,injected,blocked)
                         
                         helpers["actions"].setMidaction(true)
                         system["Next Allowed"] = (os.clock() + delay)
-                        
-                        if system["Spell Interrupt"]:current() then
-                            helpers["actions"].lockPosition(me.x, me.y, me.z)
-                        end
                     
                     elseif param == 28787 then
                         helpers["actions"].setMidaction(false)
@@ -371,43 +366,36 @@ globals[3] = function(id,original,modified,injected,blocked)
                 end
                 
             end    
-    
+        
         end
-    
+        
     end
     
 end
 
 --------------------------------------------------------------------------------
--- For Farmer tool.
+-- Pet Status Update.
 --------------------------------------------------------------------------------
 globals[4] = function(id,original,modified,injected,blocked)
-    --[[
-    if id == 0x00e then
-        local p = packets.parse("incoming", original)
-        
-        if p and p["NPC"] then
-            local zone       = windower.ffxi.get_info().zone
-            local npc_info   = helpers["npcupdater"]:build(original)
-            local display    = npc_info.mbits:sub(6,6)
-            local status     = {[0]=true,[1]=true,[2]=false,[3]=false}
-            local mob_id     = tonumber(npc_info.npc)
-            local mob_status = tonumber(npc_info.status)
-            
-            -- Handle mobs in range.
-            if windower.ffxi.get_mob_by_id(mob_id) and display == "0" and status[mob_status] then
-                local mob = windower.ffxi.get_mob_by_id(mob_id)
-                --helpers["farmer"].addMob(mob)
-                
-            elseif (display == "1" or not status[mob_status]) then
-                --helpers["farmer"].removeMob(mob_id)
-                
-            end
-        
-        end
     
+    if id == 0x068 then
+        local pet = windower.ffxi.get_mob_by_target("pet") or false
+        
+        if pet then
+            local hpp    = original:unpack("C", 0x0e+1)
+            local mpp    = original:unpack("C", 0x0f+1)
+            local tp     = original:unpack("I", 0x10+1)
+            local target = original:unpack("I", 0x14+1)
+            
+            system["Pet"] = {hpp=hpp, mpp=mpp, tp=tp, target=target}
+            
+        elseif not pet then
+            system["Pet"] = {hpp=0, mpp=0, tp=0, target=0}
+            
+        end
+        
     end
-    ]]--
+    
 end
 
 --------------------------------------------------------------------------------
@@ -416,77 +404,40 @@ end
 globals[5] = function(id,original,modified,injected,blocked)
     
     if id == 0x00e then
-        local p   = packets.parse("incoming", original)
-        local npc = p["NPC"]
+        local p = packets.parse("incoming", original)
         
-        if p and npc and helpers["npcupdater"] ~= nil then
+        if helpers["resourcer"] ~= nil and helpers["resourcer"].isEnabled() then
             
-            local zone       = windower.ffxi.get_info().zone
-            local npc_info   = helpers["npcupdater"]:build(original)
-            local display    = npc_info.mbits:sub(6,6)
-            local status     = {[0]=true,[1]=true,[2]=false,[3]=false}
-            local mob_id     = tonumber(npc_info.npc)
-            local mob_status = tonumber(npc_info.status)
-            local bit_data   = {
+            local zone   = windower.ffxi.get_info().zone
+            local player = windower.ffxi.get_player() or false
+            local mob    = windower.ffxi.get_mob_by_id(p["NPC"]) or false
+            local update = helpers["bits"].unpack(0x0a, 8, original)
+            local update_types = {
                 
-                ["despawn"] = "00000100",
-                ["status"]  = "11110000",
+                despawn = "00000100",
+                spawn   = "11110000",
                 
             }
             
-            if helpers["helm"] ~= nil and helpers["helm"].getToggle() and not helpers["helm"].getFlag("gathering") and helpers["actions"].getLocked() then
-                local x, y, z = p["X"], p["Y"], p["Z"]
-                local nodes   = helpers["helm"].getNodes()
-                local round   = helpers["helm"].getRound()
-                local max     = #nodes
-                
-                if npc_info.mbits == bit_data.status and (p["Name"]:match("Logging") or p["Name"]:match("Mining") or p["Name"]:match("Harvesting")) then
-                    
-                    if x and y and z then
-                        helpers["actions"].lockPosition(x, y, z)
-                        
-                        if npc and gather[npc] then
-                            helpers["helm"].setCurrentNode(gather[npc])
-                            helpers["helm"].setFlag("gathering", true)
-                        
-                        elseif not gather[npc] then
-                            helpers["helm"].setFlag("gathering", false)
-                            helpers["helm"].setRound(round+1)
-                            
-                            if round > max then
-                                helpers["helm"].setRound(1)
-                            end  
-                        
-                        end
-                        helpers["helm"].setTimer(os.clock())
-                        
-                    end
-                    
-                end
+            if player and mob and update and player.name == "Eliidyr" then
             
-            end
-            
-            if system["Player"].name == "Eliidyr" then
-            
-                -- Handle mobs in range.
-                if windower.ffxi.get_mob_by_id(mob_id) and npc_info.mbits ~= "11110000" then
-                    local mob = windower.ffxi.get_mob_by_id(mob_id)
+                if update == update_types.spawn then
                     
-                    if mob.name:match("Home Point") then
+                    if (mob.name):match("Home Point") then
                         
                         if not warps["homepoints"][mob.id] then
                             warps["homepoints"][mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z, size=mob.model_size, scale=mob.model_scale, option=0, menu=0, _u1=0, _u2=0}
                             bpcore:writeSettings(("/bp/resources/homepoints/"..zone.."/homepoints"), warps["homepoints"])
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
     
-                    elseif mob.name:match("Survival Guide") then
+                    elseif (mob.name):match("Survival Guide") then
                         
                         if not warps["guides"][mob.id] then
                             warps["guides"][mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z, size=mob.model_size, scale=mob.model_scale, option=0, menu=0, _u1=0, _u2=0}
                             bpcore:writeSettings(("/bp/resources/guides/"..zone.."/guides"), warps["guides"])
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
                         
@@ -495,7 +446,7 @@ globals[5] = function(id,original,modified,injected,blocked)
                         if not warps["proto"][mob.id] then
                             warps["proto"][mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z, size=mob.model_size, scale=mob.model_scale, option=0, menu=0, _u1=0, _u2=0}
                             bpcore:writeSettings(("/bp/resources/proto/"..zone.."/proto"), warps["proto"])
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
                         
@@ -504,7 +455,7 @@ globals[5] = function(id,original,modified,injected,blocked)
                         if not warps["vw"][mob.id] then
                             warps["vw"][mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z, size=mob.model_size, scale=mob.model_scale, option=0, menu=0, _u1=0, _u2=0}
                             bpcore:writeSettings(("/bp/resources/vw/"..zone.."/vw"), warps["vw"])
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
                     
@@ -513,7 +464,7 @@ globals[5] = function(id,original,modified,injected,blocked)
                         if not warps["conflux"][mob.id] then
                             warps["conflux"][mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z, size=mob.model_size, scale=mob.model_scale, option=0, menu=0, _u1=0, _u2=0}
                             bpcore:writeSettings(("/bp/resources/conflux/"..zone.."/conflux"), warps["conflux"])
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
                         
@@ -522,7 +473,7 @@ globals[5] = function(id,original,modified,injected,blocked)
                         if not warps["unity"][mob.id] then
                             warps["unity"][mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z, size=mob.model_size, scale=mob.model_scale, option=0, menu=0, _u1=0, _u2=0}
                             bpcore:writeSettings(("/bp/resources/unity/"..zone.."/unity"), warps["unity"])
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
                     
@@ -531,7 +482,7 @@ globals[5] = function(id,original,modified,injected,blocked)
                         if not warps["abyssea"][mob.id] then
                             warps["abyssea"][mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z, size=mob.model_size, scale=mob.model_scale, option=0, menu=0, _u1=0, _u2=0}
                             bpcore:writeSettings(("/bp/resources/abyssea/"..zone.."/abyssea"), warps["abyssea"])
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
                     
@@ -540,7 +491,7 @@ globals[5] = function(id,original,modified,injected,blocked)
                         if not warps["escha"][mob.id] then
                             warps["escha"][mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z, size=mob.model_size, scale=mob.model_scale, option=0, menu=0, _u1=0, _u2=0}
                             bpcore:writeSettings(("/bp/resources/escha/"..zone.."/escha"), warps["escha"])
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
                     
@@ -549,7 +500,7 @@ globals[5] = function(id,original,modified,injected,blocked)
                         if not warps["waypoints"][mob.id] then
                             warps["waypoints"][mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z, size=mob.model_size, scale=mob.model_scale, option=0, menu=0, _u1=0, _u2=0}
                             bpcore:writeSettings(("bp/resources/waypoints/"..zone.."/waypoints"), warps["waypoints"])
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
                         
@@ -558,7 +509,7 @@ globals[5] = function(id,original,modified,injected,blocked)
                         if not gather[mob.id] then
                             gather[mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z}
                             bpcore:writeSettings(("bp/resources/gather/"..zone.."/gather"), gather)
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
                         
@@ -567,7 +518,7 @@ globals[5] = function(id,original,modified,injected,blocked)
                         if not npcs[mob.id] then
                             npcs[mob.id] = {name=mob.name, id=mob.id, index=mob.index, x=mob.x, y=mob.y, z=mob.z, size=mob.model_size, scale=mob.model_scale}
                             bpcore:writeSettings(("bp/resources/npc/"..zone.."/npc"), npcs)
-                            helpers["popchat"]:pop(mob.name .. " added to resources!", system["Popchat Window"])
+                            helpers["popchat"]:pop(string.format("%s added to resources!", mob.name):upper(), system["Popchat Window"])
                             
                         end
                     
@@ -589,40 +540,29 @@ end
 globals[6] = function(id,original,modified,injected,blocked)
     
     if id == 0x037 then
+        local p = packets.parse("incoming", original)
+        local timestamp = original:unpack("I", 0x40+1)
         
         -- Store data.
         system["I: 0x037 Data"] = original
-        helpers["speed"].setData(original)
-        
-        -- Unknowns.
-        local _u3  = T{ original:unpack("b8", 0x44+1) }
-        local mask = T{ original:unpack("b8", 0x4C+1) }
-        local _u4  = T{ original:unpack("b4", 0x54+1) }
         
         if system["Fast Synth"] then
             system["Finish Synth"] = true
         end
         
-        -- Local variables
-        local p = packets.parse("incoming", original)
-        local maintenance = commands["mode"].settings().toggle
-        local timestamp   = original:unpack("I", 0x40+1)
-        local speed       = helpers["speed"].getSpeed()
-        
-        -- Unlock character position if killed.
-        if helpers["actions"].getLocked() and (p["Status"] == 2 or p["Status"] == 3) then
-            helpers["actions"].setLocked(false)
+        if helpers["speed"] ~= nil then
+            helpers["speed"].setData(original)
         end
         
-        if maintenance then
-            return original:sub(1, 44)..("C"):pack(speed)..original:sub(46,48)..("C"):pack(31)..original:sub(50)
+        if helpers["speed"] ~= nil and commands["mode"] ~= nil and commands["mode"].getMode() then
+            return original:sub(1, 44)..("C"):pack(helpers["speed"].getSpeed())..original:sub(46,48)..("C"):pack(31)..original:sub(50)
         
         elseif system["Fast Synth"] then
-            local timestamp = original:unpack("I", 0x40+1)
-            local update    = original:sub(1,64)..("I"):pack(timestamp - 100)..original:sub(69)
+            --local timestamp = original:unpack("I", 0x40+1)
+            --local update    = original:sub(1,64)..("I"):pack(timestamp - 100)..original:sub(69)
         
         else
-            return original:sub(1, 44)..("C"):pack(speed)..original:sub(46)
+            return original:sub(1, 44)..("C"):pack(helpers["speed"].getSpeed())..original:sub(46)
         
         end
         
@@ -645,7 +585,6 @@ globals[7] = function(id,original,modified,injected,blocked)
         local p           = packets.parse("incoming", original)
         local me          = windower.ffxi.get_mob_by_target("me")
         local index       = original:unpack("H", 0x08+1)
-        local speed       = helpers["speed"].getSpeed()
         local despawn     = p["Despawn"]
         local status      = p["Status"]
         
@@ -653,8 +592,13 @@ globals[7] = function(id,original,modified,injected,blocked)
             helpers["status"].removePlayer(p["Player"])
         end
         
-        if helpers["speed"].getEnabled() and index == me.index then
-            return original:sub(1, 44)..("C"):pack(speed)..original:sub(46)            
+        -- Check if speed helper is enabled.
+        if helpers["speed"] ~= nil and helpers["speed"].getEnabled() and index == me.index then
+            return original:sub(1,28)..("C"):pack(helpers["speed"].getSpeed())..original:sub(30)
+            
+        else
+            return original
+            
         end
         
     end
@@ -693,132 +637,119 @@ end
 globals[9] = function(id,original,modified,injected,blocked)
     
     if id == 0x032 or id == 0x034 then
-        local p    = packets.parse("incoming", original)
-        local node = helpers["helm"].getCurrentNode()
-
-        if helpers["megawarp"].getStatus() == "homepoints" then
-            local nearest = helpers["megawarp"].getNearest()
-            local options = helpers["megawarp"].getOptions()
-            
-            if nearest and options then
-                helpers["actions"].doHomepoint(p, nearest, options.unknown1)
-            
-            end
-            helpers["megawarp"].setStatus(false)
-            return true
+        local p = packets.parse("incoming", original)
         
-        elseif helpers["megawarp"].getStatus() == "survivalguides" then
-            local nearest = helpers["megawarp"].getNearest()
-            local options = helpers["megawarp"].getOptions()
+        if helpers["megawarp"] ~= nil then
+        
+            if helpers["megawarp"].getStatus() == "homepoints" then
+                local nearest = helpers["megawarp"].getNearest()
+                local options = helpers["megawarp"].getOptions()
+                
+                if nearest and options then
+                    helpers["actions"].doHomepoint(p, nearest, options.unknown1)
+                
+                end
+                helpers["megawarp"].setStatus(false)
+                return true
             
-            if nearest and options then
-                helpers["actions"].doSurvivalguide(p, nearest, options.option)
+            elseif helpers["megawarp"].getStatus() == "survivalguides" then
+                local nearest = helpers["megawarp"].getNearest()
+                local options = helpers["megawarp"].getOptions()
+                
+                if nearest and options then
+                    helpers["actions"].doSurvivalguide(p, nearest, options.option)
+                    
+                end
+                helpers["megawarp"].setStatus(false)
+                return true
+            
+            elseif helpers["megawarp"].getStatus() == "waypoints" then
+                local nearest = helpers["megawarp"].getNearest()
+                local options = helpers["megawarp"].getOptions()
+                
+                if nearest and options then
+                    helpers["actions"].doWaypoint(p, nearest, options.x, options.y, options.z, options.option, options.zone)
+                
+                end
+                helpers["megawarp"].setStatus(false)
+                return true
+            
+            elseif helpers["megawarp"].getStatus() == "proto" then
+                local nearest = helpers["megawarp"].getNearest()
+                local options = helpers["megawarp"].getOptions()
+    
+                if nearest and options then
+                    helpers["actions"].doProtoWP(p, nearest, options.option)
+                end
+                helpers["megawarp"].setStatus(false)
+                return true
+            
+            elseif helpers["megawarp"].getStatus() == "voidwatch" then
+                local nearest = helpers["megawarp"].getNearest()
+                local options = helpers["megawarp"].getOptions()
+                
+                if nearest and options then
+                    helpers["actions"].doVoidwatch(p, nearest, options.option)
+                
+                end
+                helpers["megawarp"].setStatus(false)
+                return true
+            
+            elseif helpers["megawarp"].getStatus() == "unity" then
+                local nearest = helpers["megawarp"].getNearest()
+                local options = helpers["megawarp"].getOptions()
+                
+                if nearest and options then
+                    helpers["actions"].doUnity(p, nearest, options.option)
+                
+                end
+                helpers["megawarp"].setStatus(false)
+                return true
+            
+            elseif helpers["megawarp"].getStatus() == "abyssea" then
+                local nearest = helpers["megawarp"].getNearest()
+                local options = helpers["megawarp"].getOptions()
+                local zone    = helpers["megawarp"].getNextZone()
+                
+                if nearest and options and zone ~= "*" then
+                    helpers["actions"].doAbyssea(p, nearest, options.option)
+                    
+                else
+                    helpers["actions"].doEntrance(p, nearest)
+                    
+                end
+                helpers["megawarp"].setStatus(false)
+                return true
+            
+            elseif helpers["megawarp"].getStatus() == "escha" then
+                local nearest = helpers["megawarp"].getNearest()
+                local options = helpers["megawarp"].getOptions()
+                local zone    = helpers["megawarp"].getNextZone()
+                
+                if nearest and options and zone ~= "*" then
+                    helpers["actions"].doEscha(p, nearest, options.x, options.y, options.z, options.option, options.zone)
+                    
+                else
+                    helpers["actions"].doEntrance(p, nearest)
+                    
+                end
+                helpers["megawarp"].setStatus(false)
+                return true
+            
+            elseif helpers["megawarp"].getStatus() == "conflux" then
+                local nearest = helpers["megawarp"].getNearest()
+                local options = helpers["megawarp"].getOptions()
+                local zone    = helpers["megawarp"].getNextZone()
+                
+                if nearest and options and zone ~= "*" then
+                    helpers["actions"].doConflux(p, nearest, options.x, options.y, options.z, options.option, options.zone)
+                    
+                end
+                helpers["megawarp"].setStatus(false)
+                return true
                 
             end
-            helpers["megawarp"].setStatus(false)
-            return true
-        
-        elseif helpers["megawarp"].getStatus() == "waypoints" then
-            local nearest = helpers["megawarp"].getNearest()
-            local options = helpers["megawarp"].getOptions()
-            
-            if nearest and options then
-                helpers["actions"].doWaypoint(p, nearest, options.x, options.y, options.z, options.option, options.zone)
-            
-            end
-            helpers["megawarp"].setStatus(false)
-            return true
-        
-        elseif helpers["megawarp"].getStatus() == "proto" then
-            local nearest = helpers["megawarp"].getNearest()
-            local options = helpers["megawarp"].getOptions()
-
-            if nearest and options then
-                helpers["actions"].doProtoWP(p, nearest, options.option)
-            end
-            helpers["megawarp"].setStatus(false)
-            return true
-        
-        elseif helpers["megawarp"].getStatus() == "voidwatch" then
-            local nearest = helpers["megawarp"].getNearest()
-            local options = helpers["megawarp"].getOptions()
-            
-            if nearest and options then
-                helpers["actions"].doVoidwatch(p, nearest, options.option)
-            
-            end
-            helpers["megawarp"].setStatus(false)
-            return true
-        
-        elseif helpers["megawarp"].getStatus() == "unity" then
-            local nearest = helpers["megawarp"].getNearest()
-            local options = helpers["megawarp"].getOptions()
-            
-            if nearest and options then
-                helpers["actions"].doUnity(p, nearest, options.option)
-            
-            end
-            helpers["megawarp"].setStatus(false)
-            return true
-        
-        elseif helpers["megawarp"].getStatus() == "abyssea" then
-            local nearest = helpers["megawarp"].getNearest()
-            local options = helpers["megawarp"].getOptions()
-            local zone    = helpers["megawarp"].getNextZone()
-            
-            if nearest and options and zone ~= "*" then
-                helpers["actions"].doAbyssea(p, nearest, options.option)
-                
-            else
-                helpers["actions"].doEntrance(p, nearest)
-                
-            end
-            helpers["megawarp"].setStatus(false)
-            return true
-        
-        elseif helpers["megawarp"].getStatus() == "escha" then
-            local nearest = helpers["megawarp"].getNearest()
-            local options = helpers["megawarp"].getOptions()
-            local zone    = helpers["megawarp"].getNextZone()
-            
-            if nearest and options and zone ~= "*" then
-                helpers["actions"].doEscha(p, nearest, options.x, options.y, options.z, options.option, options.zone)
-                
-            else
-                helpers["actions"].doEntrance(p, nearest)
-                
-            end
-            helpers["megawarp"].setStatus(false)
-            return true
-        
-        elseif helpers["megawarp"].getStatus() == "conflux" then
-            local nearest = helpers["megawarp"].getNearest()
-            local options = helpers["megawarp"].getOptions()
-            local zone    = helpers["megawarp"].getNextZone()
-            
-            if nearest and options and zone ~= "*" then
-                helpers["actions"].doConflux(p, nearest, options.x, options.y, options.z, options.option, options.zone)
-                
-            end
-            helpers["megawarp"].setStatus(false)
-            return true
-        
-        elseif helpers["helm"].getFlag("gathering") then
-            local node  = helpers["helm"].getCurrentNode()
-            local round = helpers["helm"].getRound()
-            local max   = #helpers["helm"].getNodes()
-            
-            helpers["helm"].setFlag("gathering", false)
-            helpers["helm"].setRound(round+1)
-            helpers["actions"].setLocked(false)
-            helpers["helm"].setTimer(os.clock())
-            
-            if round >= max then
-                helpers["helm"].setRound(1)
-            end
-            
-        else
-            helpers["megawarp"].setStatus(false)
+            helpers["megawarp"].setStatus(false)         
             
         end
         
@@ -1088,7 +1019,7 @@ globals[10] = function(id,original,modified,injected,blocked)
                 
                 for i,v in ipairs(unpacked) do
                     
-                    if (i < 2 or i > 10) then
+                    if (i < 2 or i > 12) then
                         packed[i] = ("C"):pack(unpacked[i])
                     else
                         packed[i] = ("C"):pack(255)
@@ -1208,13 +1139,27 @@ globals[10] = function(id,original,modified,injected,blocked)
                 windower.packets.inject_incoming(0x034, original:sub(1,8)..table.concat(packed,"")..original:sub(41))
                 return true
                 
-            else
-                return original
+            -- Escha NPCs.
+            elseif npc and (npc.name == "Affi" or npc.name == "Dremi" or npc.name == "Shiftrix") then
+                local unpacked = { original:sub(9,40):unpack("C32") }
+                local packed   = {}
+                
+                for i,v in ipairs(unpacked) do
+                    
+                    if (i < 5 or i > 10) then
+                        packed[i] = ("C"):pack(unpacked[i])
+                    else
+                        packed[i] = ("C"):pack(5)
+                    end
+                    
+                end
+                windower.packets.inject_incoming(0x034, original:sub(1,8)..table.concat(packed,"")..original:sub(41))
+                return true
                 
             end
         
         -- Rytaal (Assualt NPC).
-        elseif npc and npc.name == "Rytaal" then
+        elseif helpers["assaults"] ~= nil and npc and npc.name == "Rytaal" then
             helpers["assaults"].setTags(original)
         
         else
@@ -1250,10 +1195,6 @@ globals[11] = function(id,original,modified,injected,blocked)
         elseif helpers["zincore"].getInjecting() then
             helpers["zincore"].handleMenus(p)
             return true
-        
-        elseif helpers["helm"].getFlag("injecting") then
-            helpers["helm"].purchase(p)
-            helpers["helm"].setFlag("injecting", false)
             
         elseif helpers["crystals"].getFlag() then
             local target   = windower.ffxi.get_mob_by_target("t") or false
@@ -1285,14 +1226,30 @@ globals[11] = function(id,original,modified,injected,blocked)
                 return original
                 
             end
+        
+        elseif helpers["kits"] ~= nil and helpers["kits"].getInjecting() then
+            local target = windower.ffxi.get_mob_by_target("t") or false
+            local kit = helpers["kits"].getKit()
+            local quantity = helpers["kits"].getQuantity()
             
+            if target and kit and quantity and tonumber(kit) ~= nil and tonumber(quantity) ~= nil then
+                helpers["kits"].purchase(p, target, kit, quantity)
+                helpers["kits"].setInjecting(false)
+                return true
+            
+            else
+                helpers["kits"].setInjecting(false)
+                return original
+                
+            end
+        
         else
             helpers["ciphers"].setInjecting(false)
             helpers["sparks"].setInjecting(false)
             helpers["millioncorn"].setInjecting(false)
             helpers["zincore"].setInjecting(false)
-            helpers["helm"].setFlag("injecting", false)
             helpers["crystals"].setFlag(false)
+            helpers["kits"].setInjecting(false)
             return original
         
         end
@@ -1402,11 +1359,28 @@ globals[16] = function(id,original,modified,injected,blocked)
         local menus = commands["menus"].settings().toggle
         local name  = commands["menus"].getNPC()
         
-        
         if menus then
+            local p = packets.parse("incoming", original)
+            local menu = { original:sub(5,36):unpack("C32") }
 
+            -- Escha NPCs.
+            if (name == "Affi" or name == "Dremi" or name == "Shiftrix") then
+                local unpacked = { original:sub(9,40):unpack("C32") }
+                local packed   = {}
+                
+                for i,v in ipairs(unpacked) do
+                    
+                    if (i < 2 or i > 32) then
+                        packed[i] = ("C"):pack(unpacked[i])
+                    else
+                        packed[i] = ("C"):pack(1)
+                    end
+                    
+                end
+                return original:sub(1,4)..table.concat(packed,"")
+            
             -- HTBF.
-            if name and (name == "Raving Opossum" or name == "Trisvain" or name == "Mimble-Pimble") then
+            elseif name and (name == "Raving Opossum" or name == "Trisvain" or name == "Mimble-Pimble") then
                 local menus1 = bpcore:adjustNPCMenu(original:sub(1,9),   9,  9, 255)
                 local menus2 = bpcore:adjustNPCMenu(original:sub(10,10), 1,  1, 255)
                 local menus3 = bpcore:adjustNPCMenu(original:sub(11,36), 26, 1, 255)
@@ -1545,9 +1519,8 @@ globals[21] = function(id,original,modified,injected,blocked)
         
         if system["Fast Synth"] and system["Finish Synth"] then
             
-            if item then
-                local message = string.format("You successfully synthesized a %s", res.items[item].name)
-                windower.add_to_chat(10, message)
+            if item and res.items[item] then
+                helpers["popchat"]:pop(string.format("You successfully synthesized a %s", res.items[item].name), system["Popchat Window"])
             
                 if result == 14 then
                     local packed = ("iCCCCHHHHHHHHHCCCCCCCCH"):pack(0x00006f08, success, quality, count, _junk1, item, lost1, lost2, lost3, lost4, lost5, lost6, lost7, lost8, skill1, skill2, skill3, skill4, up1, up2, up3, up4, crystal):append(extra)
@@ -1623,9 +1596,6 @@ globals[26] = function(id,original,modified,injected,blocked)
         local param3   = original:unpack("I", 0x10+1)
         local param4   = original:unpack("I", 0x14+1)
         local message  = original:unpack("b16", 0x1A+1)
-        local node     = helpers["helm"].getCurrentNode()
-        local round    = helpers["helm"].getRound()
-        local max      = #helpers["helm"].getNodes()
         local messages = {
             
             [39156] = "You found an item!",
@@ -1636,21 +1606,6 @@ globals[26] = function(id,original,modified,injected,blocked)
             [40291] = "You're out of range!",            
             
         }
-        
-        if message and message ~= 40291 and helpers["helm"].getFlag("gathering") then
-            helpers["helm"].setTimer(os.clock())
-            
-        elseif message == 40291 and helpers["helm"].getFlag("gathering") then
-            helpers["helm"].setFlag("gathering", false)
-            helpers["helm"].setRound(round+1)
-            helpers["actions"].setLocked(false)
-            helpers["helm"].setTimer(os.clock())
-            
-            if round >= max then
-                helpers["helm"].setRound(1)
-            end
-            
-        end
         
     end
 
@@ -1664,43 +1619,6 @@ globals[27] = function(id,original,modified,injected,blocked)
     if id == 0x036 then
         local actor    = original:unpack("I", 0x04+1)
         local message  = original:unpack("b15", 0x0A+1)
-        
-        if helpers["helm"].getFlag("gathering") then
-            local node  = helpers["helm"].getCurrentNode()
-            local round = helpers["helm"].getRound()
-            local max   = #helpers["helm"].getNodes()
-            local messages = {
-            
-                [6993] = string.format("%s is out of range.", node.id),
-                [7258] = "You're currently fatigued.",
-            
-            }
-
-            if actor == node.id then
-                
-                -- Gathering point is out of range.
-                if message == 6993 then
-                    helpers["helm"].setFlag("gathering", false)
-                    helpers["helm"].setRound(round+1)
-                    helpers["actions"].setLocked(false)
-                    helpers["helm"].setTimer(os.clock())
-                    
-                    if round >= max then
-                        helpers["helm"].setRound(1)
-                    end
-                
-                elseif message == 7258 then
-                    --helpers["helm"].setFlag("fatigue", helpers["helm"].getFlag("fatigue")+1)
-                    helpers["helm"].setFlag("gathering", false)
-                    helpers["actions"].setLocked(false)
-                    helpers["helm"].setTimer(os.clock()+900)
-                    --helpers["helm"].mode()
-                
-                end
-                
-            end
-            
-        end
         
     end
 
@@ -1716,6 +1634,61 @@ globals[28] = function(id,original,modified,injected,blocked)
         --print(res.items[item].en)
     end
 
+end
+
+--------------------------------------------------------------------------------
+-- Bazaar Listings.
+--------------------------------------------------------------------------------
+globals[29] = function(id,original,modified,injected,blocked)
+    
+    if id == 0x105 then
+        
+        if helpers["discord"] ~= nil then
+            helpers["discord"].add(original)
+        end
+        
+    end
+
+end
+
+--------------------------------------------------------------------------------
+-- Bazaar Item Purchased.
+--------------------------------------------------------------------------------
+globals[30] = function(id,original,modified,injected,blocked)
+    
+    if id == 0x10a then
+        
+        if helpers["discord"] ~= nil then
+            helpers["discord"].remove(original)
+        end
+        
+    end
+
+end
+
+--------------------------------------------------------------------------------
+-- Knock Back Blocker.
+--------------------------------------------------------------------------------
+globals[31] = function(id,original,modified,injected,blocked)
+    
+    if id == 0x028 then
+        local bits    = helpers["bits"]
+        local data    = bits.unpack(0x00, (original:length()*8), original)
+        local actor   = data:sub(40, 71):reverse()
+        local stagger = data:sub(208, 215):reverse()
+        local block   = ""
+        
+        for i=1, stagger:length() do
+            if i < 2 then
+                block = (block..0)
+            else
+                block = (block..stagger:sub(i,i))
+            end
+        end
+        --return original:sub(1,26)..("b8"):pack(bits.tonumber(block:reverse()))..original:sub(28)
+    
+    end
+    
 end
 
 return globals

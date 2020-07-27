@@ -7,7 +7,7 @@ local core = {}
 function core.get()
     self = {}
     
-    -- Master Settings
+    -- MASTER SETTINGS.
     local settings = {}
     settings["AM"]                                 = I{false,true}
     settings["AM THRESHOLD"]                       = I{3000,2000,1000}
@@ -21,7 +21,8 @@ function core.get()
     settings["DEBUFFS"]                            = I{false,true}
     settings["STATUS"]                             = I{false,true}
     settings["WS"]                                 = I{false,true}
-    settings["WSNAME"]                             = "Moonlight"
+    settings["WSNAME"]                             = "Resolution"
+    settings["RANGED WS"]                          = "N/A"
     settings["TP THRESHOLD"]                       = 1000
     settings["SC"]                                 = I{false,true}
     settings["BURST"]                              = I{false,true}
@@ -32,12 +33,12 @@ function core.get()
     settings["STUNS"]                              = I{false,true}
     settings["TANK MODE"]                          = I{false,true}
     settings["SUPER-TANK"]                         = I{false,true}
-    settings["HASSO MODE"]                         = I{true,false}
-    settings["SEKKA"]                              = "Upheaval"
+    settings["SEKKA"]                              = "Resolution"
     settings["SHADOWS"]                            = I{false,true}
     settings["FOOD"]                               = I{"Sublime Sushi","Sublime Sushi +1"}
     settings["SAMBAS"]                             = I{"Drain Samba II","Haste Samba"}
     settings["STEPS"]                              = I{"Quickstep","Box Step","Stutter Step"}
+    settings["RUNES"]                              = {rune1="",rune2="",rune3=""}
     settings["RUNE1"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
     settings["RUNE2"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
     settings["RUNE3"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
@@ -66,11 +67,24 @@ function core.get()
     settings["ETARGET"]                            = system["Main Character"]
     settings["BUBBLE BUFF"]                        = I{"Ecliptic Attrition","Lasting Emanation"}
     settings["BOOST"]                              = I{false,true}
-    settings["MYRKR"]                              = I{false,true}
+    settings["PET"]                                = I{false,true}
     settings["SPIRITS"]                            = T{"Light Spirit","Fire Spirirt","Ice Spirit","Air Spirit","Earth Spirit","Thunder Spirit","Water Spirit","Dark Spirit"}
     settings["SUMMON"]                             = I{"Carbuncle","Cait Sith","Ifrit","Shiva","Garuda","Titan","Ramuh","Leviathan","Fenrir","Diabolos","Siren"}
     settings["BPRAGE"]                             = I{false,true}
     settings["BPWARD"]                             = I{false,true}
+    settings["ROTATE"]                             = I{false,true}
+    settings["AUTO SIC"]                           = I{false,true}
+    settings["AOEHATE"]                            = I{false,true}
+    settings["EMBOLDEN"]                           = I{"Palanx","Temper","Regen IV"}
+    settings["BLU MODE"]                           = I{"DPS","NUKE"}
+    settings["MIGHTY GUARD"]                       = I{true,false}
+    settings["CHIVALRY"]                           = I{1000,1500,2000,2500,3000}
+    settings["WEATHER"]                            = I{"Firestorm","Hailstorm","Windstorm","Sandstorm","Thunderstorm","Rainstorm","Voidstorm","Aurorastorm"}
+    settings["ARTS"]                               = I{1,2,3}
+    settings["MISERY"]                             = I{false,true}
+    settings["IMPETUS WS"]                         = "Raging Fists"
+    settings["FOORWORK WS"]                        = "Tornado Kick"
+    settings["DEFAULT WS"]                         = "Howling Fist"
     
     -- DEBUFFS.
     settings["SPELLS"]={
@@ -124,7 +138,7 @@ function core.get()
         ["Leviathan"]       = I{"Spinning Dive","Grand Fall"},
         ["Fenrir"]          = I{"Eclipse Bite","Lunar Bay","Impact"},
         ["Diabolos"]        = I{"Nether Blast","Night Terror","Blindside"},
-        ["Siren"]           = I{},
+        ["Siren"]           = I{"Sonic Buffet","Hysteric Assault"},
         
     }
     
@@ -141,7 +155,7 @@ function core.get()
         ["Leviathan"]       = I{"Spring Water","Soothing Current"},
         ["Fenrir"]          = I{"Lunar Cry","Lunar Growl","Ecliptic Growl","Ecliptic Howl"},
         ["Diabolos"]        = I{"Dream Shroud","Noctoshield"},
-        ["Siren"]           = I{},
+        ["Siren"]           = I{"Chinook","Bitter Elegy","Wind's Blessing"},
         
     }
     
@@ -173,11 +187,11 @@ function core.get()
     }
     
     -- MAGIC BURST.
-    settings["Magic Burst"]={
+    settings["MAGIC BURST"]={
         
         ["Transfixion"]   = T{},
         ["Compression"]   = T{},
-        ["Liquefaction"]  = T{},
+        ["Liquefaction"]  = T{"Meteor Strike"},
         ["Scission"]      = T{},
         ["Reverberation"] = T{},
         ["Detonation"]    = T{},
@@ -193,7 +207,7 @@ function core.get()
     local display          = I{false, true}
     local display_settings = {
         ['pos']={['x']=system["Job Window X"],['y']=system["Job Window Y"]},
-        ['bg']={['alpha']=225,['red']=0,['green']=0,['blue']=0,['visible']=false},
+        ['bg']={['alpha']=200,['red']=0,['green']=0,['blue']=0,['visible']=false},
         ['flags']={['right']=false,['bottom']=false,['bold']=false,['draggable']=system["Job Draggable"],['italic']=false},
         ['padding']=system["Job Padding"],
         ['text']={['size']=system["Job Font"].size,['font']=system["Job Font"].font,['fonts']={},['alpha']=system["Job Font"].alpha,['red']=system["Job Font"].r,['green']=system["Job Font"].g,['blue']=system["Job Font"].b,
@@ -204,15 +218,17 @@ function core.get()
     local window = texts.new(windower.ffxi.get_player().main_job_full, display_settings)
     local avatar = images.new({color={alpha = 255},texture={fit = false},draggable=true})
     
+    -- HANDLE PARTY CHAT COMMANDS
     self.handleChat = function(message, sender, mode, gm)
         
         if (mode == 3 or mode == 4) then
+            local player   = windower.ffxi.get_player() or false
             local accounts = T(system["Controllers"])
             
             if (accounts):contains(sender) then
                 local commands = message:split(" ")
                 
-                if commands[1] and system["Player"].name:lower():match(commands[1]) then
+                if commands[1] and player and player.name:lower():match(commands[1]) then
                     
                 end
                 
@@ -224,201 +240,58 @@ function core.get()
         
     end
     
+    -- HANDLE CORE JOB COMMANDS.
     self.handleCommands = function(commands)
         local command = commands[1] or false
         
-        if command then
-            command = command:lower()
+        if command and type(command) == "string" then
+            local command = command:lower()
+            
+            if command == "bprage" then
+                local pet = windower.ffxi.get_mob_by_target("pet") or false
+                
+                if pet then
+                    settings["RAGES"][pet.name]:next()
+                    helpers['popchat']:pop(("CURRENT BP RAGE: " .. tostring(settings["RAGES"][pet.name]:current())):upper(), system["Popchat Window"])
+                    
+                end
+                
+            elseif command == "bpward" then
+                local pet = windower.ffxi.get_mob_by_target("pet") or false
+                
+                if pet then
+                    settings["WARDS"][pet.name]:next()
+                    helpers['popchat']:pop(("CURRENT BP RAGE: " .. tostring(settings["WARDS"][pet.name]:current())):upper(), system["Popchat Window"])
+                    
+                end
+                
+            end
+            
         end
         
-        if command == "on" or command == "toggle" or command == "off" then
-            system["BP Enabled"]:next()
-            helpers['popchat']:pop(("Automation: " .. tostring(system["BP Enabled"]:current())):upper(), system["Popchat Window"])
-            
-            if not system["BP Enabled"]:current() then
-                helpers['queue'].clear()
-            end
-            
-        elseif command == "display" then
-            display:next()
-            helpers['popchat']:pop(("DISPLAY: " .. tostring(display:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "am" then
-            settings["AM"]:next()
-            helpers['popchat']:pop(("Auto-Aftermath: " .. tostring(settings["AM"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "amt" then
-            settings["AM THRESHOLD"]:next()
-            helpers['popchat']:pop(("Aftermath Threshold: " .. tostring(settings["AM THRESHOLD"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "1hr" then
-            settings["1HR"]:next()
-            helpers['popchat']:pop(("Auto-1hour: " .. tostring(settings["1HR"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "ja" then
-            settings["JA"]:next()
-            helpers['popchat']:pop(("Auto-Job Abilities: " .. tostring(settings["JA"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "ra" then
-            settings["RA"]:next()
-            helpers['popchat']:pop(("Auto-Ranged Attacks: " .. tostring(settings["RA"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "hate" then
-            settings["HATE"]:next()
-            helpers['popchat']:pop(("Auto-Enmity: " .. tostring(settings["HATE"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "buffs" then
-            settings["BUFFS"]:next()
-            helpers['popchat']:pop(("Auto-Buffing: " .. tostring(settings["BUFFS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "debuffs" then
-            settings["DEBUFFS"]:next()
-            helpers['popchat']:pop(("Auto-Debuffing: " .. tostring(settings["DEBUFFS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "tpt" then
-            local number = commands[2] or false
-            
-            if number then
-                number = tonumber(number)
-                
-                if number > 999 and number <= 3000 then
-                    settings["TP THRESHOLD"] = number
-                    helpers['popchat']:pop(("TP THRESHOLD: " .. tostring(number) .. "."):upper(), system["Popchat Window"])
-                
-                else
-                    helpers['popchat']:pop(("Enter a number from 1000 to 3000"):upper(), system["Popchat Window"])
-                    
-                end
-            
-            end
-            
-        elseif command == "ws" then
-            settings["WS"]:next()
-            helpers['popchat']:pop(("Auto-Weapon Skills: " .. tostring(settings["WS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "wsname" then
-            local weaponskill = windower.convert_auto_trans(table.concat(commands, " "):sub(8)):lower()
-            for _,v in pairs(windower.ffxi.get_abilities().weapon_skills) do
-                
-                if v and res.weapon_skills[v].en then
-                    local match = res.weapon_skills[v].en:lower():match(("[%a%s%'%:]+"))
-
-                    if weaponskill:sub(1, #weaponskill) == match:sub(1, #weaponskill) then
-                        settings["WSNAME"] = res.weapon_skills[v].en
-                        helpers['popchat']:pop(("Weapon Skill now set to: " .. tostring(settings["WSNAME"])):upper(), system["Popchat Window"])
-                    end
-                    
-                end
-                
-            end
-            
-        elseif command == "sc" then
-            settings["SC"]:next()
-            helpers['popchat']:pop(("Auto-Skillchains: " .. tostring(settings["SC"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "burst" then
-            settings["BURST"]:next()
-            helpers['popchat']:pop(("Auto-Bursting: " .. tostring(settings["BURST"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "element" then
-            local element = windower.convert_auto_trans(commands[2]):lower() or false
-            if element then
-
-                for _,v in pairs(res.elements) do
-
-                    if v and element:sub(1,6) == v.en:sub(1,6):lower() then
-                        settings["ELEMENT"]:setTo(v.en)
-                        helpers['popchat']:pop(("Auto-Burst Element now set to: " .. tostring(settings["ELEMENT"]:current())):upper(), system["Popchat Window"])    
-                    end
-                    
-                end
-                
-            end
-            
-        elseif command == "tier" then
-            settings["TIER"]:next()
-            helpers['popchat']:pop(("Auto-Bursting Tier now set to: " .. tostring(settings["TIER"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "aoe" then
-            settings["ALLOW-AOE"]:next()
-            helpers['popchat']:pop(("AOE-Bursting now: " .. tostring(settings["ALLOW-AOE"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "drains" then
-            settings["DRAINS"]:next()
-            helpers['popchat']:pop(("Auto-Drains: " .. tostring(settings["DRAINS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "stuns" then
-            settings["STUNS"]:next()
-            helpers['popchat']:pop(("Auto-Stunning: " .. tostring(settings["STUNS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "super" then
-            settings["SUPER-TANK"]:next()
-            helpers['popchat']:pop(("Super-tanking: " .. tostring(settings["SUPER-TANK"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "utsu" then
-            settings["SHADOWS"]:next()
-            helpers['popchat']:pop(("Auto-Shadows: " .. tostring(settings["SHADOWS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "food" then
-            settings["FOOD"]:next()
-            helpers['popchat']:pop(("Auto-Food: " .. tostring(settings["FOOD"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "sambas" then
-            settings["SAMBAS"]:next()
-            helpers['popchat']:pop(("Auto-Steps: " .. tostring(settings["SAMBAS"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "steps" then
-            settings["STEPS"]:next()
-            helpers['popchat']:pop(("Auto-Steps: " .. tostring(settings["STEPS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "skillup" then
-            settings["SKILLUP"]:next()
-            helpers['popchat']:pop(("Auto-Skillup: " .. tostring(settings["SKILLUP"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "skills" then
-            settings["SKILLS"]:next()
-            helpers['popchat']:pop(("Skill-Up Skill now set to: " .. tostring(settings["SKILLS"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "myrkr" then
-            settings["MYRKR"]:next()
-            helpers['popchat']:pop(("Auto-Myrkr: " .. tostring(settings["MYRKR"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "convert" then
-            settings["CONVERT"]:next()
-            helpers['popchat']:pop(("Auto-Convert: " .. tostring(settings["CONVERT"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "spikes" then
-            settings["SPIKES"]:next()
-            helpers['popchat']:pop(("Auto-Spikes now set to: " .. tostring(settings["SPIKES"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "dia" or command == "bio" then
-            settings["DIA"]:next()
-            helpers['popchat']:pop(("Dia/Bio Mode now set to: " .. tostring(settings["DIA"]:current())):upper(), system["Popchat Window"])
-        
-        else
-            system["Core"].event(command)
-            
-        end
+        -- HANDLE GLOBAL COMMANDS.
+        helpers["corecommands"].handle(commands)
         
     end
     
+    -- HANDLE ITEM LOGIC.
     self.handleItems = function()
         
         if bpcore:canItem() and bpcore:checkReady() and not system["Midaction"] then
             
             if bpcore:buffActive(15) then
                 
-                if bpcore:findItemByName("Holy Water") then
+                if bpcore:findItemByName("Holy Water") and not helpers["queue"].inQueue(IT["Holy Water"], "me") then
                     helpers["queue"].add(IT["Holy Water"], "me")
                 
-                elseif bpcore:findItemByName("Hallowed Water") then
+                elseif bpcore:findItemByName("Hallowed Water") and not helpers["queue"].inQueue(IT["Hallowed Water"], "me") then
                     helpers["queue"].add(IT["Hallowed Water"], "me")
                     
                 end
             
             elseif bpcore:buffActive(6) then
                 
-                if bpcore:findItemByName("Echo Drops") then
+                if bpcore:findItemByName("Echo Drops") and not helpers["queue"].inQueue(IT["Echo Drops"], "me") then
                     helpers["queue"].add(IT["Echo Drops"], "me")
                 end
                 
@@ -430,20 +303,40 @@ function core.get()
     
     self.handleAutomation = function()
         
+        -- Handle items.
+        system["Core"].handleItems()
+        
         if bpcore:checkReady() and not helpers["actions"].getMoving() and system["BP Enabled"]:current() then
+            local player  = windower.ffxi.get_player() or false
+            local current = helpers["queue"].getNextAction() or false
+            
+            -- Determine how to handle status debuffs.
+            if settings["STATUS"]:current() then
+                helpers["status"].manangeStatuses()
+            end
             
             -- PLAYER IS ENGAGED.
-            if system["Player"].status == 1 then
+            if player.status == 1 then
+                local pet = windower.ffxi.get_mob_by_target("pet") or false
+                local target = helpers["target"].getTarget() or windower.ffxi.get_mob_by_target("t") or false
                 
                 -- SKILLUP LOGIC.
                 if settings["SKILLUP"]:current() then
                     
-                    if bpcore:canCast() and settings["SKILLS"]:current() == "Summoning" then
+                    if bpcore:findItemByName("B.E.W. Pitaru") and not helpers["queue"].inQueue(IT["B.E.W. Pitaru"], player) and not bpcore:buffActive(251) then
+                        helpers["queue"].add(IT["B.E.W. Pitaru"], "me")
+                    
+                    elseif windower.ffxi.get_mob_by_target("pet") then
+                        helpers["queue"].add(JA["Release"], "me")
                         
-                        -- BARFIRE.
-                        if bpcore:isMAReady(MA["Barfire"].recast_id) and bpcore:getAvailable("MA", "Barfire") then
-                            helpers["queue"].add(MA["Barfire"], "me")
-                        
+                    elseif not windower.ffxi.get_mob_by_target("pet") then
+                    
+                        for i,v in pairs(system["Skillup"][settings["SKILLS"]:current()].list) do
+    
+                            if windower.ffxi.get_spells()[MA[v].id] and bpcore:isMAReady(MA[v].recast_id) then
+                                helpers["queue"].add(MA[v], system["Skillup"][settings["SKILLS"]:current()].target)
+                            end
+                            
                         end
                     
                     end
@@ -455,28 +348,28 @@ function core.get()
                     
                     if settings["AM"]:current() then
                         
-                        if bpcore:buffActive(272) and system["Player"]["vitals"].tp > 1000 then
+                        if bpcore:buffActive(272) and player["vitals"].tp > 1000 then
                             
-                            if settings["MOONLIGHT"]:current() and system["Player"]["vitals"].mpp < system["GEO"]["Moonlight Threshold"] and bpcore:getAvailable("WS", "Moonlight") then
+                            if player["vitals"].mpp < system["SMN"]["Moonlight Threshold"] and bpcore:getAvailable("WS", "Moonlight") then
                                 helpers["queue"].addToFront(WS["Moonlight"], "me")
                             
-                            elseif bpcore:getAvailable("WS", settings["WSNAME"]) and system["Player"]["vitals"].tp > settings["TP THRESHOLD"] then
+                            elseif bpcore:getAvailable("WS", settings["WSNAME"]) and player["vitals"].tp > settings["TP THRESHOLD"] then
                                 helpers["queue"].addToFront(WS[settings["WSNAME"]], "t")
                             end
                             
-                        elseif not bpcore:buffActive(272) and system["Player"]["vitals"].tp > settings["AM THRESHOLD"] and system["Weapon"].en == "Tishtrya" and bpcore:getAvailable("WS", "Realmrazer") then
+                        elseif not bpcore:buffActive(272) and player["vitals"].tp > settings["AM THRESHOLD"] and system["Weapon"].en == "Tishtrya" and bpcore:getAvailable("WS", "Realmrazer") then
                             helpers["queue"].addToFront(WS["Realmrazer"], "t")
                         
-                        elseif not bpcore:buffActive(272) and system["Player"]["vitals"].tp > settings["AM THRESHOLD"] and system["Weapon"].en == "Idris" and bpcore:getAvailable("WS", "Exudation") then
+                        elseif not bpcore:buffActive(272) and player["vitals"].tp > settings["AM THRESHOLD"] and system["Weapon"].en == "Idris" and bpcore:getAvailable("WS", "Exudation") then
                             helpers["queue"].addToFront(WS["Exudation"], "t")
                         end
                         
-                    elseif system["Player"]["vitals"].tp > 1000 then
+                    elseif player["vitals"].tp > 1000 then
                         
-                        if settings["MOONLIGHT"]:current() and system["Player"]["vitals"].mpp < system["GEO"]["Moonlight Threshold"] and bpcore:getAvailable("WS", "Moonlight") then
+                        if player["vitals"].mpp < system["SMN"]["Moonlight Threshold"] and bpcore:getAvailable("WS", "Moonlight") then
                             helpers["queue"].addToFront(WS["Moonlight"], "me")
                         
-                        elseif bpcore:getAvailable("WS", settings["WSNAME"]) and system["Player"]["vitals"].tp > settings["TP THRESHOLD"] then
+                        elseif bpcore:getAvailable("WS", settings["WSNAME"]) and player["vitals"].tp > settings["TP THRESHOLD"] then
                             helpers["queue"].addToFront(WS[settings["WSNAME"]], "t")
                         end
                         
@@ -487,21 +380,42 @@ function core.get()
                 -- ABILITY LOGIC.
                 if settings["JA"]:current() and bpcore:canAct() then
                     
+                    -- SMN/.
+                    if player.main_job == "SMN" then
+                    
+                        if pet then
+                            
+                            if target and pet.status == 0 and bpcore:isJAReady(JA["Assault"].recast_id) and bpcore:getAvailable("JA", "Assault") and bpcore:canEngage(target) then
+                                helpers["queue"].add(JA["Assault"], target)
+                                
+                            elseif settings["BPRAGE"]:current() and target and pet.status == 1 and bpcore:isJAReady(JA["Blood Pact: Rage"].recast_id) and bpcore:getAvailable("JA", settings["RAGES"][pet.name]:current()) then 
+                                helpers["queue"].add(JA[settings["RAGES"][pet.name]:current()], target)                                
+                                
+                            end
+                            
+                        elseif not pet and settings["PET"]:current() then 
+    
+                            if bpcore:isMAReady(MA[settings["SUMMON"]:current()].recast_id) and bpcore:getAvailable("MA", settings["SUMMON"]:current()) then
+                                helpers["queue"].add(MA[settings["SUMMON"]:current()], "me")
+                            end
+                            
+                        end
+                        
+                    end
+                    
                     -- /RDM.
-                    if system["Player"].sub_job == "RDM" then
+                    if player.sub_job == "RDM" then
                         
                         -- CONVERT LOGIC.
-                        if settings["CONVERT"]:current() and system["Player"]["vitals"].hpp > system["GEO"]["Convert Threshold"].hpp and system["Player"]["vitals"].mpp < system["GEO"]["Convert Threshold"].mpp then
+                        if settings["CONVERT"]:current() and player["vitals"].hpp > system["SMN"]["Convert Threshold"].hpp and player["vitals"].mpp < system["SMN"]["Convert Threshold"].mpp then
                             if bpcore:isJAReady(JA["Convert"].recast_id) then
                                 helpers["queue"].add(JA["Convert"], "me")
                             end
                             
                         end
                     
-                    end
-                    
                     -- /DNC.
-                    if system["Player"].sub_job == "DNC" then
+                    elseif player.sub_job == "DNC" then
                         
                         -- REVERSE FLOURISH.
                         if bpcore:isJAReady(JA["Reverse Flourish"].recast_id) and bpcore:getFinishingMoves() > 4 then
@@ -516,7 +430,7 @@ function core.get()
                 if settings["HATE"]:current() then
                     
                     -- /WAR.
-                    if system["Player"].sub_job == "WAR" and bpcore:canAct() then
+                    if player.sub_job == "WAR" and bpcore:canAct() then
                         
                         -- PROVOKE.
                         if bpcore:isJAReady(JA["Provoke"].recast_id) then
@@ -524,7 +438,7 @@ function core.get()
                         end
                         
                     -- /DNC.
-                    elseif system["Player"].sub_job == "DNC" and bpcore:canAct() then
+                    elseif player.sub_job == "DNC" and bpcore:canAct() then
                         
                         -- ANIMATED FLOURISH.
                         if bpcore:isJAReady(JA["Animated Flourish"].recast_id) and bpcore:getFinishingMoves() > 0 then
@@ -538,8 +452,26 @@ function core.get()
                 -- BUFF LOGIC.
                 if settings["BUFFS"]:current() then
                     
+                    -- SMN/.
+                    if player.main_job == "SMN" then
+                        
+                        if pet and settings["BPWARD"]:current() then
+                            
+                            if bpcore:isJAReady(JA["Blood Pact: Ward"].recast_id) and bpcore:getAvailable("JA", "Blood Pact: Ward") then
+                                helpers["queue"].add(JA[settings["WARDS"][pet.name]:current()], player)
+                                
+                                if settings["ROTATE"]:current() then
+                                    settings["WARDS"][pet.name]:next()
+                                end
+                                
+                            end
+                            
+                        end
+                        
+                    end
+                    
                     -- /RDM
-                    if system["Player"].sub_job == "RDM" and bpcore:canCast() then
+                    if player.sub_job == "RDM" and bpcore:canCast() then
                         
                         -- REFRESH I
                         if bpcore:isMAReady(MA["Refresh"].recast_id) and not bpcore:buffActive(43) then
@@ -571,10 +503,8 @@ function core.get()
                             helpers["queue"].add(MA[settings["SPIKES"]:current()], "me")                        
                         end
                     
-                    end
-                    
                     -- /WHM
-                    if system["Player"].sub_job == "WHM" and bpcore:canCast() then
+                    elseif player.sub_job == "WHM" and bpcore:canCast() then
                         
                         -- HASTE
                         if bpcore:isMAReady(MA["Haste"].recast_id) and not bpcore:buffActive(33) then
@@ -596,10 +526,8 @@ function core.get()
                             helpers["queue"].add(MA["Aquaveil"], "me")
                         end
                     
-                    end
-                    
                     -- /WAR.
-                    if system["Player"].sub_job == "WAR" and bpcore:canAct() then
+                    elseif player.sub_job == "WAR" and bpcore:canAct() then
                         
                         -- BERSERK.
                         if bpcore:isJAReady(JA["Berserk"].recast_id) then
@@ -616,7 +544,7 @@ function core.get()
                         end
                         
                     -- /DNC.
-                    elseif system["Player"].sub_job == "DNC" and bpcore:canAct() then
+                    elseif player.sub_job == "DNC" and bpcore:canAct() then
                     
                         -- HASTE SAMBA.
                         if bpcore:isJAReady(JA["Haste Samba"].recast_id) then
@@ -624,7 +552,7 @@ function core.get()
                         end
                     
                     -- /NIN.
-                    elseif system["Player"].sub_job == "NIN" and bpcore:canCast() then
+                    elseif player.sub_job == "NIN" and bpcore:canCast() then
                     
                         -- UTSUSEMI
                         if bpcore:findItemByName("Shihei", 0) then
@@ -703,10 +631,10 @@ function core.get()
                     end
                     
                     -- /DNC.
-                    if system["Player"].sub_job == "DNC" and bpcore:canAct() and target then
+                    if player.sub_job == "DNC" and bpcore:canAct() and target then
                     
                         -- STEPS.
-                        if bpcore:isJAReady(JA[settings["STEPS"]:current()].recast_id) and os.clock()-system["GEO"]["Steps Timer"] > system["GEO"]["Steps Delay"] and bpcore:getAvailable("JA", settings["STEPS"]:current()) then
+                        if bpcore:isJAReady(JA[settings["STEPS"]:current()].recast_id) and os.clock()-system["SMN"]["Steps Timer"] > system["SMN"]["Steps Delay"] and bpcore:getAvailable("JA", settings["STEPS"]:current()) then
                             helpers["queue"].add(JA[settings["STEPS"]:current()], "t")                            
                         end
                     
@@ -718,25 +646,25 @@ function core.get()
                 if settings["DRAINS"]:current() and bpcore:canCast() then
                     
                     -- DRAIN
-                    if bpcore:isMAReady(MA["Drain III"].recast_id) and system["Player"]["vitals"].hpp < system["GEO"]["Drain Threshold"] then
+                    if bpcore:isMAReady(MA["Drain III"].recast_id) and player["vitals"].hpp < system["SMN"]["Drain Threshold"] then
                         helpers["queue"].add(MA["Drain III"], "t")
                         
-                    elseif bpcore:isMAReady(MA["Drain II"].recast_id) and system["Player"]["vitals"].hpp < system["GEO"]["Drain Threshold"] then
+                    elseif bpcore:isMAReady(MA["Drain II"].recast_id) and player["vitals"].hpp < system["SMN"]["Drain Threshold"] then
                         helpers["queue"].add(MA["Drain II"], "t")
                         
-                    elseif bpcore:isMAReady(MA["Drain"].recast_id) and system["Player"]["vitals"].hpp < system["GEO"]["Drain Threshold"] then
+                    elseif bpcore:isMAReady(MA["Drain"].recast_id) and player["vitals"].hpp < system["SMN"]["Drain Threshold"] then
                         helpers["queue"].add(MA["Drain"], "t")
                     
                     end
                     
                     -- ASPIR
-                    if bpcore:isMAReady(MA["Aspir III"].recast_id) and system["Player"]["vitals"].mpp < system["GEO"]["Aspir Threshold"] then
+                    if bpcore:isMAReady(MA["Aspir III"].recast_id) and player["vitals"].mpp < system["SMN"]["Aspir Threshold"] then
                         helpers["queue"].add(MA["Aspir III"], "t")
                     
-                    elseif bpcore:isMAReady(MA["Aspir II"].recast_id) and system["Player"]["vitals"].mpp < system["GEO"]["Aspir Threshold"] then
+                    elseif bpcore:isMAReady(MA["Aspir II"].recast_id) and player["vitals"].mpp < system["SMN"]["Aspir Threshold"] then
                         helpers["queue"].add(MA["Aspir II"], "t")
                     
-                    elseif bpcore:isMAReady(MA["Aspir"].recast_id) and system["Player"]["vitals"].mpp < system["GEO"]["Aspir Threshold"] then
+                    elseif bpcore:isMAReady(MA["Aspir"].recast_id) and player["vitals"].mpp < system["SMN"]["Aspir Threshold"] then
                         helpers["queue"].add(MA["Aspir"], "t")
                     
                     end
@@ -744,17 +672,27 @@ function core.get()
                 end
             
             -- PLAYER IS DISENGAGED LOGIC.
-            elseif system["Player"].status == 0 then
+            elseif (player.status == 0 or settings["SUPER-TANK"]:current()) then
+                local pet = windower.ffxi.get_mob_by_target("pet") or false
+                local target = helpers["target"].getTarget()
                 
                 -- SKILLUP LOGIC.
                 if settings["SKILLUP"]:current() then
                     
-                    if bpcore:canCast() and settings["SKILLS"]:current() == "Summoning" then
+                    if bpcore:findItemByName("B.E.W. Pitaru") and not helpers["queue"].inQueue(IT["B.E.W. Pitaru"], player) and not bpcore:buffActive(251) then
+                        helpers["queue"].add(IT["B.E.W. Pitaru"], "me")
+                    
+                    elseif windower.ffxi.get_mob_by_target("pet") then
+                        helpers["queue"].add(JA["Release"], "me")
                         
-                        -- BARFIRE.
-                        if bpcore:isMAReady(MA["Barfire"].recast_id) and bpcore:getAvailable("MA", "Barfire") then
-                            helpers["queue"].add(MA["Barfire"], "me")
-                        
+                    elseif not windower.ffxi.get_mob_by_target("pet") then
+                    
+                        for i,v in pairs(system["Skillup"][settings["SKILLS"]:current()].list) do
+    
+                            if windower.ffxi.get_spells()[MA[v].id] and bpcore:isMAReady(MA[v].recast_id) then
+                                helpers["queue"].add(MA[v], system["Skillup"][settings["SKILLS"]:current()].target)
+                            end
+                            
                         end
                     
                     end
@@ -764,8 +702,8 @@ function core.get()
                 -- WEAPON SKILL LOGIC.
                 if settings["WS"]:current() and bpcore:canAct() then
                     
-                    if settings["MOONLIGHT"]:current() and system["Player"]["vitals"].mpp < system["GEO"]["Moonlight Threshold"] and bpcore:getAvailable("WS", "Moonlight") then
-                        helpers["queue"].addToFront(WS["Moonlight"], "me")                        
+                    if player["vitals"].tp > 999 and player["vitals"].mpp < system["SMN"]["Myrkr Threshold"] and bpcore:getAvailable("WS", "Myrkr") then
+                        helpers["queue"].addToFront(WS["Myrkr"], "me")                        
                     end
                     
                 end
@@ -773,11 +711,35 @@ function core.get()
                 -- ABILITY LOGIC.
                 if settings["JA"]:current() and bpcore:canAct() then
                     
+                    -- SMN/.
+                    if player.main_job == "SMN" then
+                    
+                        if pet then
+                            
+                            if target and pet.status == 0 and bpcore:isJAReady(JA["Assault"].recast_id) and bpcore:getAvailable("JA", "Assault") and bpcore:canEngage(target) then
+                                helpers["queue"].add(JA["Assault"], target)
+                                
+                            elseif settings["BPRAGE"]:current() and target and pet.status == 1 and bpcore:isJAReady(JA["Blood Pact: Rage"].recast_id) and bpcore:getAvailable("JA", settings["RAGES"][pet.name]:current()) then 
+                                helpers["queue"].add(JA[settings["RAGES"][pet.name]:current()], target)                                
+                                
+                            end
+                            
+                        elseif not pet and settings["PET"]:current() then 
+    
+                            if bpcore:isMAReady(MA[settings["SUMMON"]:current()].recast_id) and bpcore:getAvailable("MA", settings["SUMMON"]:current()) then
+                                helpers["queue"].add(MA[settings["SUMMON"]:current()], "me")
+                            end
+                            
+                        end
+                        
+                    end
+                    
                     -- /RDM.
-                    if system["Player"].sub_job == "RDM" then
+                    if player.sub_job == "RDM" then
                         
                         -- CONVERT LOGIC.
-                        if settings["CONVERT"]:current() and bpcore:canAct() and system["Player"]["vitals"].hpp > system["GEO"]["Convert Threshold"].hpp and system["Player"]["vitals"].mpp < system["GET"]["Convert Threshold"].mpp then
+                        if settings["CONVERT"]:current() and player["vitals"].hpp > system["SMN"]["Convert Threshold"].hpp and player["vitals"].mpp < system["SMN"]["Convert Threshold"].mpp then
+                            
                             if bpcore:isJAReady(JA["Convert"].recast_id) then
                                 helpers["queue"].add(JA["Convert"], "me")
                             end
@@ -787,7 +749,7 @@ function core.get()
                     end
                     
                     -- /DNC.
-                    if system["Player"].sub_job == "DNC" then
+                    if player.sub_job == "DNC" then
                         
                         -- REVERSE FLOURISH.
                         if bpcore:isJAReady(JA["Reverse Flourish"].recast_id) and bpcore:getFinishingMoves() > 4 then
@@ -802,7 +764,7 @@ function core.get()
                 if settings["HATE"]:current() then
                     
                     -- /WAR.
-                    if system["Player"].sub_job == "WAR" and bpcore:canAct() and bpcore:canEngage(helpers["target"].getTarget()) then
+                    if player.sub_job == "WAR" and bpcore:canAct() and bpcore:canEngage(helpers["target"].getTarget()) then
                         
                         -- PROVOKE.
                         if bpcore:isJAReady(JA["Provoke"].recast_id) and target then
@@ -810,7 +772,7 @@ function core.get()
                         end
                         
                     -- /DNC.
-                    elseif system["Player"].sub_job == "DNC" and bpcore:canAct() and bpcore:canEngage(helpers["target"].getTarget()) then
+                    elseif player.sub_job == "DNC" and bpcore:canAct() and bpcore:canEngage(helpers["target"].getTarget()) then
                         
                         -- ANIMATED FLOURISH.
                         if bpcore:isJAReady(JA["Animated Flourish"].recast_id) and bpcore:getFinishingMoves() > 0 and target then
@@ -824,8 +786,26 @@ function core.get()
                 -- BUFF LOGIC.
                 if settings["BUFFS"]:current() then
                     
-                    -- /RDM
-                    if system["Player"].sub_job == "RDM" and bpcore:canCast() then
+                    -- SMN/.
+                    if player.main_job == "SMN" then
+                        
+                        if pet and settings["BPWARD"]:current() then
+                            
+                            if bpcore:isJAReady(JA["Blood Pact: Ward"].recast_id) and bpcore:getAvailable("JA", "Blood Pact: Ward") then
+                                helpers["queue"].add(JA[settings["WARDS"][pet.name]:current()], player)
+                                
+                                if settings["ROTATE"]:current() then
+                                    settings["WARDS"][pet.name]:next()
+                                end
+                                
+                            end
+                            
+                        end
+                        
+                    end
+                    
+                    -- /RDM.
+                    if player.sub_job == "RDM" and bpcore:canCast() then
                         
                         -- REFRESH I
                         if bpcore:isMAReady(MA["Refresh"].recast_id) and not bpcore:buffActive(43) then
@@ -857,10 +837,8 @@ function core.get()
                             helpers["queue"].add(MA[settings["SPIKES"]:current()], "me")                        
                         end
                     
-                    end
-                    
-                    -- /WHM
-                    if system["Player"].sub_job == "WHM" and bpcore:canCast() then
+                    -- /WHM.
+                    elseif player.sub_job == "WHM" and bpcore:canCast() then
                         
                         -- HASTE
                         if bpcore:isMAReady(MA["Haste"].recast_id) and not bpcore:buffActive(33) then
@@ -882,10 +860,8 @@ function core.get()
                             helpers["queue"].add(MA["Aquaveil"], "me")
                         end
                     
-                    end
-                    
                     -- /WAR.
-                    if system["Player"].sub_job == "WAR" and bpcore:canAct() then
+                    elseif player.sub_job == "WAR" and bpcore:canAct() then
                         
                         -- BERSERK.
                         if bpcore:isJAReady(JA["Berserk"].recast_id) then
@@ -902,7 +878,7 @@ function core.get()
                         end
                         
                     -- /DNC.
-                    elseif system["Player"].sub_job == "DNC" and bpcore:canAct() then
+                    elseif player.sub_job == "DNC" and bpcore:canAct() then
                     
                         -- HASTE SAMBA.
                         if bpcore:isJAReady(JA["Haste Samba"].recast_id) then
@@ -910,7 +886,7 @@ function core.get()
                         end
                     
                     -- /NIN.
-                    elseif system["Player"].sub_job == "NIN" and bpcore:canCast() then
+                    elseif player.sub_job == "NIN" and bpcore:canCast() then
                     
                         -- UTSUSEMI
                         if bpcore:findItemByName("Shihei", 0) then
@@ -989,10 +965,10 @@ function core.get()
                     end
                     
                     -- /DNC.
-                    if system["Player"].sub_job == "DNC" and bpcore:canAct() and bpcore:canEngage(helpers["target"].getTarget()) then
+                    if player.sub_job == "DNC" and bpcore:canAct() and bpcore:canEngage(helpers["target"].getTarget()) then
                     
                         -- STEPS.
-                        if bpcore:isJAReady(JA[settings["STEPS"]:current()].recast_id) and os.clock()-system["GEO"]["Steps Timer"] > system["GEO"]["Steps Delay"] and bpcore:getAvailable("MA", settings["STEPS"]:current()) then
+                        if bpcore:isJAReady(JA[settings["STEPS"]:current()].recast_id) and os.clock()-system["SMN"]["Steps Timer"] > system["SMN"]["Steps Delay"] and bpcore:getAvailable("MA", settings["STEPS"]:current()) then
                             helpers["queue"].add(JA[settings["STEPS"]:current()], target)                            
                         end
                     
@@ -1004,25 +980,25 @@ function core.get()
                 if settings["DRAINS"]:current() and bpcore:canCast() and bpcore:canEngage(helpers["target"].getTarget()) then
                     
                     -- DRAIN
-                    if bpcore:isMAReady(MA["Drain III"].recast_id) and system["Player"]["vitals"].hpp < system["GEO"]["Drain Threshold"] and bpcore:getAvailable("MA", "Drain III") then
+                    if bpcore:isMAReady(MA["Drain III"].recast_id) and player["vitals"].hpp < system["SMN"]["Drain Threshold"] and bpcore:getAvailable("MA", "Drain III") then
                         helpers["queue"].add(MA["Drain III"], target)
                         
-                    elseif bpcore:isMAReady(MA["Drain II"].recast_id) and system["Player"]["vitals"].hpp < system["GEO"]["Drain Threshold"] and bpcore:getAvailable("MA", "Drain II") then
+                    elseif bpcore:isMAReady(MA["Drain II"].recast_id) and player["vitals"].hpp < system["SMN"]["Drain Threshold"] and bpcore:getAvailable("MA", "Drain II") then
                         helpers["queue"].add(MA["Drain II"], target)
                         
-                    elseif bpcore:isMAReady(MA["Drain"].recast_id) and system["Player"]["vitals"].hpp < system["GEO"]["Drain Threshold"] and bpcore:getAvailable("MA", "Drain") then
+                    elseif bpcore:isMAReady(MA["Drain"].recast_id) and player["vitals"].hpp < system["SMN"]["Drain Threshold"] and bpcore:getAvailable("MA", "Drain") then
                         helpers["queue"].add(MA["Drain"], target)
                     
                     end
                     
                     -- ASPIR
-                    if bpcore:isMAReady(MA["Aspir III"].recast_id) and system["Player"]["vitals"].mpp < system["GEO"]["Aspir Threshold"] and bpcore:getAvailable("MA", "Aspir III") then
+                    if bpcore:isMAReady(MA["Aspir III"].recast_id) and player["vitals"].mpp < system["SMN"]["Aspir Threshold"] and bpcore:getAvailable("MA", "Aspir III") then
                         helpers["queue"].add(MA["Aspir III"], target)
                     
-                    elseif bpcore:isMAReady(MA["Aspir II"].recast_id) and system["Player"]["vitals"].mpp < system["GEO"]["Aspir Threshold"] and bpcore:getAvailable("MA", "Aspir II") then
+                    elseif bpcore:isMAReady(MA["Aspir II"].recast_id) and player["vitals"].mpp < system["SMN"]["Aspir Threshold"] and bpcore:getAvailable("MA", "Aspir II") then
                         helpers["queue"].add(MA["Aspir II"], target)
                     
-                    elseif bpcore:isMAReady(MA["Aspir"].recast_id) and system["Player"]["vitals"].mpp < system["GEO"]["Aspir Threshold"] and bpcore:getAvailable("MA", "Aspir") then
+                    elseif bpcore:isMAReady(MA["Aspir"].recast_id) and player["vitals"].mpp < system["SMN"]["Aspir Threshold"] and bpcore:getAvailable("MA", "Aspir") then
                         helpers["queue"].add(MA["Aspir"], target)
                     
                     end
@@ -1031,17 +1007,10 @@ function core.get()
                 
             end
             
-            -- HANDLE ALL CURING.
-            if settings["CURES"]:current() == 2 and (player.sub_job == "WHM" or player.sub_job == "RDM" or player.sub_job == "SCH") then
-                helpers["cures"].handleParty()
-                
-            elseif settings["CURES"]:current() == 3 and (player.sub_job == "WHM" or player.sub_job == "RDM" or player.sub_job == "SCH") then
-                helpers["cures"].handleParty()
-                helpers["cures"].handleAlliance()
-            end
-            
             -- HANDLE EVERYTHING INSIDE THE QUEUE.
-            helpers["queue"].handleQueue()
+            helpers["cures"].handleCuring()
+            helpers["buffer"].handleBuffs()
+            helpers['queue'].handleQueue()
         
         end
         
@@ -1058,10 +1027,23 @@ function core.get()
             avatar:path(string.format("%sbp/core/smn/icons/%s.png", windower.addon_path, pet.name))
                 
             if pet and not released then
-                local target = windower.ffxi.get_mob_by_index(pet.index)
-                local value  = string.format("[ %s + HP%%: %s + Distance: %.2f + Target: %s ]", pet.name, pet.hpp, pet.distance:sqrt(), target.name)
-                local color  = settings["COLORS"][pet.name]
-                local a,d    = (-10), (3.2)
+                local pName     = pet.name
+                local pDistance = pet.distance:sqrt()
+                local pHPP      = system["Pet"].hpp
+                local pMPP      = system["Pet"].mpp
+                local pTP       = system["Pet"].tp
+                local rRage     = windower.ffxi.get_ability_recasts()[JA["Blood Pact: Rage"].recast_id]
+                local rWard     = windower.ffxi.get_ability_recasts()[JA["Blood Pact: Ward"].recast_id]
+                local color     = "\\cs(25,200,230)"
+                local value = string.format("[ \\cs(250,200,230)%s™\\cr ► HP%%: %s%s%%\\cr + MP%%: %s%s%%\\cr + TP: %s%s\\cr + Distance: %s%.2f\\cr + Rage: %s%s\\cr + Ward: %s%s\\cr ]",
+                    pName,
+                    color, pHPP,
+                    color, pMPP,
+                    color, pTP,
+                    color, pDistance,
+                    color, rRage,
+                    color, rWard
+                )
                 
                 if bpcore:fileExists(string.format("../equipviewer/pets/%s.png", pet.name:lower())) then
                     windower.send_command(string.format("ev %s", pet.name:lower()))
@@ -1074,17 +1056,14 @@ function core.get()
                 
                 end
                 
-                avatar:size(25, 25)
+                avatar:size(32, 32)
                 avatar:transparency(0)
-                avatar:pos_x((window:pos_x()-30))
-                avatar:pos_y(window:pos_y()+5)
+                avatar:pos_x((window:pos_x()-35))
+                avatar:pos_y(window:pos_y()-1)
                 avatar:show()
                 
                 window:text(value)
                 window:bg_visible(true)
-                window:bg_color((color.r/d):floor(), (color.g/d):floor(), (color.b/d):floor())
-                window:color((color.r), (color.g), (color.b))
-                window:stroke_color((color.r-(color.r/1.4)):floor(), (color.g)-(color.g/1.4):floor(), (color.b-(color.b/1.4)))
                 window:update()
                 window:show()
             
@@ -1112,17 +1091,57 @@ function core.get()
         display:next()
     end
     
-    self.setSetting = function(setting, value)
-        setting:setTo(value)
+    self.getDisplay = function()
+        return display:current()
     end
     
-    self.event = function(name)
+    self.next = function(name)
         local name = name or false
         
         if name then
-            
+            settings[name]:next()        
         end
         
+    end
+    
+    self.current = function(name)
+        local name = name or false
+        
+        if name then        
+            return settings[name]:current()
+        end
+        
+    end
+    
+    self.set = function(name, value)
+        local name, value = name or false, value or false
+        
+        if name and value then
+            settings[name]:setTo(value)
+        end
+        
+    end
+    
+    self.value = function(name, value)
+        local name, value = name or false, value or false
+        
+        if name and value then
+            settings[name] = (value)
+        end
+        
+    end
+    
+    self.get = function(name)
+        local name = name or false
+        
+        if name then        
+            return settings[name]
+        end
+        
+    end
+    
+    self.getSettings = function()
+        return settings
     end
     
     return self

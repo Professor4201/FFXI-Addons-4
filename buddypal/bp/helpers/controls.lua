@@ -3,10 +3,10 @@
 --------------------------------------------------------------------------------
 local controls = {}
 function controls.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
-    local delays       = {assist=2, distance=0.3, facing=1}
+    local delays       = {assist=2, distance=0.45, facing=1}
     local times        = {assist=0, distance=0, facing=0}
     local last         = os.clock()
     local assist_range = system["Assist Range"]
@@ -40,27 +40,30 @@ function controls.new()
     end
     
     self.distance = function()
-        local toggle = toggle:current() or false
-        local target = helpers["target"].getTarget() or false
+        local toggle    = toggle:current() or false
+        local target    = helpers["target"].getTarget() or false
+        local midaction = helpers["actions"].getMidaction()
         
-        if (os.clock()-times.distance) > delays.distance then
+        if (os.clock()-times.distance) > delays.distance and not midaction then
         
             if toggle and distance and target then
-                local player = windower.ffxi.get_mob_by_target('me') or false
+                local player = windower.ffxi.get_mob_by_target("me") or false
                 
                 if player and target and player.status == 1 then
-                    local size = windower.ffxi.get_mob_by_target('me').model_size
-                    local distance = target.distance:sqrt()
+                    local pSize     = player.model_size
+                    local variation = (0.75)
+                    local maximum   = (3-pSize)
+                    local distance  = target.distance:sqrt()
                     
-                    if distance-size > 3.5 then
-                        helpers["actions"].moveToPosition(target.x, target.y, false)
+                    if distance > maximum then
+                        helpers["actions"].move(target.x, target.y)
                         times.distance = os.clock()
                         
-                    elseif distance < 3.6 and distance > (2.7 + size) then
+                    elseif distance < maximum and distance > (maximum-variation) then
                         helpers["actions"].stopMovement()
                         times.distance = os.clock()
                         
-                    elseif distance < (1.5 + size) then
+                    elseif distance < (maximum-variation) then
                         helpers["actions"].stepBackwards()
                         times.distance = os.clock()
                         

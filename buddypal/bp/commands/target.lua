@@ -46,9 +46,6 @@ function target.run()
                 helpers["target"].setTargetMode()
                 
             end
-        
-        elseif not command and target then
-            helpers['target'].setTarget(target)
             
         end
     

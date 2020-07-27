@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local fastcraft = {}
 function fastcraft.new()
-    self = {}
+    local self = {}
     
     -- Private Variables.
     local toggle = I{false,true}

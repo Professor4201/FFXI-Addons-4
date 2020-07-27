@@ -1035,6 +1035,8 @@ function core.get()
             end
             
             -- HANDLE EVERYTHING INSIDE THE QUEUE.
+            helpers["cures"].handleCuring()
+            helpers["buffer"].handleBuffs()
             helpers['queue'].handleQueue()
         
         end

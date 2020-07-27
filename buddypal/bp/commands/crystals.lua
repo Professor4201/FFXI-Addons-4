@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local crystals = {}
 function crystals.run()
-    self = {}
+    local self = {}
     
     -- Private variables.
     local name = {
@@ -11,7 +11,7 @@ function crystals.run()
         ["fire"]        = "Fire Crystal",
         ["ice"]         = "Ice Crystal",
         ["wind"]        = "Wind Crystal",
-        ["earth"]       = "Earth Cluster",
+        ["earth"]       = "Earth Crystal",
         ["thunder"]     = "Lightng. Crystal",
         ["lightning"]   = "Lightng. Crystal",
         ["water"]       = "Water Crystal",

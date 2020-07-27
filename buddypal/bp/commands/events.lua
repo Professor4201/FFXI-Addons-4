@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local events = {}
 function events.run()
-    self = {}
+    local self = {}
     
     self.execute = function(commands)        
         local commands = commands or false
@@ -15,7 +15,10 @@ function events.run()
             
             if sequence and event and map[sequence] and T(map[sequence]):contains(event) then
                 helpers["events"].register(sequence, event)
-                
+            
+            elseif sequence == "finish" and event then
+                helpers["events"].finishEvent(event)
+            
             end
         
         end

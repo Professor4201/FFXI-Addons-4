@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local missions = {}
 function missions.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local updated       = {}

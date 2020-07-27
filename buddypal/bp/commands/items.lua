@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local items = {}
 function items.run()
-    self = {}
+    local self = {}
     
     -- Private variables.
     local toggle = I{true,false}

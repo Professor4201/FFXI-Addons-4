@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local bluspell = {}
 function bluspell.new()
-    self = {}
+    local self = {}
     
     -- Private Variables
     local spell_sets   = bpcore:handleSettings("bp/helpers/bluspell/"..windower.ffxi.get_player().name:lower())

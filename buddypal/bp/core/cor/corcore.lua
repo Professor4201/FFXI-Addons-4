@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- WAR Core: Handle all job automation for Warrior.
+-- COR Core: Handle all job automation for Corsair.
 --------------------------------------------------------------------------------
 local core = {}
 
@@ -21,7 +21,8 @@ function core.get()
     settings["DEBUFFS"]                            = I{false,true}
     settings["STATUS"]                             = I{false,true}
     settings["WS"]                                 = I{false,true}
-    settings["WSNAME"]                             = "Moonlight"
+    settings["WSNAME"]                             = "Fast Blade"
+    settings["RANGED WS"]                          = "Leaden Salute"
     settings["TP THRESHOLD"]                       = 1000
     settings["SC"]                                 = I{false,true}
     settings["BURST"]                              = I{false,true}
@@ -32,12 +33,12 @@ function core.get()
     settings["STUNS"]                              = I{false,true}
     settings["TANK MODE"]                          = I{false,true}
     settings["SUPER-TANK"]                         = I{false,true}
-    settings["HASSO MODE"]                         = I{true,false}
-    settings["SEKKA"]                              = "Upheaval"
+    settings["SEKKA"]                              = "Resolution"
     settings["SHADOWS"]                            = I{false,true}
     settings["FOOD"]                               = I{"Sublime Sushi","Sublime Sushi +1"}
     settings["SAMBAS"]                             = I{"Drain Samba II","Haste Samba"}
     settings["STEPS"]                              = I{"Quickstep","Box Step","Stutter Step"}
+    settings["RUNES"]                              = {rune1="",rune2="",rune3=""}
     settings["RUNE1"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
     settings["RUNE2"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
     settings["RUNE3"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
@@ -66,17 +67,29 @@ function core.get()
     settings["ETARGET"]                            = system["Main Character"]
     settings["BUBBLE BUFF"]                        = I{"Ecliptic Attrition","Lasting Emanation"}
     settings["BOOST"]                              = I{false,true}
-    settings["MYRKR"]                              = I{false,true}
+    settings["PET"]                                = I{false,true}
     settings["SPIRITS"]                            = T{"Light Spirit","Fire Spirirt","Ice Spirit","Air Spirit","Earth Spirit","Thunder Spirit","Water Spirit","Dark Spirit"}
     settings["SUMMON"]                             = I{"Carbuncle","Cait Sith","Ifrit","Shiva","Garuda","Titan","Ramuh","Leviathan","Fenrir","Diabolos","Siren"}
     settings["BPRAGE"]                             = I{false,true}
     settings["BPWARD"]                             = I{false,true}
+    settings["AUTO SIC"]                           = I{false,true}
+    settings["AOEHATE"]                            = I{false,true}
+    settings["EMBOLDEN"]                           = I{"Palanx","Temper","Regen IV"}
+    settings["BLU MODE"]                           = I{"DPS","NUKE"}
+    settings["MIGHTY GUARD"]                       = I{true,false}
+    settings["CHIVALRY"]                           = I{1000,1500,2000,2500,3000}
+    settings["WEATHER"]                            = I{"Firestorm","Hailstorm","Windstorm","Sandstorm","Thunderstorm","Rainstorm","Voidstorm","Aurorastorm"}
+    settings["ARTS"]                               = I{1,2,3}
+    settings["MISERY"]                             = I{false,true}
+    settings["IMPETUS WS"]                         = "Raging Fists"
+    settings["FOORWORK WS"]                        = "Tornado Kick"
+    settings["DEFAULT WS"]                         = "Howling Fist"
     
     -- DEBUFFS.
     settings["SPELLS"]={}
     
     -- MAGIC BURST.
-    settings["Magic Burst"]={
+    settings["MAGIC BURST"]={
         
         ["Transfixion"]   = T{},
         ["Compression"]   = T{},
@@ -96,7 +109,7 @@ function core.get()
     local display          = I{false, true}
     local display_settings = {
         ['pos']={['x']=system["Job Window X"],['y']=system["Job Window Y"]},
-        ['bg']={['alpha']=155,['red']=0,['green']=0,['blue']=0,['visible']=false},
+        ['bg']={['alpha']=200,['red']=0,['green']=0,['blue']=0,['visible']=false},
         ['flags']={['right']=false,['bottom']=false,['bold']=false,['draggable']=system["Job Draggable"],['italic']=false},
         ['padding']=system["Job Padding"],
         ['text']={['size']=system["Job Font"].size,['font']=system["Job Font"].font,['fonts']={},['alpha']=system["Job Font"].alpha,['red']=system["Job Font"].r,['green']=system["Job Font"].g,['blue']=system["Job Font"].b,
@@ -106,6 +119,7 @@ function core.get()
 
     local window = texts.new(windower.ffxi.get_player().main_job_full, display_settings)
     
+    -- HANDLE PARTY CHAT COMMANDS
     self.handleChat = function(message, sender, mode, gm)
         
         if (mode == 3 or mode == 4) then
@@ -127,247 +141,111 @@ function core.get()
         
     end
     
+    -- HANDLE CORE JOB COMMANDS.
     self.handleCommands = function(commands)
         local command = commands[1] or false
         
-        if command then
-            command = command:lower()
+        if command and type(command) == "string" then
+            local command = command:lower()
+            local message = ""
+            
+            if command == "roll" then
+                settings["ROLL"]:next()
+                message = string.format("AUTO-ROLLING: %s", tostring(settings["ROLL"]:current()))
+            
+            elseif command == "roll1" then
+                local name = commands[2] or false
+                
+                if name and helpers["rolls"].getRoll(name) then
+                    
+                    if settings["ROLL2"] and helpers["rolls"].getRoll(name).en ~= settings["ROLL2"].en then
+                        settings["ROLL1"] = helpers["rolls"].getRoll(name)
+                        message = string.format("ROLL #1 IS NOW SET TO: %s", tostring(settings["ROLL1"].en))
+                        
+                    elseif not settings["ROLL2"] then
+                        settings["ROLL1"] = helpers["rolls"].getRoll(name)
+                        message = string.format("ROLL #1 IS NOW SET TO: %s", tostring(settings["ROLL1"].en))
+                        
+                    end
+                    
+                end
+                
+            elseif command == "roll2" then
+                local name = commands[2] or false
+                
+                if name and helpers["rolls"].getRoll(name) then
+                    
+                    if settings["ROLL1"] and helpers["rolls"].getRoll(name).en ~= settings["ROLL1"].en then
+                        settings["ROLL2"] = helpers["rolls"].getRoll(name)
+                        message = string.format("ROLL #2 IS NOW SET TO: %s", tostring(settings["ROLL2"].en))
+                        
+                    elseif not settings["ROLL1"] then
+                        settings["ROLL2"] = helpers["rolls"].getRoll(name)
+                        message = string.format("ROLL #2 IS NOW SET TO: %s", tostring(settings["ROLL2"].en))
+                        
+                    end
+                    
+                end
+                
+            elseif command == "ambuscade" then
+                message = ("AMBUSCADE SETTINGS ENABLED!")
+                settings["HATE"]:setTo(false)
+                settings["BUFFS"]:setTo(true)
+                settings["JA"]:setTo(true)
+                settings["WS"]:setTo(true)
+                settings["ROLL"]:setTo(true)
+                settings["WSNAME"] = "Fast Blade"
+                helpers["controls"].setEnabled(true)
+                
+                -- SET ROLLS.
+                settings["ROLL1"] = res.job_abilities["Fighter's Roll"]
+                settings["ROLL2"] = res.job_abilities["Samurai's Roll"]
+                
+                if bpcore:isLeader() and windower.ffxi.get_party().party1_count < 6 then
+                    helpers["trust"].setEnabled(true)
+                end
+                
+            elseif command == "disable" then
+                message = ("SETTINGS DISABLED!")
+                settings["HATE"]:setTo(false)
+                settings["BUFFS"]:setTo(false)
+                settings["JA"]:setTo(false)
+                settings["WS"]:setTo(false)
+                settings["ROLL"]:setTo(false)
+                helpers["controls"].setEnabled(true)
+                helpers["trust"].setEnabled(false)
+                
+            end
+            
+            if message ~= "" then
+                helpers['popchat']:pop(message:upper() or ("INVALID COMANDS"):upper(), system["Popchat Window"])
+            end
+            
         end
         
-        if command == "on" or command == "toggle" or command == "off" then
-            system["BP Enabled"]:next()
-            helpers['popchat']:pop(("Automation: " .. tostring(system["BP Enabled"]:current())):upper(), system["Popchat Window"])
-            
-            if not system["BP Enabled"]:current() then
-                helpers['queue'].clear()
-            end
-        
-        elseif command == "display" then
-            display:next()
-            helpers['popchat']:pop(("DISPLAY: " .. tostring(display:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "am" then
-            settings["AM"]:next()
-            helpers['popchat']:pop(("Auto-Aftermath: " .. tostring(settings["AM"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "amt" then
-            settings["AM THRESHOLD"]:next()
-            helpers['popchat']:pop(("Aftermath Threshold: " .. tostring(settings["AM THRESHOLD"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "1hr" then
-            settings["1HR"]:next()
-            helpers['popchat']:pop(("Auto-1hour: " .. tostring(settings["1HR"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "ja" then
-            settings["JA"]:next()
-            helpers['popchat']:pop(("Auto-Job Abilities: " .. tostring(settings["JA"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "ra" then
-            settings["RA"]:next()
-            helpers['popchat']:pop(("Auto-Ranged Attacks: " .. tostring(settings["RA"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "hate" then
-            settings["HATE"]:next()
-            helpers['popchat']:pop(("Auto-Enmity: " .. tostring(settings["HATE"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "buffs" then
-            settings["BUFFS"]:next()
-            helpers['popchat']:pop(("Auto-Buffing: " .. tostring(settings["BUFFS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "debuffs" then
-            settings["DEBUFFS"]:next()
-            helpers['popchat']:pop(("Auto-Debuffing: " .. tostring(settings["DEBUFFS"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "tpt" then
-            local number = commands[2] or false
-            
-            if number then
-                number = tonumber(number)
-                
-                if number > 999 and number <= 3000 then
-                    settings["TP THRESHOLD"] = number
-                    helpers['popchat']:pop(("TP THRESHOLD: " .. tostring(number) .. "."):upper(), system["Popchat Window"])
-                
-                else
-                    helpers['popchat']:pop(("Enter a number from 1000 to 3000"):upper(), system["Popchat Window"])
-                    
-                end
-            
-            end
-        
-        elseif command == "ws" then
-            settings["WS"]:next()
-            helpers['popchat']:pop(("Auto-Weapon Skills: " .. tostring(settings["WS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "wsname" then
-            local weaponskill = windower.convert_auto_trans(table.concat(commands, " "):sub(8)):lower()
-            for _,v in pairs(windower.ffxi.get_abilities().weapon_skills) do
-                
-                if v and res.weapon_skills[v].en then
-                    local match = res.weapon_skills[v].en:lower():match(("[%a%s%'%:]+"))
-
-                    if weaponskill:sub(1, #weaponskill) == match:sub(1, #weaponskill) then
-                        settings["WSNAME"] = res.weapon_skills[v].en
-                        helpers['popchat']:pop(("Weapon Skill now set to: " .. tostring(settings["WSNAME"])):upper(), system["Popchat Window"])
-                    end
-                    
-                end
-                
-            end
-        
-        elseif command == "sekka" then
-            local weaponskill = windower.convert_auto_trans(table.concat(commands, " "):sub(8)):lower()
-            for _,v in pairs(windower.ffxi.get_abilities().weapon_skills) do
-                
-                if v and res.weapon_skills[v].en then
-                    local match = res.weapon_skills[v].en:lower():match(("[%a%s%'%:]+"))
-
-                    if weaponskill:sub(1, #weaponskill) == match:sub(1, #weaponskill) then
-                        settings["SEKKA"] = res.weapon_skills[v].en
-                        helpers['popchat']:pop(("Weapon Skill now set to: " .. tostring(settings["SEKKA"])):upper(), system["Popchat Window"])
-                    end
-                    
-                end
-                
-            end
-        
-        elseif command == "boost" then
-            settings["BOOST"]:next()
-            helpers['popchat']:pop(("Auto-Boost: " .. tostring(settings["BOOST"]:current())):upper(), system["Popchat Window"])
-            
-        elseif (command == "hasso" or command == "seigan") then
-            settings["HASSO MODE"]:next()
-            helpers['popchat']:pop(("Hasso Mode: " .. tostring(settings["HASSO MODE"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "sc" then
-            settings["SC"]:next()
-            helpers['popchat']:pop(("Auto-Skillchains: " .. tostring(settings["SC"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "burst" then
-            settings["BURST"]:next()
-            helpers['popchat']:pop(("Auto-Bursting: " .. tostring(settings["BURST"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "element" then
-            local element = windower.convert_auto_trans(commands[2]):lower() or false
-            if element then
-
-                for _,v in pairs(res.elements) do
-
-                    if v and (element):sub(1,6) == (v.en):sub(1,6):lower() then
-                        settings["ELEMENT"]:setTo(v.en)
-                        helpers['popchat']:pop(("Auto-Burst Element now set to: " .. tostring(settings["ELEMENT"]:current())):upper(), system["Popchat Window"])    
-                    end
-                    
-                end
-                
-            end
-            
-        elseif command == "tier" then
-            settings["TIER"]:next()
-            helpers['popchat']:pop(("Auto-Bursting Tier now set to: " .. tostring(settings["TIER"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "aoe" then
-            settings["ALLOW-AOE"]:next()
-            helpers['popchat']:pop(("AOE-Bursting now: " .. tostring(settings["ALLOW-AOE"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "drains" then
-            settings["DRAINS"]:next()
-            helpers['popchat']:pop(("Auto-Drains: " .. tostring(settings["DRAINS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "stuns" then
-            settings["STUNS"]:next()
-            helpers['popchat']:pop(("Auto-Stunning: " .. tostring(settings["STUNS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "super" then
-            settings["SUPER-TANK"]:next()
-            helpers['popchat']:pop(("Super-tanking: " .. tostring(settings["SUPER-TANK"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "utsu" then
-            settings["SHADOWS"]:next()
-            helpers['popchat']:pop(("Auto-Shadows: " .. tostring(settings["SHADOWS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "food" then
-            settings["FOOD"]:next()
-            helpers['popchat']:pop(("Auto-Food: " .. tostring(settings["FOOD"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "sambas" then
-            settings["SAMBAS"]:next()
-            helpers['popchat']:pop(("Auto-Steps: " .. tostring(settings["SAMBAS"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "steps" then
-            settings["STEPS"]:next()
-            helpers['popchat']:pop(("Auto-Steps: " .. tostring(settings["STEPS"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "skillup" then
-            settings["SKILLUP"]:next()
-            helpers['popchat']:pop(("Auto-Skillup: " .. tostring(settings["SKILLUP"]:current())):upper(), system["Popchat Window"])
-            
-        elseif command == "skills" then
-            settings["SKILLS"]:next()
-            helpers['popchat']:pop(("Skill-Up spell now set to: " .. tostring(settings["SKILLS"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "roll" then
-            settings["ROLL"]:next()
-            helpers['popchat']:pop(("Auto-Rolling: " .. tostring(settings["ROLL"]:current())):upper(), system["Popchat Window"])
-        
-        elseif command == "roll1" then
-            local name = commands[2] or false
-            
-            if name and helpers["rolls"].getRoll(name) then
-                
-                if settings["ROLL2"] and helpers["rolls"].getRoll(name).en ~= settings["ROLL2"].en then
-                    settings["ROLL1"] = helpers["rolls"].getRoll(name)
-                    helpers['popchat']:pop(("Roll #1 is now set to: " .. tostring(settings["ROLL1"].en)):upper(), system["Popchat Window"])
-                    
-                elseif not settings["ROLL2"] then
-                    settings["ROLL1"] = helpers["rolls"].getRoll(name)
-                    helpers['popchat']:pop(("Roll #1 is now set to: " .. tostring(settings["ROLL1"].en)):upper(), system["Popchat Window"])
-                    
-                end
-                
-            end
-            
-        elseif command == "roll2" then
-            local name = commands[2] or false
-            
-            if name and helpers["rolls"].getRoll(name) then
-                
-                if settings["ROLL1"] and helpers["rolls"].getRoll(name).en ~= settings["ROLL1"].en then
-                    settings["ROLL2"] = helpers["rolls"].getRoll(name)
-                    helpers['popchat']:pop(("Roll #2 is now set to: " .. tostring(settings["ROLL2"].en)):upper(), system["Popchat Window"])
-                    
-                elseif not settings["ROLL1"] then
-                    settings["ROLL2"] = helpers["rolls"].getRoll(name)
-                    helpers['popchat']:pop(("Roll #2 is now set to: " .. tostring(settings["ROLL2"].en)):upper(), system["Popchat Window"])
-                    
-                end
-                
-            end
-        
-        else
-            system["Core"].event(command)
-            
-        end
+        -- HANDLE GLOBAL COMMANDS.
+        helpers["corecommands"].handle(commands)
         
     end
     
+    -- HANDLE ITEM LOGIC.
     self.handleItems = function()
         
         if bpcore:canItem() and bpcore:checkReady() and not system["Midaction"] then
             
             if bpcore:buffActive(15) then
                 
-                if bpcore:findItemByName("Holy Water") then
+                if bpcore:findItemByName("Holy Water") and not helpers["queue"].inQueue(IT["Holy Water"], "me") then
                     helpers["queue"].add(IT["Holy Water"], "me")
                 
-                elseif bpcore:findItemByName("Hallowed Water") then
+                elseif bpcore:findItemByName("Hallowed Water") and not helpers["queue"].inQueue(IT["Hallowed Water"], "me") then
                     helpers["queue"].add(IT["Hallowed Water"], "me")
                     
                 end
             
             elseif bpcore:buffActive(6) then
                 
-                if bpcore:findItemByName("Echo Drops") then
+                if bpcore:findItemByName("Echo Drops") and not helpers["queue"].inQueue(IT["Echo Drops"], "me") then
                     helpers["queue"].add(IT["Echo Drops"], "me")
                 end
                 
@@ -384,12 +262,16 @@ function core.get()
         
         if bpcore:checkReady() and not helpers["actions"].getMoving() and system["BP Enabled"]:current() then
             local player  = windower.ffxi.get_player() or false
+            local current = helpers["queue"].getNextAction() or false
             local rolling = helpers["rolls"].getRolling()
+            
+            -- Determine how to handle status debuffs.
+            if settings["STATUS"]:current() then
+                helpers["status"].manangeStatuses()
+            end
             
             -- PLAYER IS ENGAGED.
             if player.status == 1 then
-                
-                -- Determine which target is mine.
                 local target = helpers["target"].getTarget() or windower.ffxi.get_mob_by_target("t") or false
                 
                 -- WEAPON SKILL LOGIC.
@@ -567,9 +449,7 @@ function core.get()
                 end
             
             -- PLAYER IS DISENGAGED LOGIC.
-            elseif player.status == 0 then
-                
-                -- Determine which target is mine.
+            elseif (player.status == 0 or settings["SUPER-TANK"]:current()) then
                 local target = helpers["target"].getTarget()
                 
                 -- ABILITY LOGIC.
@@ -766,6 +646,7 @@ function core.get()
             end
             
             -- HANDLE EVERYTHING INSIDE THE QUEUE.
+            helpers["cures"].handleCuring()
             helpers['queue'].handleQueue()
         
         end
@@ -828,25 +709,61 @@ function core.get()
         name:setTo(value)
     end
     
-    self.event = function(name)
+    self.toggleDisplay = function()
+        display:next()
+    end
+    
+    self.getDisplay = function()
+        return display:current()
+    end
+    
+    self.next = function(name)
         local name = name or false
         
         if name then
-            
-            if name == "trash" then
-                
-            elseif name == "domaininvasion" then
-                settings["JA"]:setTo(true)
-                settings["WS"]:setTo(true)
-                settings["BUFFS"]:setTo(true)
-                settings["SANGUINE"]:setTo(true)
-                helpers["controls"].setEnabled(true)
-                helpers["trust"].setEnabled(true)
-                
-            end
-            
+            settings[name]:next()
         end
         
+    end
+    
+    self.current = function(name)
+        local name = name or false
+        
+        if name then        
+            return settings[name]:current()
+        end
+        
+    end
+    
+    self.set = function(name, value)
+        local name, value = name or false, value or false
+        
+        if name and value then
+            settings[name]:setTo(value)
+        end
+        
+    end
+    
+    self.value = function(name, value)
+        local name, value = name or false, value or false
+        
+        if name and value then
+            settings[name] = (value)
+        end
+        
+    end
+    
+    self.get = function(name)
+        local name = name or false
+        
+        if name then        
+            return settings[name]
+        end
+        
+    end
+    
+    self.getSettings = function()
+        return settings
     end
     
     return self

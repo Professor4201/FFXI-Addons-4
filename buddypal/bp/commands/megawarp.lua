@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local megawarp = {}
 function megawarp.run()
-    self = {}
+    local self = {}
     
     --------------------------------------------------------------------------------------
     -- Handle the execution of all helper commands.
@@ -13,7 +13,7 @@ function megawarp.run()
         local command     = commands[2] or false
         local destination = {}
         local post        = commands[#commands] or false
-
+        
         for i=3, #commands do
 
             if tonumber(commands[i]) ~= nil then
@@ -30,7 +30,12 @@ function megawarp.run()
             post = 1
         end
         
-        if command and destination and post then
+        if command == "max" then
+            helpers["megawarp"].toggleDistance()
+            return
+        end
+        
+        if command and destination and post and helpers["megawarp"] ~= nil then
             local destination = table.concat(destination, " ")
             local scan        = command:sub(1, #command):lower()
             

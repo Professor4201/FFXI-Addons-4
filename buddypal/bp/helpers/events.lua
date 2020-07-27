@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local events = {}
 function events.new()
-    self = {}
+    local self = {}
     
     --------------------------------------------------------------------------------
     -- Private Event Map.
@@ -11,28 +11,28 @@ function events.new()
     local map = {
         
         -- WINDOWER EVENTS.
-        ["incoming"]        = {"Globals"},
-        ["outgoing"]        = {"Globals"},
-        ["prerender"]       = {"Globals"},
-        ["zonechange"]      = {"Globals"},
-        ["timechange"]      = {"Globals"},
-        ["daychange"]       = {"Globals"},
-        ["incomingtext"]    = {"Globals"},
-        ["chatmessage"]     = {"Globals"},
-        ["jobchange"]       = {"Globals"},
-        ["statuschange"]    = {"Globals"},
-        ["ipcmessage"]      = {"Globals"},
-        ["partyinvite"]     = {"Globals"},
-        ["gainbuff"]        = {"Globals"},
-        ["losebuff"]        = {"Globals"},
-        ["mouse"]           = {"Globals"},
+        ["incoming"]        = {"globals"},
+        ["outgoing"]        = {"globals"},
+        ["prerender"]       = {"globals"},
+        ["zonechange"]      = {"globals"},
+        ["timechange"]      = {"globals"},
+        ["daychange"]       = {"globals"},
+        ["incomingtext"]    = {"globals"},
+        ["chatmessage"]     = {"globals"},
+        ["jobchange"]       = {"globals"},
+        ["statuschange"]    = {"globals"},
+        ["ipcmessage"]      = {"globals"},
+        ["partyinvite"]     = {"globals"},
+        ["gainbuff"]        = {"globals"},
+        ["losebuff"]        = {"globals"},
+        ["mouse"]           = {"globals"},
         
         -- CUSTOM EVENTS.
         ["maps"]            = {"promurouve"},
         ["quest"]           = {"mogexit"},
         ["jobs"]            = {"PLD","DRK","BST","BRD","RNG","SMN","SAM","NIN","DRG","BLU","COR","PUP","DNC","SCH","GEO","RUN",},
         ["summoner"]        = {"caitsith","ifrit","shiva","garuda","titan","ramuh","leviathan","fenrir","diabolos","siren","atomos","alexander","odin"},
-        ["craft"]           = {"Smithing","Gold","Leathercraft","Clothcraft","Woodworking","Alchemy","Bonecraft","Cooking"},
+        ["craft"]           = {"smithing","gold","leathercraft","clothcraft","woodworking","alchemy","bonecraft","cooking"},
         ["sparks"]          = {"Sparks"},
         ["couriers"]        = {"petitioner","probationer","disciple","contributor","partner","advisor","magnate","legend"},
         ["pioneers"]        = {"petitioner","probationer","disciple","contributor","partner","advisor","magnate","legend"},
@@ -49,34 +49,28 @@ function events.new()
             --"Periqia_PSC",   "Periqia_PFC",     "Periqia_SP",   "Periqia_LC",   "Periqia_C",    "Periqia_S",    "Periqia_SM",   "Periqia_CS",   "Periqia_SL",   "Periqia_FL",
             --"Ilrusi_PSC",    "Ilrusi_PFC",      "Ilrusi_SP",    "Ilrusi_LC",    "Ilrusi_C",     "Ilrusi_S",     "Ilrusi_SM",    "Ilrusi_CS",    "Ilrusi_SL",    "Ilrusi_FL",
             
-        ["ambuscade"]       = {
-            
-            "antica","slime",
-            
-            "dullahan",
-        
-        },
-        ["Einherjar"]       = {"Einherjar"},
-        ["Salvage"]         = {"Arrapago","Bhaflau","SilverSea","Zhayolm","ArrapagoII","BhaflauII","SilverSeaII","ZhayolmII"},      
-        ["Domain Invasion"] = {"AziDahaka","NagaRaja","Quetzalcoatl"},
-        ["Battlefield"]     = {
+        ["ambuscade"]       = {"antica","slime","aquans","dullahan","vermin"},
+        ["einherjar"]       = {"einherjar"},
+        ["salvage"]         = {"arrapago","bhaflau","silversea","zhayolm","arrapagoII","bhaflauii","silverseaii","zhayolmii"},      
+        ["di"]              = {"azi","naga","quetz"},
+        ["battlefield"]     = {
             
             "NestOfNightmares",
             "ShadowLord","DelfkuttsTower","ArkAngelHM","ArkAngelTT","ArkAngelMR","ArkAngelEV","ArkAngelGK","DivineMight","CelestialNexus","TheSavage","HeadWind","OneToBeFeared","WarriorsPath","Dawn","PuppetInPeril","LegacyOfTheLost",
             "MaidenOfTheDusk","TrialByWind","TrialByLightning","TrialByEarth","TrialByFire","TrialByWater","TrialByIce","TheMoonlitPath","WakingTheBeast","WakingDreams","AStygianPact","DivineInterference","ChampionOfTheDawn"
         
         },
-        ["Unity"]           = {"99","119","122","125","128","135","Buy Items"},
-        ["Omen"]            = {"Fu","Kyou","Kei","Gin","Kin","Ou"},
-        ["Bastok"]          = {"Rank1","Rank2","Rank3","Rank4","Rank5","Rank6","Rank7","Rank8","Rank9","Rank10"},
-        ["Sandoria"]        = {"Rank1","Rank2","Rank3","Rank4","Rank5","Rank6","Rank7","Rank8","Rank9","Rank10"},
-        ["Windurst"]        = {"Rank1","Rank2","Rank3","Rank4","Rank5","Rank6","Rank7","Rank8","Rank9","Rank10"},
-        ["ROZ"]             = {},
-        ["COP"]             = {},
-        ["TOAU"]            = {},
-        ["WOTG"]            = {},
-        ["SOA"]             = {},
-        ["ROV"]             = {},
+        ["unity"]           = {"99","119","122","125","128","135","Buy Items"},
+        ["omen"]            = {"Fu","Kyou","Kei","Gin","Kin","Ou"},
+        ["bastok"]          = {"Rank1","Rank2","Rank3","Rank4","Rank5","Rank6","Rank7","Rank8","Rank9","Rank10"},
+        ["sandoria"]        = {"Rank1","Rank2","Rank3","Rank4","Rank5","Rank6","Rank7","Rank8","Rank9","Rank10"},
+        ["windurst"]        = {"Rank1","Rank2","Rank3","Rank4","Rank5","Rank6","Rank7","Rank8","Rank9","Rank10"},
+        ["roz"]             = {},
+        ["cop"]             = {},
+        ["toau"]            = {},
+        ["wotg"]            = {},
+        ["soa"]             = {},
+        ["rov"]             = {},
     }
     
     -- Private Variables
@@ -101,7 +95,7 @@ function events.new()
     --Event Window Settings.
     local settings = {
         ['pos']={['x']=225,['y']=740},
-        ['bg']={['alpha']=155,['red']=000,['green']=000,['blue']=000,['visible']=false},
+        ['bg']={['alpha']=200,['red']=000,['green']=000,['blue']=000,['visible']=false},
         ['flags']={['right']=false,['bottom']=false,['bold']=false,['draggable']=false,['italic']=false},
         ['padding']=8,
         ['text']={['size']=10,['font']='lucida console',['fonts']={},['alpha']=255,['red']=245,['green']=200,['blue']=020,
@@ -195,8 +189,9 @@ function events.new()
         
         if event then
             local registry = event.registry
-
+    
             for i,v in pairs(event) do
+                
                 if type(v) == "function" then
                     local id = windower.register_event(registry[i], event[i])
                     registered["current"][i] = {name=i, id=id, func=event[i]}
@@ -228,21 +223,21 @@ function events.new()
     -- Register all Global Events.
     --------------------------------------------------------------------------------
     self.registerGlobals = function()
-        local incoming       = helpers["events"].callEvents("incoming",      "Globals")
-        local outgoing       = helpers["events"].callEvents("outgoing",      "Globals")
-        local prerender      = helpers["events"].callEvents("prerender",     "Globals")
-        local daychange      = helpers["events"].callEvents("daychange",     "Globals")
-        local timechange     = helpers["events"].callEvents("timechange",    "Globals")
-        local incoming_text  = helpers["events"].callEvents("incomingtext",  "Globals")
-        local chat_message   = helpers["events"].callEvents("chatmessage",   "Globals")
-        local jobchange      = helpers["events"].callEvents("jobchange",     "Globals")
-        local statuschange   = helpers["events"].callEvents("statuschange",  "Globals")
-        local zonechange     = helpers["events"].callEvents("zonechange",    "Globals")
-        local ipcmessage     = helpers["events"].callEvents("ipcmessage",   "Globals")
-        local partyinvite    = helpers["events"].callEvents("partyinvite",  "Globals")
-        local gainbuff       = helpers["events"].callEvents("gainbuff",     "Globals")
-        local losebuff       = helpers["events"].callEvents("losebuff",     "Globals")
-        local mouse          = helpers["events"].callEvents("mouse",         "Globals")
+        local incoming       = helpers["events"].callEvents("incoming",      "globals")
+        local outgoing       = helpers["events"].callEvents("outgoing",      "globals")
+        local prerender      = helpers["events"].callEvents("prerender",     "globals")
+        local daychange      = helpers["events"].callEvents("daychange",     "globals")
+        local timechange     = helpers["events"].callEvents("timechange",    "globals")
+        local incoming_text  = helpers["events"].callEvents("incomingtext",  "globals")
+        local chat_message   = helpers["events"].callEvents("chatmessage",   "globals")
+        local jobchange      = helpers["events"].callEvents("jobchange",     "globals")
+        local statuschange   = helpers["events"].callEvents("statuschange",  "globals")
+        local zonechange     = helpers["events"].callEvents("zonechange",    "globals")
+        local ipcmessage     = helpers["events"].callEvents("ipcmessage",    "globals")
+        local partyinvite    = helpers["events"].callEvents("partyinvite",   "globals")
+        local gainbuff       = helpers["events"].callEvents("gainbuff",      "globals")
+        local losebuff       = helpers["events"].callEvents("losebuff",      "globals")
+        local mouse          = helpers["events"].callEvents("mouse",         "globals")
 
         -- Register Globals Events.
         if incoming then
@@ -673,11 +668,10 @@ function events.new()
     -- Finish the event that is currently registered.
     --------------------------------------------------------------------------------
     self.finishEvent = function(current_event, sequence, event)
-        local sequence = sequence or false
-        local event    = event or false
+        local current_event, sequence, event = current_event or false, sequence or false, event or false
         
         if current_event then
-            helpers['schedule'].updateStats(current_event)
+            helpers["schedule"].updateStats(current_event)
             helpers["events"].setDelays("zone",  20)
             helpers["events"].setCounts("npc",   1)
             helpers["events"].setCounts("kills", 0)
@@ -692,8 +686,11 @@ function events.new()
             helpers["events"].unregister()
             
             if sequence and event then
-                helpers["events"].register(sequence, event)
+                --helpers["events"].register(sequence, event)
+                helpers["schedule"].scheduleEvent(sequence, event)
             end
+            
+            -- Maybe possibly add some sort of time stamp to completion?
             
         end
     

@@ -3,11 +3,8 @@
 --------------------------------------------------------------------------------
 local ciphers = {}
 function ciphers.run()
-    self = {}
-    
-    --------------------------------------------------------------------------------------
-    -- Handle the execution of all helper commands.
-    --------------------------------------------------------------------------------------
+    local self = {}
+
     self.execute = function(commands)
         local target   = windower.ffxi.get_mob_by_target("t") or false
         local item     = bpcore:findItemByName("cipher") or false
