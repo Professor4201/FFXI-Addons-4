@@ -1,6 +1,6 @@
 _addon.name     = "craftstats"
 _addon.author   = "Elidyr"
-_addon.version  = "1.20200513"
+_addon.version  = "1.20200726"
 _addon.command  = "stats"
 
 local helpers = require("helpers")
@@ -40,19 +40,20 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
     if id == 0x06f then
         local result  = original:unpack("C", 0x04+1)
         local quality = original:unpack("c", 0x05+1)
-        local skill   = original:unpack("H", 0x1a+1)
+        local skill   = helpers.tonumber(helpers.unpack(0x01a, 6, original))
         local item    = original:unpack("H", 0x08+1)
         
         if result and hash and quality and item then
             
             if result == 0 then
                 stats = helpers.add(stats, skill, hash, result, quality, item)
+                helpers.update(display, stats, skill, hash)
                     
-            elseif result == 1 then
+            elseif (result == 1 or result == 5) then
                 stats = helpers.add(stats, skill, hash, result, quality, item)
+                helpers.update(display, stats, skill, hash)
                 
             end
-            helpers.update(display, stats, skill, hash)
             
         end
         

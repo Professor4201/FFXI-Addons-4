@@ -1,11 +1,25 @@
 local helpers = {}
 function helpers.get()
-    self = {}
+    local self = {}
     
     -- Local Files Library.
-    local files   = require("files")
-    local res     = require("resources")
-    local texts   = require("texts")
+    local files  = require("files")
+    local res    = require("resources")
+    local texts  = require("texts")
+    local math   = math
+    local skills = {
+        [00] = "None",
+        [03] = "Fishing",
+        [53] = "Woodworking",
+        [19] = "Smithing",
+        [51] = "Goldsmithing",
+        [11] = "Clothcraft",
+        [43] = "Leathcercraft",
+        [27] = "Bonecraft",
+        [59] = "Alchemy",
+        [07] = "Cooking",
+        [39] = "Synergy",
+    }
     
     self.findItemById = function(ingredient)
         local items = windower.ffxi.get_items(0) or false
@@ -50,11 +64,11 @@ function helpers.get()
     end
     
     self.add = function(stats, skill, hash, result, quality, item)
-        local stats, skill, hash, result, quality, item = stats or false, skill or false, hash or false, result or false, quality or false, item or false
+        local stats, skill, hash, result, quality, item = stats or false, skill or 0, hash or false, result or false, quality or false, item or false
         local f = files.new(string.format("stats/%s.lua", windower.ffxi.get_player().name))
         
         if stats and skill and hash and result and quality and item then
-            
+
             if stats[skill] then
                 
                 if stats[skill][hash] then
@@ -76,7 +90,7 @@ function helpers.get()
                             
                         end
                         
-                    elseif result == 1 then
+                    elseif (result == 1 or result == 5) then
                         stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=res.items[item].en}
                         
                     end
@@ -100,7 +114,7 @@ function helpers.get()
                             
                         end
                         
-                    elseif result == 1 then
+                    elseif (result == 1 or result == 5) then
                         stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en}
                         
                     end
@@ -112,21 +126,26 @@ function helpers.get()
                 if result == 0 then
                         
                     if quality == 0 then
-                        stats = {[skill]={[hash]={total=(1), nq=(1), hq1=(0), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en}}}
+                        stats[skill] = {}
+                        stats[skill][hash] = {total=(1), nq=(1), hq1=(0), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en}
                     
                     elseif quality == 1 then
-                        stats = {[skill]={[hash]={total=(1), nq=(0), hq1=(1), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en}}}
+                        stats[skill] = {}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(1), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en}
                         
                     elseif quality == 2 then
-                        stats = {[skill]={[hash]={total=(1), nq=(0), hq1=(0), hq2=(1), hq3=(0), breaks=(0), item=res.items[item].en}}}
+                        stats[skill] = {}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(1), hq3=(0), breaks=(0), item=res.items[item].en}
                         
                     elseif quality == 3 then
-                        stats = {[skill]={[hash]={total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(1), breaks=(0), item=res.items[item].en}}}
+                        stats[skill] = {}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(1), breaks=(0), item=res.items[item].en}
                         
                     end
                     
-                elseif result == 1 then
-                    stats = {[skill]={[hash]={total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en}}}
+                elseif (result == 1 or result == 5) then
+                    stats[skill] = {}
+                    stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en}
                     
                 end
                 
@@ -157,19 +176,21 @@ function helpers.get()
     end
     
     self.update = function(display, stats, skill, hash)
-        local display, stats, skill, hash  = display or false, stats or false, skill or false, hash or false
+        local display, stats, skill, hash  = display or false, stats or false, skill, hash or false
         
         if display and stats and skill and hash and stats[skill] and stats[skill][hash] and type(stats[skill][hash]) == "table" then
             local info     = stats[skill][hash]
             local count    = #stats[skill][hash]
             local title    = "\\cs(065,245,245)"
+            local item     = "\\cs(200,175,140)"
             local craft    = "\\cs(200,175,140)"
             local close    = "\\cr"
             local percents = {total=(((info.nq+info.hq1+info.hq2+info.hq3)/info.total)*100), nq=(info.nq/info.total)*100, hq1=(info.hq1/info.total)*100, hq2=(info.hq2/info.total)*100, hq3=((info.hq3/info.total)*100), breaks=((info.breaks/info.total)*100)}
             local update   = {
                 
                 string.format("%s $$$$ %+10s Crafting Statistics %-10s $$$$ %s", title, "", "", close),
-                string.format("\n\n%s%s - Ingredients Hash: %s%s", craft, res.skills[skill].en, hash, close),
+                string.format("\n\n%sItem: %s%s", item, info.item, close),
+                string.format("\n%s%s - Ingredients Hash: %s%s", craft, skills[skill], hash, close),
                 string.format("\n\nTotal Synths: %+9s %s[%03s]%s", info.total, self.getColor(percents.total), percents.total, close),
                 string.format("\nSuccessful:   %+9s %s[%03s]%s", info.nq, self.getColor(percents.nq), percents.nq, close),
                 string.format("\nHQ T1:  %+15s %s[%03s]%s", info.hq1, self.getColor(percents.hq1), percents.hq1, close),
@@ -195,7 +216,7 @@ function helpers.get()
     end
     
     self.getColor = function(value, reverse)
-        local value   = value or false
+        local value   = value or 0
         local reverse = reverse or false
         
         if value and type(value) == "number" then
@@ -219,6 +240,9 @@ function helpers.get()
                     
                     elseif v and type(v) == "table" and value <= v.value and reverse then
                         color = v.color
+                        
+                    elseif reverse and value > 98 then
+                        color = colors[1].color
                     
                     end
                     
@@ -230,6 +254,40 @@ function helpers.get()
         end
         return false
         
+    end
+    
+    self.unpack = function(p, s, d)
+        local p, s, d, r = p or false, s or false, d or false, ""
+        if p and s and d and r == "" then
+            for i=1, s, +1 do
+                r = (r..d:unpack("b", p+1, i))
+            end
+        end
+        return r
+    end
+    
+    self.tonumber = function(b)
+        local num, ex, l, new = 0, ((b):length()-1), 0, ""
+        l = ex + 1
+        for i = 1, l do
+            new = (b):sub(i,i)
+            if new == "1" then
+                num = num + 2^ex
+            end
+            ex = ex - 1
+        end
+        return tonumber(string.format("%u", num))
+    end
+    
+    self.tobit = function(n)
+        local result = ""
+        repeat
+            local divres = (n/2)
+            local int, frac = math.modf(divres)
+            n = int
+            result = (math.ceil(frac)..result)
+        until n == 0
+        return tonumber(string.format(result, "s"))
     end
     
     return self
