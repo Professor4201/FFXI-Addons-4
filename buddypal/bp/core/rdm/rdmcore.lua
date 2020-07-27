@@ -5,7 +5,7 @@ local core = {}
 
 -- CORE AUTOMATED FUNCTION FOR THIS JOB.
 function core.get()
-    self = {}
+    local self = {}
     
     -- MASTER SETTINGS.
     local settings = {}
@@ -72,6 +72,7 @@ function core.get()
     settings["SUMMON"]                             = I{"Carbuncle","Cait Sith","Ifrit","Shiva","Garuda","Titan","Ramuh","Leviathan","Fenrir","Diabolos","Siren"}
     settings["BPRAGE"]                             = I{false,true}
     settings["BPWARD"]                             = I{false,true}
+    settings["ROTATE"]                             = I{false,true}
     settings["AUTO SIC"]                           = I{false,true}
     settings["AOEHATE"]                            = I{false,true}
     settings["EMBOLDEN"]                           = I{"Palanx","Temper","Regen IV"}
@@ -80,6 +81,10 @@ function core.get()
     settings["CHIVALRY"]                           = I{1000,1500,2000,2500,3000}
     settings["WEATHER"]                            = I{"Firestorm","Hailstorm","Windstorm","Sandstorm","Thunderstorm","Rainstorm","Voidstorm","Aurorastorm"}
     settings["ARTS"]                               = I{1,2,3}
+    settings["MISERY"]                             = I{false,true}
+    settings["IMPETUS WS"]                         = "Raging Fists"
+    settings["FOORWORK WS"]                        = "Tornado Kick"
+    settings["DEFAULT WS"]                         = "Howling Fist"
     
     -- DEBUFFS.
     settings["SPELLS"]={

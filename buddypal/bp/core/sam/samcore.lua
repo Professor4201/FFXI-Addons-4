@@ -5,7 +5,7 @@ local core = {}
 
 -- CORE AUTOMATED FUNCTION FOR THIS JOB.
 function core.get()
-    self = {}
+    local self = {}
     
     -- MASTER SETTINGS.
     local settings = {}
@@ -72,6 +72,7 @@ function core.get()
     settings["SUMMON"]                             = I{"Carbuncle","Cait Sith","Ifrit","Shiva","Garuda","Titan","Ramuh","Leviathan","Fenrir","Diabolos","Siren"}
     settings["BPRAGE"]                             = I{false,true}
     settings["BPWARD"]                             = I{false,true}
+    settings["ROTATE"]                             = I{false,true}
     settings["AUTO SIC"]                           = I{false,true}
     settings["AOEHATE"]                            = I{false,true}
     settings["EMBOLDEN"]                           = I{"Palanx","Temper","Regen IV"}

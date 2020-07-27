@@ -5,7 +5,7 @@ local core = {}
 
 -- CORE AUTOMATED FUNCTIONS FOR THIS JOB.
 function core.get()
-    self = {}
+    local self = {}
     
     -- MASTER SETTINGS.
     local settings = {}

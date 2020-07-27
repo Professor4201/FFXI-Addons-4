@@ -5,20 +5,25 @@ local core = {}
 
 -- CORE AUTOMATED FUNCTION FOR THIS JOB.
 function core.get()
-    self = {}
+    local self = {}
     
     -- Red Mage Master Settings
     local settings = {}
-    settings["ON"]                                 = I{false,true}
     settings["AM"]                                 = I{false,true}
+    settings["AM THRESHOLD"]                       = I{3000,2000,1000}
     settings["1HR"]                                = I{false,true}
     settings["JA"]                                 = I{false,true}
     settings["RA"]                                 = I{false,true}
+    settings["CURES"]                              = I{1,2,3}
+    settings["SUBLIMATION"]                        = I{true,false}
     settings["HATE"]                               = I{false,true}
     settings["BUFFS"]                              = I{false,true}
     settings["DEBUFFS"]                            = I{false,true}
+    settings["STATUS"]                             = I{false,true}
     settings["WS"]                                 = I{false,true}
-    settings["WSNAME"]                             = "Savage Blade"
+    settings["WSNAME"]                             = "Resolution"
+    settings["RANGED WS"]                          = "N/A"
+    settings["TP THRESHOLD"]                       = 1000
     settings["SC"]                                 = I{false,true}
     settings["BURST"]                              = I{false,true}
     settings["ELEMENT"]                            = I{"Fire","Ice","Wind","Earth","Lightning","Water","Light","Dark","Random"}
@@ -26,21 +31,60 @@ function core.get()
     settings["ALLOW-AOE"]                          = I{false,true}
     settings["DRAINS"]                             = I{false,true}
     settings["STUNS"]                              = I{false,true}
+    settings["TANK MODE"]                          = I{false,true}
     settings["SUPER-TANK"]                         = I{false,true}
+    settings["SEKKA"]                              = "Resolution"
     settings["SHADOWS"]                            = I{false,true}
     settings["FOOD"]                               = I{"Sublime Sushi","Sublime Sushi +1"}
+    settings["SAMBAS"]                             = I{"Drain Samba II","Haste Samba"}
     settings["STEPS"]                              = I{"Quickstep","Box Step","Stutter Step"}
+    settings["RUNES"]                              = {rune1="",rune2="",rune3=""}
+    settings["RUNE1"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
+    settings["RUNE2"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
+    settings["RUNE3"]                              = I{"Lux","Tenebrae","Unda","Ignis","Gelus","Flabra","Tellus","Sulpor"}
     settings["SKILLUP"]                            = I{false,true}
-    settings["SKILLS"]                             = I{"Enhancing","Elemental","Enfeebling","Dark","Divine"}
-    
-    -- Specialty Settings
-    settings["SANGUINE"]                           = I{false,true}
+    settings["SKILLS"]                             = I{"Enhancing"}
     settings["COMPOSURE"]                          = I{true,false}
     settings["CONVERT"]                            = I{true,false}
     settings["ENSPELL"]                            = I{"Enfire","Enblizzard","Enaero","Enstone","Enthunder","Enwater"}
     settings["GAINS"]                              = I{"Gain-DEX","Gain-STR","Gain-MND","Gain-INT","Gain-AGI","Gain-VIT","Gain-CHR"}
     settings["SPIKES"]                             = I{"None","Blaze Spikes","Ice Spikes","Shock Spikes"}
     settings["DIA"]                                = I{"Dia","Bio"}
+    settings["SANGUINE"]                           = I{false,true}
+    settings["REPEAT"]                             = I{false,true}
+    settings["LAST REPEAT"]                        = os.clock()
+    settings["ROLL"]                               = I{false,true}
+    settings["QD"]                                 = I{false,true}
+    settings["SHOTS"]                              = I{"Fire Shot","Ice Shot","Wind Shot","Earth Shot","Thunder Shot","Water Shot","Light Shot","Dark Shot"}
+    settings["ROLL1"]                              = false
+    settings["ROLL2"]                              = false
+    settings["INDI"]                               = I{false,true}
+    settings["GEO"]                                = I{false,true}
+    settings["ENTRUST"]                            = I{false,true}
+    settings["ISPELL"]                             = ""
+    settings["GSPELL"]                             = ""
+    settings["ESPELL"]                             = ""
+    settings["ETARGET"]                            = system["Main Character"]
+    settings["BUBBLE BUFF"]                        = I{"Ecliptic Attrition","Lasting Emanation"}
+    settings["BOOST"]                              = I{false,true}
+    settings["PET"]                                = I{false,true}
+    settings["SPIRITS"]                            = T{"Light Spirit","Fire Spirirt","Ice Spirit","Air Spirit","Earth Spirit","Thunder Spirit","Water Spirit","Dark Spirit"}
+    settings["SUMMON"]                             = I{"Carbuncle","Cait Sith","Ifrit","Shiva","Garuda","Titan","Ramuh","Leviathan","Fenrir","Diabolos","Siren"}
+    settings["BPRAGE"]                             = I{false,true}
+    settings["BPWARD"]                             = I{false,true}
+    settings["ROTATE"]                             = I{false,true}
+    settings["AUTO SIC"]                           = I{false,true}
+    settings["AOEHATE"]                            = I{false,true}
+    settings["EMBOLDEN"]                           = I{"Palanx","Temper","Regen IV"}
+    settings["BLU MODE"]                           = I{"DPS","NUKE"}
+    settings["MIGHTY GUARD"]                       = I{true,false}
+    settings["CHIVALRY"]                           = I{1000,1500,2000,2500,3000}
+    settings["WEATHER"]                            = I{"Firestorm","Hailstorm","Windstorm","Sandstorm","Thunderstorm","Rainstorm","Voidstorm","Aurorastorm"}
+    settings["ARTS"]                               = I{1,2,3}
+    settings["MISERY"]                             = I{false,true}
+    settings["IMPETUS WS"]                         = "Raging Fists"
+    settings["FOORWORK WS"]                        = "Tornado Kick"
+    settings["DEFAULT WS"]                         = "Howling Fist"
     
     settings["SPELLS"]={
         
