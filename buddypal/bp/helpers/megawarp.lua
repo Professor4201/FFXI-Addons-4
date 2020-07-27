@@ -317,7 +317,7 @@ function megawarp.new()
                 local target = windower.ffxi.get_mob_by_id(v.id) or false
                 local coords = (v.x+v.y+v.z)
                 
-                if target and ((target.distance):sqrt() <= 6 or max_distance) and coords ~= 0 then
+                if target and coords ~= 0 and ((target.distance):sqrt() <= 6 or max_distance:current()) then
                     
                     if warp_type == "homepoints" then
                         

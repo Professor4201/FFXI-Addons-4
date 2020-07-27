@@ -1,6 +1,6 @@
 _addon.name     = "buddypal"
 _addon.author   = "Elidyr"
-_addon.version  = "1.20200726b"
+_addon.version  = "1.20200727b"
 _addon.command  = "bp"
 
 --Bootstrap all the system files.
