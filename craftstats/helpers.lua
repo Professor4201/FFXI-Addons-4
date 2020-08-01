@@ -49,8 +49,8 @@ function helpers.get()
         
     end
     
-    self.createId = function(ingredients, crystal, moon)
-        local ingredients, crystal, moon = ingredients or false, crystal or false, moon or false
+    self.createId = function(ingredients, crystal, day, moon, weather)
+        local ingredients, crystal, moon = ingredients or false, crystal or false, day or false, moon or false, weather or false
         
         if ingredients and crystal and moon and type(ingredients) == "table" then
             local uid = 0
@@ -62,15 +62,15 @@ function helpers.get()
                 end
                 
             end
-            return ((uid*crystal)+moon)
+            return ((uid*crystal)+(day+moon+weather))
             
         end
         return false
         
     end
     
-    self.add = function(stats, skill, hash, result, quality, item, moon)
-        local stats, skill, hash, result, quality, item, moon = stats or false, skill or 0, hash or false, result or false, quality or false, item or false, moon or false
+    self.add = function(stats, skill, hash, result, quality, item, day, moon, weather)
+        local stats, skill, hash, result, quality, item, moon = stats or false, skill or 0, hash or false, result or false, quality or false, item or false, day or false, moon or false, weather or false
         local f = files.new(string.format("stats/%s.lua", windower.ffxi.get_player().name))
         
         if stats and skill and hash and result and quality and item and moon then
@@ -85,31 +85,31 @@ function helpers.get()
                         if quality == -1 then
 
                             if s.item ~= "Mangled Mess" then
-                                stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=s.item, skill=skill, hash=hash, moon=moon}
+                                stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=s.item, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                             else
-                                stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                                stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=res.items[item].en, skill=skill, day=day, moon=moon, weather=weather}
                             end
                         
                         elseif quality == 0 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq+1), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq+1), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, day=day, moon=moon, weather=weather}
                         
                         elseif quality == 1 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1+1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1+1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, day=day, moon=moon, weather=weather}
                             
                         elseif quality == 2 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2+1), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2+1), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, day=day, moon=moon, weather=weather}
                             
                         elseif quality == 3 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3+1), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3+1), breaks=(s.breaks), item=res.items[item].en, skill=skill, day=day, moon=moon, weather=weather}
                             
                         end
                         
                     elseif (result == 1 or result == 5) then
                         
                         if s.item ~= "Mangled Mess" then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=s.item, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=s.item, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                         else
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                         end
                         
                     end
@@ -120,24 +120,24 @@ function helpers.get()
                     if (result == 0 or result == 12) then
                         
                         if quality == -1 then
-                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                         
                         elseif quality == 0 then
-                            stats[skill][hash] = {total=(1), nq=(1), hq1=(0), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(1), nq=(1), hq1=(0), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                         
                         elseif quality == 1 then
-                            stats[skill][hash] = {total=(1), nq=(0), hq1=(1), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(1), nq=(0), hq1=(1), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                             
                         elseif quality == 2 then
-                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(1), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(1), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                             
                         elseif quality == 3 then
-                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(1), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(1), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                             
                         end
                         
                     elseif (result == 1 or result == 5) then
-                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                         
                     end
                     
@@ -149,29 +149,29 @@ function helpers.get()
                     
                     if quality == -1 then
                         stats[skill] = {}
-                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                     
                     elseif quality == 0 then
                         stats[skill] = {}
-                        stats[skill][hash] = {total=(1), nq=(1), hq1=(0), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                        stats[skill][hash] = {total=(1), nq=(1), hq1=(0), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                     
                     elseif quality == 1 then
                         stats[skill] = {}
-                        stats[skill][hash] = {total=(1), nq=(0), hq1=(1), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(1), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                         
                     elseif quality == 2 then
                         stats[skill] = {}
-                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(1), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(1), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                         
                     elseif quality == 3 then
                         stats[skill] = {}
-                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(1), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(1), breaks=(0), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                         
                     end
                     
                 elseif (result == 1 or result == 5) then
                     stats[skill] = {}
-                    stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash, moon=moon}
+                    stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                     
                 end
                 
@@ -243,7 +243,7 @@ function helpers.get()
             menus[0]:update()
             
             for i=1, 5 do
-                
+
                 if i == 1 then
                     menus[i] = self.display()
                     menus[i]:text(string.format(" \\cs(200,175,250)@ %-20s.\\cr", (results[index].item):sub(1, 20)))
@@ -287,7 +287,7 @@ function helpers.get()
                     if #results == i then
                         menus[i+1] = self.display()
                         menus[i+1]:pos_x(display:pos_x()-24)
-                        menus[i+1]:pos_y(menus[1]:pos_y()+30)
+                        menus[i+1]:pos_y(menus[i]:pos_y()+30)
                         menus[i+1]:visible(true)
                         menus[i+1]:bg_visible(true)
                         menus[i+1]:text(string.format("%s", "▼"))
@@ -404,8 +404,8 @@ function helpers.get()
                 string.format("%s << %s [%s] %+10s %-10s <Crafting Statistics> %s", title, matches, #T(results), "", "", close),
                 string.format("\n\n%sItem: %s%s", item, info.item, close),
                 string.format("\n%s%s - Ingredients Hash: %s%s", craft, skills[skill], hash, close),
-                string.format("\n\nMoon Phase: \\cs(60,175,250)%+28s\\cr", res.moon_phases[info.moon].en),
-                string.format("\nTotal Synths: %+9s %s[%03s]%s", info.total, self.getColor(percents.total), percents.total, close),
+                string.format("\n\nDay: \\cs(60,175,250)%s (%s) - %s\\cr", res.days[info.day].en, res.weather[info.weather].en, res.moon_phases[info.moon].en),
+                string.format("\n\nTotal Synths: %+9s %s[%03s]%s", info.total, self.getColor(percents.total), percents.total, close),
                 string.format("\nSuccessful:   %+9s %s[%03s]%s", info.nq, self.getColor(percents.nq), percents.nq, close),
                 string.format("\nHQ T1:  %+15s %s[%03s]%s", info.hq1, self.getColor(percents.hq1), percents.hq1, close),
                 string.format("\nHQ T2:  %+15s %s[%03s]%s", info.hq2, self.getColor(percents.hq2), percents.hq2, close),
@@ -433,25 +433,25 @@ function helpers.get()
         
     end
     
-    self.up = function(amount)
+    self.up = function()
         local max = #T(results)
-        pos.start = (pos.start - (amount or 0))
-        
+        pos.start = (pos.start - 1)
+
         if pos.start < 1 then
             pos.start = max
-        end        
+        end
         self.clear()
         self.showResults(dupe_display)
         
     end
     
-    self.down = function(amount)
+    self.down = function()
         local max = #T(results)
-        pos.start = (pos.start + (amount or 0))
-        
-        if pos.start == max then
+        pos.start = (pos.start + 1)
+
+        if pos.start > max then
             pos.start = 1
-        end        
+        end
         self.clear()
         self.showResults(dupe_display)
         
