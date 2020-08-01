@@ -1,6 +1,6 @@
 _addon.name     = "craftstats"
 _addon.author   = "Elidyr"
-_addon.version  = "1.20200801"
+_addon.version  = "1.20200801b"
 _addon.command  = "stats"
 
 local helpers = require("helpers")
@@ -51,9 +51,10 @@ windower.register_event("outgoing chunk", function(id,original,modified,injected
     if id == 0x096 then
         local ingredients = {original:unpack("H8", 0x0a+1)} or false
         local crystal     = original:unpack("H", 0x06+1) or false
+        local moon        = windower.ffxi.get_info().moon_phase
         
         if ingredients and crystal then
-            hash = helpers.createId(ingredients, crystal)
+            hash = helpers.createId(ingredients, crystal, moon)
         end
         
     end
@@ -67,15 +68,16 @@ windower.register_event("incoming chunk", function(id,original,modified,injected
         local quality = original:unpack("c", 0x05+1)
         local skill   = helpers.tonumber(helpers.unpack(0x01a, 6, original))
         local item    = original:unpack("H", 0x08+1)
+        local moon    = windower.ffxi.get_info().moon_phase
         
-        if result and hash and quality and item then
+        if result and hash and quality and item and moon then
             
             if (result == 0 or result == 12) then
-                stats = helpers.add(stats, skill, hash, result, quality, item)
+                stats = helpers.add(stats, skill, hash, result, quality, item, moon)
                 helpers.update(display, stats, skill, hash)
                     
             elseif (result == 1 or result == 5) then
-                stats = helpers.add(stats, skill, hash, result, quality, item)
+                stats = helpers.add(stats, skill, hash, result, quality, item, moon)
                 helpers.update(display, stats, skill, hash)
                 
             end
@@ -95,11 +97,11 @@ windower.register_event("mouse", function(type, x, y, delta, blocked)
             local menus = helpers.getMenus()
             
             if menus[0]:hover(x, y) then
-                helpers.up()
+                helpers.up(1)
                 return true
-                
+            
             elseif menus[#menus] and menus[#menus]:hover(x, y) then
-                helpers.down()
+                helpers.down(1)
                 return true
                 
             elseif menus[6] and menus[6]:hover(x, y) then
@@ -113,7 +115,7 @@ windower.register_event("mouse", function(type, x, y, delta, blocked)
             
             if menus[0]:hover(x, y) then
                 return true
-                
+            
             elseif menus[#menus] and menus[#menus]:hover(x, y) then
                 return true
                 
