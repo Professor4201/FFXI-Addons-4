@@ -404,7 +404,7 @@ function helpers.get()
                 string.format("%s << %s [%s] %+10s %-10s <Crafting Statistics> %s", title, matches, #T(results), "", "", close),
                 string.format("\n\n%sItem: %s%s", item, info.item, close),
                 string.format("\n%s%s - Ingredients Hash: %s%s", craft, skills[skill], hash, close),
-                string.format("\n\nMoon Phase: \\cs(60,175,250)%s\\cr", res.moon_phases[info.moon].en),
+                string.format("\n\nMoon Phase: \\cs(60,175,250)%+28s\\cr", res.moon_phases[info.moon].en),
                 string.format("\nTotal Synths: %+9s %s[%03s]%s", info.total, self.getColor(percents.total), percents.total, close),
                 string.format("\nSuccessful:   %+9s %s[%03s]%s", info.nq, self.getColor(percents.nq), percents.nq, close),
                 string.format("\nHQ T1:  %+15s %s[%03s]%s", info.hq1, self.getColor(percents.hq1), percents.hq1, close),
