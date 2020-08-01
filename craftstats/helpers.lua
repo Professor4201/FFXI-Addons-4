@@ -3,11 +3,17 @@ function helpers.get()
     local self = {}
     
     -- Local Files Library.
-    local files  = require("files")
-    local res    = require("resources")
-    local texts  = require("texts")
-    local math   = math
-    local skills = {
+    local dupe_display = {}
+    local files   = require("files")
+    local res     = require("resources")
+    local texts   = require("texts")
+    local stats   = {}
+    local menus   = {}
+    local results = {}
+    local pos     = {start=1, wrap=5}
+    local matches = ""
+    local math    = math
+    local skills  = {
         [00] = "None",
         [03] = "Fishing",
         [35] = "Woodworking",
@@ -74,48 +80,54 @@ function helpers.get()
                 if stats[skill][hash] then
                     local s = stats[skill][hash]
                     
-                    if result == 0 then
+                    if (result == 0 or result == 12) then
                         
-                        if quality == 0 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq+1), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en}
+                        if quality == -1 then
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=res.items[item].en, skill=skill, hash=hash}
+                        
+                        elseif quality == 0 then
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq+1), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash}
                         
                         elseif quality == 1 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1+1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1+1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash}
                             
                         elseif quality == 2 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2+1), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2+1), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash}
                             
                         elseif quality == 3 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3+1), breaks=(s.breaks), item=res.items[item].en}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3+1), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash}
                             
                         end
                         
                     elseif (result == 1 or result == 5) then
-                        stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=res.items[item].en}
+                        stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=res.items[item].en, skill=skill, hash=hash}
                         
                     end
                     
                 else
                     stats[skill][hash] = {}
                     
-                    if result == 0 then
+                    if (result == 0 or result == 12) then
                         
-                        if quality == 0 then
-                            stats[skill][hash] = {total=(1), nq=(1), hq1=(0), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en}
+                        if quality == -1 then
+                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash}
+                        
+                        elseif quality == 0 then
+                            stats[skill][hash] = {total=(1), nq=(1), hq1=(0), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash}
                         
                         elseif quality == 1 then
-                            stats[skill][hash] = {total=(1), nq=(0), hq1=(1), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en}
+                            stats[skill][hash] = {total=(1), nq=(0), hq1=(1), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash}
                             
                         elseif quality == 2 then
-                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(1), hq3=(0), breaks=(0), item=res.items[item].en}
+                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(1), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash}
                             
                         elseif quality == 3 then
-                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(1), breaks=(0), item=res.items[item].en}
+                            stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(1), breaks=(0), item=res.items[item].en, skill=skill, hash=hash}
                             
                         end
                         
                     elseif (result == 1 or result == 5) then
-                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash}
                         
                     end
                     
@@ -123,29 +135,33 @@ function helpers.get()
                 
             else
                 
-                if result == 0 then
-                        
-                    if quality == 0 then
+                if (result == 0 or result == 12) then
+                    
+                    if quality == -1 then
                         stats[skill] = {}
-                        stats[skill][hash] = {total=(1), nq=(1), hq1=(0), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash}
+                    
+                    elseif quality == 0 then
+                        stats[skill] = {}
+                        stats[skill][hash] = {total=(1), nq=(1), hq1=(0), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash}
                     
                     elseif quality == 1 then
                         stats[skill] = {}
-                        stats[skill][hash] = {total=(1), nq=(0), hq1=(1), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(1), hq2=(0), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash}
                         
                     elseif quality == 2 then
                         stats[skill] = {}
-                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(1), hq3=(0), breaks=(0), item=res.items[item].en}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(1), hq3=(0), breaks=(0), item=res.items[item].en, skill=skill, hash=hash}
                         
                     elseif quality == 3 then
                         stats[skill] = {}
-                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(1), breaks=(0), item=res.items[item].en}
+                        stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(1), breaks=(0), item=res.items[item].en, skill=skill, hash=hash}
                         
                     end
                     
                 elseif (result == 1 or result == 5) then
                     stats[skill] = {}
-                    stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en}
+                    stats[skill][hash] = {total=(1), nq=(0), hq1=(0), hq2=(0), hq3=(0), breaks=(1), item=res.items[item].en, skill=skill, hash=hash}
                     
                 end
                 
@@ -156,21 +172,232 @@ function helpers.get()
         if f:exists() then
             f:write("return " .. T(stats):tovstring())
         end
+        self.setStats(stats)
         return stats
         
     end        
     
-    self.display = function()
+    self.find = function(name, stats, display)
+        local name  = name or false
+        local stats = stats or false
+        
+        if name and type(name) == "string" and name ~= "" and stats then
+            results = {}
+            
+            for _,skill in pairs(stats) do
+                
+                if skill and type(skill) == "table" then
+                    
+                    for _,hash in pairs(skill) do
+                        
+                        if hash and type(hash) == "table" then
+
+                            if hash and hash.item and (hash.item:lower()):match(name:lower()) then
+                                table.insert(results, hash)
+                            end
+                            
+                        end
+                        
+                    end
+                    
+                end
+                
+            end
+            
+            -- Display results.
+            self.showResults(display)
+            
+        end
+        
+    end
+    
+    self.showResults = function(display)
+        local display = display or false
+        local index   = pos.start
+        local title   = "\\cs(065,245,245)"
+        local item    = "\\cs(200,175,140)"
+        local craft   = "\\cs(200,175,140)"
+        local close   = "\\cr"
+        
+        if results and display and #results > 0 then
+            menus = {}
+            matches = "Matches"
+            
+            -- Check display.
+            if not display:visible() then
+                local update   = {
+            
+                    string.format("%s << %s [%s] %+10s %-10s <Crafting Statistics> %s", title, matches, #T(results), "", "", close),
+                    string.format("\n\n%sItem: %s%s", item, "None", close),
+                    string.format("\n%s%s - Ingredients Hash: %s%s", craft, skills[0], 0, close),
+                    string.format("\n\nTotal Synths: %+9s %s[%03s]%s", 0, self.getColor(0), 0, close),
+                    string.format("\nSuccessful:   %+9s %s[%03s]%s", 0, self.getColor(0), 0, close),
+                    string.format("\nHQ T1:  %+15s %s[%03s]%s", 0, self.getColor(0), 0, close),
+                    string.format("\nHQ T2:  %+15s %s[%03s]%s", 0, self.getColor(0), 0, close),
+                    string.format("\nHQ T3:  %+15s %s[%03s]%s", 0, self.getColor(0), 0, close),
+                    string.format("\nBreaks: %+15s %s[%03s]%s", 0, self.getColor(0, true), 0, close),
+                    
+                }
+                
+                display:text(table.concat(update, ""))
+                display:visible(true)
+                display:bg_visible(true)
+                display:update()
+                self.setDisplay(display)
+            
+            end
+            
+            -- Create the header text.
+            menus[0] = self.display()
+            menus[0]:pos_x(display:pos_x()-23)
+            menus[0]:pos_y(display:pos_y()-30)
+            menus[0]:visible(true)
+            menus[0]:bg_visible(true)
+            menus[0]:text(string.format("%s", "▲"))
+            menus[0]:update()
+            
+            for i=1, 5 do
+                
+                if i == 1 then
+                    menus[i] = self.display()
+                    menus[i]:text(string.format(" \\cs(200,175,250)@ %-20s.\\cr", (results[index].item):sub(1, 20)))
+                    menus[i]:size(10)
+                    menus[i]:stroke_width(1)
+                    menus[i]:visible(true)
+                    menus[i]:bg_visible(true)
+                    menus[i]:pos_x(display:pos_x()-215)
+                    menus[i]:pos_y(menus[0]:pos_y()+30)
+                    menus[i]:update()
+                    
+                    if #results == 1 then
+                        menus[i+1] = self.display()
+                        menus[i+1]:pos_x(display:pos_x()-23)
+                        menus[i+1]:pos_y(menus[1]:pos_y()+30)
+                        menus[i+1]:visible(true)
+                        menus[i+1]:bg_visible(true)
+                        menus[i+1]:text(string.format("%s", "▼"))
+                        menus[i+1]:update()
+                        break
+                        
+                    end
+                    
+                    index = (index + 1)
+                    if index > #results then
+                        index = 1
+                    elseif index == 1 then
+                        index = #results
+                    end
+                    
+                elseif i > 1 and i < 5 then
+                    menus[i] = self.display()
+                    menus[i]:text(string.format(" \\cs(065,245,200)@ %-20s.\\cr", (results[index].item):sub(1, 20)))
+                    menus[i]:size(10)
+                    menus[i]:visible(true)
+                    menus[i]:bg_visible(true)
+                    menus[i]:pos_x(display:pos_x()-215)
+                    menus[i]:pos_y(menus[i-1]:pos_y()+30)
+                    menus[i]:update()
+                        
+                    if #results == i then
+                        menus[i+1] = self.display()
+                        menus[i+1]:pos_x(display:pos_x()-23)
+                        menus[i+1]:pos_y(menus[1]:pos_y()+30)
+                        menus[i+1]:visible(true)
+                        menus[i+1]:bg_visible(true)
+                        menus[i+1]:text(string.format("%s", "▼"))
+                        menus[i+1]:update()
+                        break
+                        
+                    end
+                    
+                    index = (index + 1)
+                    if index > #results then
+                        index = 1
+                    elseif index == 1 then
+                        index = #results
+                    end
+                
+                elseif i == 5 then
+                    menus[i] = self.display()
+                    menus[i]:text(string.format(" \\cs(065,245,200)@ %-20s.\\cr", (results[index].item):sub(1, 20)))
+                    menus[i]:size(10)
+                    menus[i]:visible(true)
+                    menus[i]:bg_visible(true)
+                    menus[i]:pos_x(display:pos_x()-215)
+                    menus[i]:pos_y(menus[i-1]:pos_y()+30)
+                    menus[i]:update()
+
+                    menus[i+1] = self.display()
+                    menus[i+1]:pos_x(display:pos_x()-23)
+                    menus[i+1]:pos_y(menus[i]:pos_y()+30)
+                    menus[i+1]:visible(true)
+                    menus[i+1]:bg_visible(true)
+                    menus[i+1]:text(string.format("%s", "▼"))
+                    menus[i+1]:update()
+                    
+                    index = (index + 1)
+                    if index > #results then
+                        index = 1
+                    elseif index == 1 then
+                        index = #results
+                    end
+                    
+                end
+                
+            end
+            self.update(display, stats, results[pos.start].skill, results[pos.start].hash)
+            
+        end
+        
+    end        
+    
+    self.clear = function()
+        
+        if #menus > 0 then
+        
+            for i,v in ipairs(menus) do
+                menus[i]:destroy()
+            end
+            menus[0]:destroy()
+            matches = ""
+            
+        end
+        
+    end
+    
+    self.getMenus = function()
+        return menus
+    end
+    
+    self.getResults = function()
+        return results
+    end
+    
+    self.setStats = function(value)
+        local value = value or false
+        if value and type(value) == "table" then
+            stats = value
+        end
+    end
+    
+    self.setDisplay = function(value)
+        local value = value or false
+        if value and type(value) == "table" then
+            dupe_display = value
+        end
+    end
+        
+    self.display = function(drag)
+        local drag = drag or false
         local settings = {
-            ['pos']={['x']=1,['y']=1},
+            ['pos']={['x']=350,['y']=600},
             ['bg']={['alpha']=155,['red']=0,['green']=0,['blue']=0,['visible']=false},
-            ['flags']={['right']=false,['bottom']=false,['bold']=false,['draggable']=true,['italic']=false},
+            ['flags']={['right']=false,['bottom']=false,['bold']=false,['draggable']=drag,['italic']=false},
             ['padding']=5,
             ['text']={['size']=10,['font']="lucida console",['fonts']={},['alpha']=190,['red']=255,['green']=255,['blue']=255,
                 ['stroke']={['width']=1,['alpha']=255,['red']=0,['green']=0,['blue']=0}
             },
         }
-
         return texts.new("", settings)            
         
     end
@@ -188,7 +415,7 @@ function helpers.get()
             local percents = {total=(((info.nq+info.hq1+info.hq2+info.hq3)/info.total)*100), nq=(info.nq/info.total)*100, hq1=(info.hq1/info.total)*100, hq2=(info.hq2/info.total)*100, hq3=((info.hq3/info.total)*100), breaks=((info.breaks/info.total)*100)}
             local update   = {
                 
-                string.format("%s $$$$ %+10s Crafting Statistics %-10s $$$$ %s", title, "", "", close),
+                string.format("%s << %s [%s] %+10s %-10s <Crafting Statistics> %s", title, matches, #T(results), "", "", close),
                 string.format("\n\n%sItem: %s%s", item, info.item, close),
                 string.format("\n%s%s - Ingredients Hash: %s%s", craft, skills[skill], hash, close),
                 string.format("\n\nTotal Synths: %+9s %s[%03s]%s", info.total, self.getColor(percents.total), percents.total, close),
@@ -200,18 +427,46 @@ function helpers.get()
                 
             }
             
+            
+            
             display:text(table.concat(update, ""))
             display:visible(true)
             display:bg_visible(true)
             display:update()
+            self.setDisplay(display)
         
         else
             display:text("")
             display:visible(false)
             display:bg_visible(false)
             display:update()
+            self.setDisplay(display)
             
         end
+        
+    end
+    
+    self.up = function()
+        local max = #T(results)
+        pos.start = (pos.start - 1)
+        
+        if pos.start < 1 then
+            pos.start = max
+        end        
+        self.clear()
+        self.showResults(dupe_display)
+        
+    end
+    
+    self.down = function()
+        local max = #T(results)
+        pos.start = (pos.start + 1)
+        
+        if pos.start == max then
+            pos.start = 1
+        end        
+        self.clear()
+        self.showResults(dupe_display)
         
     end
     
