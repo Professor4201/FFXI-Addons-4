@@ -331,7 +331,6 @@ function helpers.get()
                 end
                 
             end
-            table.print(results[pos.start])
             self.update(display, stats, results[pos.start].skill, results[pos.start].hash)
             
         end
