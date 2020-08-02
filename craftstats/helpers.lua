@@ -87,20 +87,20 @@ function helpers.get()
                             if s.item ~= "Mangled Mess" then
                                 stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=s.item, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                             else
-                                stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=res.items[item].en, skill=skill, day=day, moon=moon, weather=weather}
+                                stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks+1), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                             end
                         
                         elseif quality == 0 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq+1), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, day=day, moon=moon, weather=weather}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq+1), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                         
                         elseif quality == 1 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1+1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, day=day, moon=moon, weather=weather}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1+1), hq2=(s.hq2), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                             
                         elseif quality == 2 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2+1), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, day=day, moon=moon, weather=weather}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2+1), hq3=(s.hq3), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                             
                         elseif quality == 3 then
-                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3+1), breaks=(s.breaks), item=res.items[item].en, skill=skill, day=day, moon=moon, weather=weather}
+                            stats[skill][hash] = {total=(s.total+1), nq=(s.nq), hq1=(s.hq1), hq2=(s.hq2), hq3=(s.hq3+1), breaks=(s.breaks), item=res.items[item].en, skill=skill, hash=hash, day=day, moon=moon, weather=weather}
                             
                         end
                         
@@ -340,12 +340,15 @@ function helpers.get()
     self.clear = function()
         
         if #menus > 0 then
-        
+            
             for i,v in ipairs(menus) do
                 menus[i]:destroy()
             end
             menus[0]:destroy()
+            
+            -- Default the variables.
             matches = ""
+            menus   = {}
             
         end
         

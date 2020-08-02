@@ -1,6 +1,6 @@
 _addon.name     = "craftstats"
 _addon.author   = "Elidyr"
-_addon.version  = "1.20200801c"
+_addon.version  = "1.20200802b"
 _addon.command  = "stats"
 
 local helpers = require("helpers")
@@ -40,7 +40,14 @@ windower.register_event("addon command", function(...)
                 helpers.find(item, stats, display)
                 
             end
+        
+        elseif c == "hide" then
+            helpers.clear()
+            display:hide()
             
+        elseif c == "show" then
+            display:show()
+        
         end
     
     end
