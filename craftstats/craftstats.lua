@@ -1,6 +1,6 @@
 _addon.name     = "craftstats"
 _addon.author   = "Elidyr"
-_addon.version  = "1.20200801c"
+_addon.version  = "1.20200802"
 _addon.command  = "stats"
 
 local helpers = require("helpers")
