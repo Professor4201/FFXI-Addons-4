@@ -1,4 +1,4 @@
-**LSalute: Bringing some fun back to events.**\
+**LSalute: Bringing some fun back to events.**\ -- **Currently not working I think, some messages for charm event are missing.**
 What this addon does is makes it so when a member of your party is charmed and you have TP you attempt to use a ranged weapon skill on them.
 - Commands
   - *//salute \<ws name\>*
